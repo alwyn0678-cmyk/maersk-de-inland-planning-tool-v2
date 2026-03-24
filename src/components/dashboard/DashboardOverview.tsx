@@ -382,7 +382,7 @@ export function DashboardOverview() {
                 <div>
                   <CardTitle className="text-xl font-black tracking-tight text-white drop-shadow-sm">Rhine Water Levels Monitor</CardTitle>
                   <CardDescription className="text-white/80 font-bold">
-                    Live PEGEL data via pegelonline.wsv.de{lastRefresh ? ` · Updated ${lastRefresh.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}` : ''}
+                    Live PEGEL data via pegelonline.wsv.de{lastRefresh ? ` · Updated ${lastRefresh.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}` : ' · Connecting...'}
                   </CardDescription>
                 </div>
               </div>
@@ -398,85 +398,147 @@ export function DashboardOverview() {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="grid md:grid-cols-5 divide-x divide-white/10">
-              {waterLevelData.map((item, i) => (
-                <div key={i} className="p-8 hover:bg-white/5 transition-all duration-500 flex flex-col group/site relative">
-                  <div className="absolute inset-0 animate-shimmer opacity-0 group-hover/site:opacity-10 transition-opacity duration-500 pointer-events-none" />
-                  <div className="flex items-center justify-between mb-6 relative z-10">
-                    <span className="text-xs font-black text-[#42b0d5] uppercase tracking-[0.25em] drop-shadow-[0_0_8px_rgba(66,176,213,0.4)]">{item.site}</span>
-                    <div className={cn(
-                      "px-2 py-1 rounded-lg font-black text-[10px] uppercase tracking-wider shadow-sm",
-                      item.trend === 'up' ? 'bg-emerald-500 text-white' : 
-                      item.trend === 'down' ? 'bg-rose-500 text-white' : 
-                      'bg-slate-500 text-white'
-                    )}>
-                      {item.trend}
-                    </div>
+            {waterLoading ? (
+              /* Loading skeleton */
+              <div className="grid md:grid-cols-5 divide-x divide-white/10">
+                {[0,1,2,3,4].map(i => (
+                  <div key={i} className="p-6 flex flex-col space-y-4">
+                    <div className="h-3 w-16 bg-white/10 rounded animate-pulse" />
+                    <div className="h-8 w-20 bg-white/10 rounded animate-pulse" />
+                    <div className="h-20 w-full bg-white/5 rounded-lg animate-pulse" />
+                    <div className="h-3 w-12 bg-white/10 rounded animate-pulse" />
                   </div>
-                  
-                  <div className="flex items-baseline space-x-2 mb-8 relative z-10">
-                    <span className="text-5xl font-black text-white tracking-tighter drop-shadow-xl">{item.error ? '—' : item.level?.toFixed(2) ?? '—'}</span>
-                    <span className="text-xl font-bold text-white/60">m</span>
-                    <span className={cn(
-                      "ml-auto text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded shadow-sm",
-                      item.status === 'Normal' ? 'bg-emerald-500 text-white' : 
-                      item.status === 'Low' ? 'bg-amber-500 text-white' : 'bg-rose-500 text-white'
-                    )}>{item.status}</span>
-                  </div>
-                  
-                  {/* Water Level Diagram - High Quality */}
-                  <div className="h-28 w-full mb-8 relative z-10">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={item.history}>
-                        <defs>
-                          <linearGradient id={`colorLevel-${i}`} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#42b0d5" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#42b0d5" stopOpacity={0.1}/>
-                          </linearGradient>
-                        </defs>
-                        <Tooltip 
-                          content={({ active, payload }) => {
-                            if (active && payload && payload.length) {
-                              return (
-                                <div className="bg-maersk-dark p-2 rounded-lg shadow-2xl border border-white/20">
-                                  <p className="text-[10px] font-bold text-white/60">{payload[0].payload.time}</p>
-                                  <p className="text-xs font-black text-white">{payload[0].value}m</p>
-                                </div>
-                              );
-                            }
-                            return null;
-                          }}
-                        />
-                        <Area 
-                          type="monotone" 
-                          dataKey="val" 
-                          stroke="#42b0d5" 
-                          strokeWidth={4} 
-                          fillOpacity={1} 
-                          fill={`url(#colorLevel-${i})`} 
-                          animationDuration={2000}
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
+                ))}
+              </div>
+            ) : waterLevelData.length === 0 ? (
+              <div className="p-8 text-center text-white/40 font-bold text-sm uppercase tracking-widest">
+                No station data available — check network connection
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-5 divide-x divide-white/10">
+                {waterLevelData.map((item, i) => {
+                  // Ensure chart always has data — use flat placeholder if empty
+                  const chartData = item.history.length >= 2
+                    ? item.history
+                    : [
+                        { time: '00:00', val: item.level ?? 2.0 },
+                        { time: '04:00', val: item.level ?? 2.0 },
+                        { time: '08:00', val: item.level ?? 2.0 },
+                        { time: '12:00', val: item.level ?? 2.0 },
+                        { time: '16:00', val: item.level ?? 2.0 },
+                        { time: '20:00', val: item.level ?? 2.0 },
+                      ];
 
-                  <div className="mt-auto flex items-center justify-between pt-6 border-t border-white/10 relative z-10">
-                    <Badge className={cn(
-                      "text-[10px] font-black border-none px-3 py-1 uppercase tracking-widest shadow-lg",
-                      item.status === 'Critical' ? 'bg-rose-600 text-white' : 
-                      item.status === 'Low' ? 'bg-amber-600 text-white' : 
-                      'bg-emerald-600 text-white'
-                    )}>
-                      {item.status}
-                    </Badge>
-                    <div className="flex items-center text-[10px] font-black text-white/50 uppercase tracking-widest">
-                      <Info className="h-3.5 w-3.5 mr-1.5 text-maersk-blue" />
-                      PEGEL SYNC
+                  const minVal = Math.min(...chartData.map(d => d.val)) * 0.97;
+                  const maxVal = Math.max(...chartData.map(d => d.val)) * 1.03;
+
+                  return (
+                    <div key={i} className="p-6 hover:bg-white/5 transition-all duration-500 flex flex-col group/site relative">
+                      <div className="flex items-center justify-between mb-4 relative z-10">
+                        <span className="text-xs font-black text-[#42b0d5] uppercase tracking-[0.25em]">{item.site}</span>
+                        <div className={cn(
+                          "px-2 py-0.5 rounded-md font-black text-[9px] uppercase tracking-wider",
+                          item.error ? 'bg-white/10 text-white/40' :
+                          item.trend === 'up' ? 'bg-emerald-500 text-white' :
+                          item.trend === 'down' ? 'bg-rose-500 text-white' :
+                          'bg-slate-600 text-white'
+                        )}>
+                          {item.error ? 'offline' : item.trend}
+                        </div>
+                      </div>
+
+                      <div className="flex items-baseline space-x-1.5 mb-4 relative z-10">
+                        <span className="text-3xl font-black text-white tracking-tighter">
+                          {item.error ? '—' : item.level?.toFixed(2) ?? '—'}
+                        </span>
+                        <span className="text-sm font-bold text-white/50">m</span>
+                        <span className={cn(
+                          "ml-auto text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded",
+                          item.status === 'Normal' ? 'bg-emerald-500/80 text-white' :
+                          item.status === 'Low' ? 'bg-amber-500/80 text-white' :
+                          'bg-rose-500/80 text-white'
+                        )}>{item.status}</span>
+                      </div>
+
+                      {/* Water level chart — always renders */}
+                      <div className="h-24 w-full relative z-10">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={chartData} margin={{ top: 4, right: 2, left: 2, bottom: 0 }}>
+                            <defs>
+                              <linearGradient id={`wl-${i}`} x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#42b0d5" stopOpacity={item.error ? 0.2 : 0.7} />
+                                <stop offset="95%" stopColor="#42b0d5" stopOpacity={0.05} />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="2 4" stroke="rgba(255,255,255,0.06)" vertical={false} />
+                            <XAxis
+                              dataKey="time"
+                              tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 8, fontWeight: 700 }}
+                              tickLine={false}
+                              axisLine={false}
+                              interval={1}
+                            />
+                            <YAxis
+                              domain={[minVal, maxVal]}
+                              tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 8, fontWeight: 700 }}
+                              tickLine={false}
+                              axisLine={false}
+                              width={28}
+                              tickFormatter={(v) => `${v.toFixed(1)}`}
+                            />
+                            <Tooltip
+                              content={({ active, payload }) => {
+                                if (active && payload && payload.length) {
+                                  return (
+                                    <div className="bg-[#0e1117] border border-white/20 px-2.5 py-1.5 rounded-lg shadow-xl">
+                                      <p className="text-[9px] font-bold text-white/50">{payload[0].payload.time}</p>
+                                      <p className="text-xs font-black text-[#42b0d5]">{Number(payload[0].value).toFixed(2)}m</p>
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              }}
+                            />
+                            <Area
+                              type="monotone"
+                              dataKey="val"
+                              stroke={item.error ? 'rgba(255,255,255,0.15)' : '#42b0d5'}
+                              strokeWidth={item.error ? 1.5 : 2.5}
+                              strokeDasharray={item.error ? '4 3' : undefined}
+                              fillOpacity={1}
+                              fill={`url(#wl-${i})`}
+                              dot={false}
+                              animationDuration={1200}
+                            />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                        {item.error && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-[9px] font-black text-white/25 uppercase tracking-widest">No live data</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="mt-4 flex items-center justify-between pt-3 border-t border-white/10 relative z-10">
+                        <Badge className={cn(
+                          "text-[9px] font-black border-none px-2.5 py-0.5 uppercase tracking-widest",
+                          item.error ? 'bg-white/10 text-white/40' :
+                          item.status === 'Critical' ? 'bg-rose-600 text-white' :
+                          item.status === 'Low' ? 'bg-amber-600 text-white' :
+                          'bg-emerald-600 text-white'
+                        )}>
+                          {item.error ? 'Offline' : item.status}
+                        </Badge>
+                        <div className="flex items-center text-[9px] font-black text-white/30 uppercase tracking-widest">
+                          <Info className="h-3 w-3 mr-1 text-maersk-blue/60" />
+                          PEGEL
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
 
