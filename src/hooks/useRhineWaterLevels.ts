@@ -38,7 +38,8 @@ function computeTrend(history: { val: number }[]): 'up' | 'down' | 'stable' {
 }
 
 async function fetchStation(station: string): Promise<{ measurements: { timestamp: string; value: number }[] }> {
-  const url = `${PEGEL_BASE}/${encodeURIComponent(station)}/W/measurements.json?start=PT24H`;
+  const start = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const url = `${PEGEL_BASE}/${encodeURIComponent(station)}/W/measurements.json?start=${start}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();

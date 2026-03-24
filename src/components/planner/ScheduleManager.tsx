@@ -143,32 +143,32 @@ export function ScheduleManager({ direction }: ScheduleManagerProps) {
 
   return (
     <div className="space-y-6">
-      <Card className="border-none bg-white/90 backdrop-blur-xl shadow-2xl overflow-hidden rounded-[2.5rem]">
-        <div className="h-2 w-full bg-gradient-to-r from-maersk-dark via-maersk-blue to-maersk-dark animate-pulse" />
-        <CardHeader className="px-10 pt-10 pb-6 border-b border-slate-100">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-maersk-dark rounded-2xl shadow-xl shadow-blue-900/20">
-                <Calendar className="h-6 w-6 text-maersk-blue" />
+      <Card className="border-none bg-white/90 backdrop-blur-xl shadow-xl overflow-hidden rounded-2xl">
+        <div className="h-1.5 w-full bg-gradient-to-r from-maersk-dark via-maersk-blue to-maersk-dark" />
+        <CardHeader className="px-6 pt-5 pb-4 border-b border-slate-100">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2.5 bg-maersk-dark rounded-xl shadow-lg">
+                <Calendar className="h-5 w-5 text-maersk-blue" />
               </div>
               <div>
-                <CardTitle className="text-2xl font-black text-maersk-dark tracking-tight">
+                <CardTitle className="text-lg font-black text-maersk-dark tracking-tight">
                   {direction} Barge & Rail Schedules
                 </CardTitle>
-                <CardDescription className="text-slate-500 font-bold uppercase tracking-widest text-xs mt-1">
+                <CardDescription className="text-slate-500 font-bold uppercase tracking-widest text-[10px] mt-0.5">
                   Network Capacity Management v4.0
                 </CardDescription>
               </div>
             </div>
             
             <div className="flex items-center gap-3">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={handleExportExcel}
-                className="rounded-xl border-slate-200 hover:bg-slate-50 font-black text-xs uppercase tracking-widest h-11 px-6 group"
+                className="rounded-xl border-slate-200 hover:bg-slate-50 font-black text-xs uppercase tracking-widest h-9 px-4 group"
               >
-                <Download className="mr-2 h-4 w-4 group-hover:-translate-y-1 transition-transform" />
-                Extract Excel
+                <Download className="mr-2 h-3.5 w-3.5 group-hover:-translate-y-0.5 transition-transform" />
+                Extract
               </Button>
               <div className="relative">
                 <input
@@ -178,17 +178,17 @@ export function ScheduleManager({ direction }: ScheduleManagerProps) {
                   accept=".xlsx, .xls"
                   onChange={handleFileUpload}
                 />
-                <label 
+                <label
                   htmlFor="schedule-upload"
-                  className="inline-flex items-center justify-center bg-maersk-blue hover:bg-maersk-blue/90 text-white rounded-xl shadow-lg shadow-maersk-blue/20 font-black text-xs uppercase tracking-widest h-11 px-6 cursor-pointer transition-all active:translate-y-px"
+                  className="inline-flex items-center justify-center bg-maersk-blue hover:bg-maersk-blue/90 text-white rounded-xl shadow-md shadow-maersk-blue/20 font-black text-xs uppercase tracking-widest h-9 px-4 cursor-pointer transition-all active:translate-y-px"
                 >
-                  <Upload className="mr-2 h-4 w-4" />
-                  Upload Data
+                  <Upload className="mr-2 h-3.5 w-3.5" />
+                  Upload
                 </label>
               </div>
-              <Button 
+              <Button
                 onClick={() => setIsAdding(!isAdding)}
-                className="bg-maersk-dark hover:bg-maersk-dark/90 text-white rounded-xl shadow-lg shadow-blue-900/20 font-black text-xs uppercase tracking-widest h-11 px-6"
+                className="bg-maersk-dark hover:bg-maersk-dark/90 text-white rounded-xl shadow-md font-black text-xs uppercase tracking-widest h-9 px-4"
               >
                 <Plus className={cn("mr-2 h-4 w-4 transition-transform", isAdding && "rotate-45")} />
                 {isAdding ? 'Cancel' : 'Add New'}
@@ -206,7 +206,7 @@ export function ScheduleManager({ direction }: ScheduleManagerProps) {
                 exit={{ height: 0, opacity: 0 }}
                 className="overflow-hidden border-b border-slate-100 bg-slate-50/50"
               >
-                <form onSubmit={handleAddSchedule} className="p-10 grid grid-cols-1 md:grid-cols-4 gap-6">
+                <form onSubmit={handleAddSchedule} className="p-5 grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Transport Type</Label>
                     <Select 
@@ -298,65 +298,65 @@ export function ScheduleManager({ direction }: ScheduleManagerProps) {
             )}
           </AnimatePresence>
 
-          <div className="p-10 space-y-8">
+          <div className="p-5 space-y-4">
             {/* Filters */}
-            <div className="flex flex-col md:flex-row md:items-center gap-4">
+            <div className="flex flex-col md:flex-row md:items-center gap-3">
               <div className="relative flex-1 group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-maersk-blue transition-colors" />
-                <Input 
-                  placeholder="Search by origin or destination..." 
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 group-focus-within:text-maersk-blue transition-colors" />
+                <Input
+                  placeholder="Search by origin or destination..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-12 bg-slate-50 border-slate-200 rounded-2xl h-12 font-bold focus-visible:ring-maersk-blue/30"
+                  className="pl-10 bg-slate-50 border-slate-200 rounded-xl h-9 font-bold focus-visible:ring-maersk-blue/30 text-sm"
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Button 
+                <Button
                   variant={typeFilter === 'All' ? 'default' : 'outline'}
                   onClick={() => setTypeFilter('All')}
                   className={cn(
-                    "rounded-xl h-12 px-6 font-black text-xs uppercase tracking-widest transition-all",
+                    "rounded-xl h-9 px-4 font-black text-xs uppercase tracking-widest transition-all",
                     typeFilter === 'All' ? "bg-maersk-dark text-white" : "border-slate-200 text-slate-500"
                   )}
                 >
                   All
                 </Button>
-                <Button 
+                <Button
                   variant={typeFilter === 'Barge' ? 'default' : 'outline'}
                   onClick={() => setTypeFilter('Barge')}
                   className={cn(
-                    "rounded-xl h-12 px-6 font-black text-xs uppercase tracking-widest transition-all",
+                    "rounded-xl h-9 px-4 font-black text-xs uppercase tracking-widest transition-all",
                     typeFilter === 'Barge' ? "bg-maersk-blue text-white" : "border-slate-200 text-slate-500"
                   )}
                 >
-                  <Ship className="mr-2 h-4 w-4" />
+                  <Ship className="mr-1.5 h-3.5 w-3.5" />
                   Barge
                 </Button>
-                <Button 
+                <Button
                   variant={typeFilter === 'Rail' ? 'default' : 'outline'}
                   onClick={() => setTypeFilter('Rail')}
                   className={cn(
-                    "rounded-xl h-12 px-6 font-black text-xs uppercase tracking-widest transition-all",
+                    "rounded-xl h-9 px-4 font-black text-xs uppercase tracking-widest transition-all",
                     typeFilter === 'Rail' ? "bg-amber-500 text-white" : "border-slate-200 text-slate-500"
                   )}
                 >
-                  <Train className="mr-2 h-4 w-4" />
+                  <Train className="mr-1.5 h-3.5 w-3.5" />
                   Rail
                 </Button>
               </div>
             </div>
 
             {/* Table */}
-            <div className="rounded-3xl border border-slate-100 overflow-hidden shadow-inner bg-slate-50/30">
+            <div className="rounded-2xl border border-slate-100 overflow-hidden shadow-inner bg-slate-50/30">
               <Table>
                 <TableHeader className="bg-slate-100/50">
                   <TableRow className="hover:bg-transparent border-slate-100">
-                    <TableHead className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 py-6 pl-8">Type</TableHead>
-                    <TableHead className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 py-6">Route</TableHead>
-                    <TableHead className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 py-6">Departure</TableHead>
-                    <TableHead className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 py-6">Arrival</TableHead>
-                    <TableHead className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 py-6">Capacity</TableHead>
-                    <TableHead className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 py-6 pr-8">Status</TableHead>
+                    <TableHead className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 py-3 pl-5">Type</TableHead>
+                    <TableHead className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 py-3">Route</TableHead>
+                    <TableHead className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 py-3">Departure</TableHead>
+                    <TableHead className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 py-3">Arrival</TableHead>
+                    <TableHead className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 py-3">Capacity</TableHead>
+                    <TableHead className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 py-3 pr-5">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -370,7 +370,7 @@ export function ScheduleManager({ direction }: ScheduleManagerProps) {
                         exit={{ opacity: 0 }}
                         className="group hover:bg-white transition-colors border-slate-100"
                       >
-                        <TableCell className="py-6 pl-8">
+                        <TableCell className="py-3 pl-5">
                           <div className="flex items-center space-x-3">
                             <div className={cn(
                               "p-2.5 rounded-xl shadow-sm",
@@ -381,14 +381,14 @@ export function ScheduleManager({ direction }: ScheduleManagerProps) {
                             <span className="font-black text-sm text-maersk-dark">{s.type}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="py-6">
+                        <TableCell className="py-3">
                           <div className="flex items-center space-x-3">
                             <span className="font-black text-sm text-maersk-dark">{s.origin}</span>
                             <ArrowRight className="h-3 w-3 text-slate-300" />
                             <span className="font-black text-sm text-maersk-dark">{s.destination}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="py-6">
+                        <TableCell className="py-3">
                           <div className="flex flex-col">
                             <span className="font-black text-sm text-maersk-dark">
                               {new Date(s.departure).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
@@ -398,7 +398,7 @@ export function ScheduleManager({ direction }: ScheduleManagerProps) {
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell className="py-6">
+                        <TableCell className="py-3">
                           <div className="flex flex-col">
                             <span className="font-black text-sm text-maersk-dark">
                               {new Date(s.arrival).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
@@ -408,7 +408,7 @@ export function ScheduleManager({ direction }: ScheduleManagerProps) {
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell className="py-6">
+                        <TableCell className="py-3">
                           <div className="flex flex-col space-y-1.5 w-24">
                             <div className="flex justify-between text-xs font-black uppercase tracking-tighter">
                               <span className="text-maersk-dark">{s.capacity} TEU</span>
@@ -419,7 +419,7 @@ export function ScheduleManager({ direction }: ScheduleManagerProps) {
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="py-6 pr-8">
+                        <TableCell className="py-3 pr-5">
                           <Badge className={cn(
                             "rounded-lg font-black text-xs uppercase tracking-widest border-none px-3 py-1.5 shadow-sm",
                             s.status === 'On Time' ? "bg-emerald-500 text-white" :
@@ -442,7 +442,7 @@ export function ScheduleManager({ direction }: ScheduleManagerProps) {
         </CardContent>
       </Card>
       
-      <div className="flex items-center justify-center space-x-4 p-6 bg-maersk-dark/5 rounded-3xl border border-maersk-dark/10">
+      <div className="flex items-center justify-center space-x-4 p-4 bg-maersk-dark/5 rounded-2xl border border-maersk-dark/10">
         <FileSpreadsheet className="h-5 w-5 text-maersk-blue" />
         <p className="text-xs font-bold text-maersk-dark opacity-70">
           Bulk operations supported. Use the <span className="text-maersk-blue">Extract Excel</span> button to get the current template for bulk updates.
