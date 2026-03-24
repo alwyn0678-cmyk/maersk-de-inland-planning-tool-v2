@@ -1,16 +1,17 @@
 import { motion } from 'motion/react';
-import { 
-  LayoutDashboard, 
-  Download, 
-  Upload, 
-  FileText, 
-  Settings, 
-  HelpCircle, 
+import {
+  LayoutDashboard,
+  Download,
+  Upload,
+  FileText,
+  Settings,
+  HelpCircle,
   LogOut,
   ChevronLeft,
   ChevronRight,
   Ship,
-  ArrowRightLeft
+  ArrowRightLeft,
+  CalendarDays
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
@@ -26,6 +27,7 @@ const menuItems = [
   { id: 'import', label: 'Import Planner', icon: Download },
   { id: 'export', label: 'Export Planner', icon: Upload },
   { id: 'cycy', label: 'CY/CY Planner', icon: ArrowRightLeft },
+  { id: 'schedules', label: 'Network Schedules', icon: CalendarDays },
   { id: 'prd', label: 'Specifications', icon: FileText },
 ];
 

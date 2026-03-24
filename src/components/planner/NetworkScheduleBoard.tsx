@@ -39,7 +39,7 @@ function fmtShort(d: Date): string {
   return d.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short' });
 }
 
-interface DepartureRow {
+export interface DepartureRow {
   mod: 'Barge' | 'Rail';
   origin: string;
   destination: string;
@@ -97,9 +97,10 @@ function buildExportDepartures(today: Date): DepartureRow[] {
 
 interface Props {
   direction: 'Import' | 'Export';
+  onRowClick?: (dep: DepartureRow) => void;
 }
 
-export function NetworkScheduleBoard({ direction }: Props) {
+export function NetworkScheduleBoard({ direction, onRowClick }: Props) {
   const [modFilter, setModFilter] = useState<'All' | 'Barge' | 'Rail'>('All');
   const today = useMemo(() => new Date(), []);
 
@@ -180,7 +181,11 @@ export function NetworkScheduleBoard({ direction }: Props) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: i * 0.025, duration: 0.3 }}
-              className="grid grid-cols-[72px_1fr_40px_104px] gap-0 px-5 py-2.5 hover:bg-white/5 transition-colors duration-150 group"
+              onClick={() => onRowClick?.(dep)}
+              className={cn(
+                "grid grid-cols-[72px_1fr_40px_104px] gap-0 px-5 py-2.5 hover:bg-white/5 transition-colors duration-150 group",
+                onRowClick && "cursor-pointer hover:bg-white/10"
+              )}
             >
               {/* Mode badge */}
               <div className="flex items-center">

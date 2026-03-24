@@ -20,48 +20,24 @@ const STATIONS: { site: string; station: string }[] = [
   { site: 'Emmerich',   station: 'EMMERICH' },
 ];
 
-// Realistic static baseline data for Rhine stations (typical March levels, cm)
+// Generate today-relative timestamps (last 24h, every 4 hours ending now)
+function todayHistory(vals: number[]): { time: string; val: number }[] {
+  const now = Date.now();
+  return vals.map((val, i) => {
+    const t = new Date(now - (5 - i) * 4 * 60 * 60 * 1000);
+    const hh = t.getHours().toString().padStart(2, '0');
+    const mm = t.getMinutes().toString().padStart(2, '0');
+    return { time: `${hh}:${mm}`, val };
+  });
+}
+
+// Realistic static baseline data for Rhine stations (typical levels, cm)
 const STATIC_BASELINES: Record<string, { levelCm: number; history: { time: string; val: number }[] }> = {
-  'BONN': {
-    levelCm: 382,
-    history: [
-      { time: '00:00', val: 3.91 }, { time: '04:00', val: 3.88 },
-      { time: '08:00', val: 3.85 }, { time: '12:00', val: 3.82 },
-      { time: '16:00', val: 3.80 }, { time: '20:00', val: 3.83 },
-    ],
-  },
-  'KÖLN': {
-    levelCm: 315,
-    history: [
-      { time: '00:00', val: 3.21 }, { time: '04:00', val: 3.19 },
-      { time: '08:00', val: 3.17 }, { time: '12:00', val: 3.15 },
-      { time: '16:00', val: 3.14 }, { time: '20:00', val: 3.16 },
-    ],
-  },
-  'DÜSSELDORF': {
-    levelCm: 322,
-    history: [
-      { time: '00:00', val: 3.28 }, { time: '04:00', val: 3.26 },
-      { time: '08:00', val: 3.24 }, { time: '12:00', val: 3.22 },
-      { time: '16:00', val: 3.21 }, { time: '20:00', val: 3.23 },
-    ],
-  },
-  'DUISBURG-RUHRORT': {
-    levelCm: 358,
-    history: [
-      { time: '00:00', val: 3.65 }, { time: '04:00', val: 3.63 },
-      { time: '08:00', val: 3.61 }, { time: '12:00', val: 3.59 },
-      { time: '16:00', val: 3.57 }, { time: '20:00', val: 3.58 },
-    ],
-  },
-  'EMMERICH': {
-    levelCm: 892,
-    history: [
-      { time: '00:00', val: 9.01 }, { time: '04:00', val: 8.98 },
-      { time: '08:00', val: 8.95 }, { time: '12:00', val: 8.92 },
-      { time: '16:00', val: 8.90 }, { time: '20:00', val: 8.92 },
-    ],
-  },
+  'BONN':             { levelCm: 382, history: todayHistory([3.91, 3.88, 3.85, 3.82, 3.80, 3.83]) },
+  'KÖLN':             { levelCm: 315, history: todayHistory([3.21, 3.19, 3.17, 3.15, 3.14, 3.16]) },
+  'DÜSSELDORF':       { levelCm: 322, history: todayHistory([3.28, 3.26, 3.24, 3.22, 3.21, 3.23]) },
+  'DUISBURG-RUHRORT': { levelCm: 358, history: todayHistory([3.65, 3.63, 3.61, 3.59, 3.57, 3.58]) },
+  'EMMERICH':         { levelCm: 892, history: todayHistory([9.01, 8.98, 8.95, 8.92, 8.90, 8.92]) },
 };
 
 const PEGEL_BASE = 'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations';

@@ -3,6 +3,7 @@ import { Sidebar } from './components/layout/Sidebar';
 import { ImportPlanner } from './pages/ImportPlanner';
 import { ExportPlanner } from './pages/ExportPlanner';
 import { CYCYPlanner } from './pages/CYCYPlanner';
+import { NetworkSchedules } from './pages/NetworkSchedules';
 import { PRD } from './pages/PRD';
 import { Settings } from './pages/Settings';
 import { Help } from './pages/Help';
@@ -27,6 +28,8 @@ export default function App() {
         return <ExportPlanner />;
       case 'cycy':
         return <CYCYPlanner />;
+      case 'schedules':
+        return <NetworkSchedules />;
       case 'prd':
         return <PRD />;
       case 'settings':
