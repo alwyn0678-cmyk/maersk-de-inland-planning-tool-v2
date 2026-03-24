@@ -2,7 +2,39 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ImportRequest, ExportRequest, ImportResult, ExportResult, CYCYRequest, CYCYResult } from '../types';
 import { ImpRunResult } from '../logic/import/impRun';
-import { ExpRunResult } from '../logic/export/expRun';
+import { ExpRunResult, ExpCard } from '../logic/export/expRun';
+import { ImpInstance } from '../logic/import/computeInstances';
+
+export interface CYCYImpRunResult {
+  direction: 'Import';
+  portCode: 'RTM' | 'ANR';
+  portName: string;
+  termCode: string;
+  termName: string;
+  vesselETD: Date;
+  etdTime: string;
+  instances: ImpInstance[];
+  maxCards: number;
+}
+
+export interface CYCYExpRunResult {
+  direction: 'Export';
+  depotCode: string;
+  depotName: string;
+  termCode: string;
+  termName: string;
+  yot: number;
+  port: 'RTM' | 'ANR';
+  loadingDate: Date;
+  loadTime: string;
+  cards: ExpCard[];
+  orderDL?: Date;
+  orderDLPassed?: boolean;
+  customsDeadline?: Date;
+  skipped: { mod: string; etd: Date; reason: string }[];
+}
+
+export type CYCYRunResult = CYCYImpRunResult | CYCYExpRunResult;
 
 interface PlannerState {
   activeTab: string;
@@ -14,6 +46,7 @@ interface PlannerState {
   cycyResult: CYCYResult | null;
   impRunResult: ImpRunResult | null;
   expRunResult: ExpRunResult | null;
+  cycyRunResult: CYCYRunResult | null;
   truckCapacityData: { location: string; forecast: number[] }[];
   terminalCongestionData: TerminalCongestion[];
   schedules: Schedule[];
@@ -26,6 +59,7 @@ interface PlannerState {
   setCYCYResult: (res: CYCYResult | null) => void;
   setImpRunResult: (res: ImpRunResult | null) => void;
   setExpRunResult: (res: ExpRunResult | null) => void;
+  setCycyRunResult: (res: CYCYRunResult | null) => void;
   setTruckCapacityData: (data: { location: string; forecast: number[] }[]) => void;
   setTerminalCongestionData: (data: TerminalCongestion[]) => void;
   setSchedules: (schedules: Schedule[]) => void;
@@ -89,6 +123,7 @@ export const usePlannerStore = create<PlannerState>()(
       cycyResult: null,
       impRunResult: null,
       expRunResult: null,
+      cycyRunResult: null,
       truckCapacityData: [
         { location: 'Duisburg', forecast: [1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1] },
         { location: 'Mainz', forecast: [1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1] },
@@ -116,6 +151,7 @@ export const usePlannerStore = create<PlannerState>()(
       setCYCYResult: (res) => set({ cycyResult: res }),
       setImpRunResult: (res) => set({ impRunResult: res }),
       setExpRunResult: (res) => set({ expRunResult: res }),
+      setCycyRunResult: (res) => set({ cycyRunResult: res }),
       setTruckCapacityData: (data) => set({ truckCapacityData: data }),
       setTerminalCongestionData: (data) => set({ terminalCongestionData: data }),
       setSchedules: (schedules) => set({ schedules }),
@@ -145,13 +181,14 @@ export const usePlannerStore = create<PlannerState>()(
       resetCYCY: () => set({
         cycyRequest: {
           direction: undefined,
-          originTerminal: 'Rotterdam',
-          destinationTerminal: 'DUISBURG',
+          originTerminal: 'RTM',
+          destinationTerminal: 'DEDUI01',
           containerType: '40HC',
           date: new Date().toISOString().split('T')[0],
           time: '12:00',
         },
         cycyResult: null,
+        cycyRunResult: null,
       }),
     }),
     {

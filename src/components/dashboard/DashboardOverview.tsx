@@ -257,113 +257,97 @@ export function DashboardOverview() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-8">
-            <div className="space-y-12">
+          <CardContent className="p-4">
+            <div className="space-y-5">
               {truckCapacityData.map((hub) => (
-                <div key={hub.location} className="space-y-6">
+                <div key={hub.location} className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="relative flex h-3 w-3">
+                    <div className="flex items-center space-x-2">
+                      <div className="relative flex h-2.5 w-2.5">
                         <span className={cn(
                           "animate-ping absolute inline-flex h-full w-full rounded-full opacity-75",
                           hub.forecast.filter(v => v === 1).length > 10 ? "bg-emerald-400" : "bg-amber-400"
                         )}></span>
                         <span className={cn(
-                          "relative inline-flex rounded-full h-3 w-3",
+                          "relative inline-flex rounded-full h-2.5 w-2.5",
                           hub.forecast.filter(v => v === 1).length > 10 ? "bg-emerald-500" : "bg-amber-500"
                         )}></span>
                       </div>
-                      <span className="text-3xl font-black text-maersk-dark tracking-tighter drop-shadow-md">{hub.location}</span>
+                      <span className="text-base font-black text-maersk-dark tracking-tight">{hub.location}</span>
                     </div>
-                    <div className="flex items-center space-x-8">
-                      <div className="flex flex-col items-end">
-                        <span className="text-[11px] font-black text-slate-700 uppercase tracking-[0.25em]">Capacity</span>
-                        <div className="flex items-baseline space-x-1.5">
-                          <span className="text-4xl font-black text-maersk-dark tracking-tighter">
-                            {Math.round((hub.forecast.filter(v => v === 1).length / 15) * 100)}
-                          </span>
-                          <span className="text-lg font-black text-slate-700">%</span>
-                        </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="flex items-baseline space-x-1">
+                        <span className="text-xl font-black text-maersk-dark tracking-tighter">
+                          {Math.round((hub.forecast.filter(v => v === 1).length / 15) * 100)}
+                        </span>
+                        <span className="text-xs font-black text-slate-500">%</span>
                       </div>
-                      <div className="h-12 w-px bg-slate-300" />
-                      <Badge variant="secondary" className="bg-maersk-blue text-white border-maersk-blue font-black text-[11px] px-5 py-2 rounded-full shadow-lg">
-                        {hub.forecast.filter(v => v === 1).length}/15 DAYS
+                      <div className="h-6 w-px bg-slate-200" />
+                      <Badge variant="secondary" className="bg-maersk-blue text-white border-maersk-blue font-black text-[10px] px-3 py-0.5 rounded-full">
+                        {hub.forecast.filter(v => v === 1).length}/15 days
                       </Badge>
                     </div>
                   </div>
-                  
-                  <div className="grid grid-cols-[repeat(15,minmax(0,1fr))] gap-4">
+
+                  <div className="grid grid-cols-[repeat(15,minmax(0,1fr))] gap-2">
                     {hub.forecast.map((status, i) => (
-                      <div key={i} className={cn(
-                        "flex flex-col items-center group/day",
-                        (i === 5 || i === 10) && "relative" 
-                      )}>
-                        {(i === 5 || i === 10) && (
-                          <div className="absolute -left-2 top-0 bottom-0 w-0.5 bg-slate-400 z-0" />
-                        )}
-                        
+                      <div key={i} className="flex flex-col items-center group/day">
                         {/* Week Number */}
-                        <div className="h-10 flex items-center justify-center w-full mb-3">
+                        <div className="h-6 flex items-center justify-center w-full mb-1">
                           {(i === 0 || days[i].weekNum !== days[i-1].weekNum) ? (
-                            <span className="text-[11px] font-black text-white bg-maersk-blue px-3 py-1.5 rounded-xl shadow-xl ring-2 ring-white/20">
-                              KW {days[i].weekNum}
+                            <span className="text-[9px] font-black text-white bg-maersk-blue px-2 py-0.5 rounded-md shadow">
+                              KW{days[i].weekNum}
                             </span>
                           ) : null}
                         </div>
-                        
+
                         {/* Day Name */}
-                        <div className="text-[12px] font-black text-maersk-dark mb-3 uppercase tracking-[0.2em] group-hover/day:text-maersk-blue transition-colors drop-shadow-sm">
+                        <div className="text-[9px] font-black text-slate-500 mb-1 uppercase tracking-wider group-hover/day:text-maersk-blue transition-colors">
                           {days[i].dayName.substring(0, 2)}
                         </div>
-                        
+
                         {/* Capacity Block */}
                         <motion.div
-                          whileHover={{ y: -6, scale: 1.08, rotate: 2 }}
+                          whileHover={{ y: -3, scale: 1.05 }}
                           onClick={() => handleDayClick(days[i], status)}
                           className={cn(
-                            "w-full h-20 rounded-2xl shadow-xl transition-all duration-300 cursor-pointer border-3 relative overflow-hidden group/block",
-                            status === 1 
-                              ? "bg-emerald-500 border-emerald-600 hover:bg-emerald-400 shadow-emerald-500/20" 
-                              : "bg-rose-500 border-rose-600 hover:bg-rose-400 shadow-rose-500/20"
+                            "w-full h-10 rounded-lg shadow transition-all duration-200 cursor-pointer relative overflow-hidden",
+                            status === 1
+                              ? "bg-emerald-500 hover:bg-emerald-400"
+                              : "bg-rose-500 hover:bg-rose-400"
                           )}
                         >
-                          <div className="absolute inset-0 animate-shimmer opacity-0 group-hover/block:opacity-30 transition-opacity duration-500 pointer-events-none" />
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <span className={cn(
-                              "text-xl font-black drop-shadow-xl",
-                              "text-white"
-                            )}>
+                            <span className="text-[10px] font-black text-white">
                               {days[i].date.split('/')[0]}
                             </span>
                           </div>
                           {status === 1 && (
-                            <div className="absolute bottom-2 right-2">
-                              <CheckCircle2 className="h-5 w-5 text-white drop-shadow-lg" />
+                            <div className="absolute bottom-0.5 right-0.5">
+                              <CheckCircle2 className="h-3 w-3 text-white/70" />
                             </div>
                           )}
                         </motion.div>
-                        
+
                         {/* Date */}
-                        <span className="text-[13px] font-black text-maersk-dark mt-4 group-hover/day:text-maersk-blue transition-colors">
+                        <span className="text-[9px] font-black text-slate-400 mt-1 group-hover/day:text-maersk-blue transition-colors">
                           {days[i].date.split('/')[0]}
                         </span>
                       </div>
                     ))}
                   </div>
 
-                  {/* Micro Progress Bar */}
-                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden relative">
-                    <motion.div 
+                  {/* Progress Bar */}
+                  <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(hub.forecast.filter(v => v === 1).length / 15) * 100}%` }}
-                      transition={{ duration: 1.5, ease: "easeOut" }}
+                      transition={{ duration: 1.2, ease: "easeOut" }}
                       className={cn(
-                        "h-full rounded-full relative",
+                        "h-full rounded-full",
                         hub.forecast.filter(v => v === 1).length > 10 ? "bg-emerald-500" : "bg-amber-500"
                       )}
-                    >
-                      <div className="absolute inset-0 animate-shimmer opacity-30" />
-                    </motion.div>
+                    />
                   </div>
                 </div>
               ))}

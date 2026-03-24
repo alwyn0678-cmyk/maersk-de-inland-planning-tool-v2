@@ -6,13 +6,16 @@ import { usePlannerStore } from '../store/usePlannerStore';
 import { ArrowRightLeft, Anchor, TrendingUp, Settings2, ChevronDown, ChevronUp, Ship } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
+import { IMP_TERM_NAMES } from '../data/import/terminalNames';
+import { EXP_DEPOTS, EXP_TERM_NAMES } from '../data/export/depotNames';
 
 export function CYCYPlanner() {
-  const { cycyResult, cycyRequest, setCYCYRequest } = usePlannerStore();
+  const { cycyResult, cycyRunResult, cycyRequest, setCYCYRequest } = usePlannerStore();
   const [showForm, setShowForm] = useState(true);
 
-  useEffect(() => { if (cycyResult) setShowForm(false); }, [cycyResult]);
-  useEffect(() => { if (!cycyResult) setShowForm(true); }, [cycyResult]);
+  const hasResult = !!(cycyResult || cycyRunResult);
+  useEffect(() => { if (hasResult) setShowForm(false); }, [hasResult]);
+  useEffect(() => { if (!hasResult) setShowForm(true); }, [hasResult]);
 
   // Direction selection splash
   if (!cycyRequest.direction) {
@@ -34,7 +37,7 @@ export function CYCYPlanner() {
           <motion.button
             whileHover={{ scale: 1.02, y: -3 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => setCYCYRequest({ direction: 'Import', originTerminal: 'Rotterdam', destinationTerminal: 'DUISBURG' })}
+            onClick={() => setCYCYRequest({ direction: 'Import', originTerminal: 'RTM', destinationTerminal: 'DEDUI01' })}
             className="group relative p-6 rounded-2xl bg-white border border-slate-100 hover:border-maersk-blue/40 transition-all duration-300 hover:shadow-[0_16px_32px_-8px_rgba(66,176,213,0.2)] flex flex-col items-center text-center space-y-3 overflow-hidden"
           >
             <div className="absolute -top-4 -right-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
@@ -55,7 +58,7 @@ export function CYCYPlanner() {
           <motion.button
             whileHover={{ scale: 1.02, y: -3 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => setCYCYRequest({ direction: 'Export', originTerminal: 'DUISBURG', destinationTerminal: 'Rotterdam' })}
+            onClick={() => setCYCYRequest({ direction: 'Export', originTerminal: 'DEDUI01', destinationTerminal: 'NLROTTM|5|RTM' })}
             className="group relative p-6 rounded-2xl bg-white border border-slate-100 hover:border-emerald-500/40 transition-all duration-300 hover:shadow-[0_16px_32px_-8px_rgba(16,185,129,0.2)] flex flex-col items-center text-center space-y-3 overflow-hidden"
           >
             <div className="absolute -top-4 -right-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
@@ -102,7 +105,7 @@ export function CYCYPlanner() {
         {/* Direction switcher */}
         <div className="bg-slate-100/70 p-1 rounded-xl flex items-center gap-1 border border-slate-200/50">
           <button
-            onClick={() => setCYCYRequest({ direction: 'Import', originTerminal: 'Rotterdam', destinationTerminal: 'DUISBURG' })}
+            onClick={() => setCYCYRequest({ direction: 'Import', originTerminal: 'RTM', destinationTerminal: 'DEDUI01' })}
             className={cn(
               'px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all duration-300 flex items-center gap-1.5',
               cycyRequest.direction === 'Import'
@@ -114,7 +117,7 @@ export function CYCYPlanner() {
             Import
           </button>
           <button
-            onClick={() => setCYCYRequest({ direction: 'Export', originTerminal: 'DUISBURG', destinationTerminal: 'Rotterdam' })}
+            onClick={() => setCYCYRequest({ direction: 'Export', originTerminal: 'DEDUI01', destinationTerminal: 'NLROTTM|5|RTM' })}
             className={cn(
               'px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all duration-300 flex items-center gap-1.5',
               cycyRequest.direction === 'Export'
@@ -139,11 +142,13 @@ export function CYCYPlanner() {
               <Settings2 className={cn('h-4 w-4', isImport ? 'text-maersk-blue' : 'text-emerald-600')} />
             </div>
             <span className="text-sm font-black text-maersk-dark uppercase tracking-wide">Optimization Parameters</span>
-            {cycyResult && !showForm && cycyRequest.originTerminal && (
+            {hasResult && !showForm && cycyRequest.originTerminal && (
               <div className="flex items-center gap-1.5 ml-2 flex-wrap">
                 {[
                   cycyRequest.direction,
-                  `${cycyRequest.originTerminal} → ${cycyRequest.destinationTerminal}`,
+                  cycyRequest.direction === 'Import'
+                    ? `${cycyRequest.originTerminal === 'RTM' ? 'Rotterdam' : 'Antwerp'} → ${IMP_TERM_NAMES[cycyRequest.destinationTerminal || ''] || cycyRequest.destinationTerminal}`
+                    : `${EXP_DEPOTS[cycyRequest.originTerminal || ''] || cycyRequest.originTerminal} → ${EXP_TERM_NAMES[(cycyRequest.destinationTerminal || '').split('|')[0]] || cycyRequest.destinationTerminal}`,
                   cycyRequest.containerType,
                   cycyRequest.date,
                 ].filter(Boolean).map((tag, i) => (
@@ -182,7 +187,7 @@ export function CYCYPlanner() {
       </div>
 
       {/* ── Results ─────────────────────────────────────────────── */}
-      <CYCYResultCard result={cycyResult} />
+      <CYCYResultCard />
 
       {/* ── Network Departure Board ──────────────────────────────── */}
       <div className="space-y-3">
