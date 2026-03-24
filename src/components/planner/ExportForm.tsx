@@ -73,68 +73,62 @@ export function ExportForm() {
     <div className="bento-card w-full overflow-hidden group relative">
       <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-500 via-emerald-400 to-emerald-600 z-10" />
       
-      <div className="pb-10 pt-12 px-10 border-b border-slate-100/50 bg-slate-50/50 relative overflow-hidden">
-        <div className="absolute -right-10 -top-10 w-40 h-40 bg-emerald-500/5 rounded-full blur-3xl" />
-        <div className="flex items-center justify-between mb-6 relative z-10">
-          <div className="flex items-center space-x-5">
-            <div className="p-4 bg-maersk-dark rounded-[1.5rem] shadow-2xl shadow-maersk-dark/30 ring-4 ring-white group-hover:scale-110 transition-transform duration-500">
-              <Settings2 className="h-7 w-7 text-emerald-500" />
+      <div className="p-5 border-b border-slate-100/50 bg-slate-50/50 relative overflow-hidden">
+        <div className="flex items-center justify-between relative z-10">
+          <div className="flex items-center space-x-3">
+            <div className="p-2.5 bg-maersk-dark rounded-xl shadow-lg ring-2 ring-white group-hover:scale-110 transition-transform duration-500">
+              <Settings2 className="h-4 w-4 text-emerald-500" />
             </div>
             <div>
-              <h3 className="text-3xl font-black text-maersk-dark tracking-tighter uppercase italic">Export <span className="text-emerald-500 not-italic">Config</span></h3>
-              <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mt-1">Optimization Parameters</p>
+              <h3 className="text-lg font-black text-maersk-dark tracking-tighter uppercase italic">Export <span className="text-emerald-500 not-italic">Config</span></h3>
+              <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.25em]">Optimization Parameters</p>
             </div>
           </div>
-          <div className="flex items-center space-x-3 px-5 py-2 bg-emerald-500/10 rounded-full border border-emerald-500/20 shadow-inner">
-            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-            <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Active</span>
+          <div className="flex items-center space-x-2 px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
+            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Active</span>
           </div>
         </div>
       </div>
       
       <form onSubmit={handleSubmit} className="relative z-10">
-        <div className="space-y-12 px-10 py-12">
+        <div className="space-y-6 p-5">
           {/* Section: Location */}
-          <div className="space-y-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4 text-emerald-600">
-                <div className="p-2 bg-emerald-50 rounded-lg">
-                  <Navigation className="h-4 w-4" />
-                </div>
-                <span className="text-[11px] font-black uppercase tracking-[0.4em]">Geographic Data</span>
+          <div className="space-y-3">
+            <div className="flex items-center space-x-3 text-emerald-600">
+              <div className="p-1.5 bg-emerald-50 rounded-lg">
+                <Navigation className="h-3.5 w-3.5" />
               </div>
-              <div className="h-px flex-1 bg-gradient-to-r from-slate-100 to-transparent ml-6" />
+              <span className="text-[10px] font-black uppercase tracking-[0.25em]">Geographic Data</span>
+              <div className="h-px flex-1 bg-slate-100" />
             </div>
-            
-            <div className="grid grid-cols-1 gap-10">
-              <div className="space-y-4">
+
+            <div className="grid grid-cols-1 gap-3">
+              <div className="space-y-1.5">
                 <Label htmlFor="export-postcode" className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Collection Postcode</Label>
                 <div className="relative group/input">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-maersk-blue/20 rounded-[1.5rem] blur opacity-0 group-focus-within/input:opacity-100 transition duration-500" />
-                  <div className="relative">
-                    <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-300 group-focus-within/input:text-emerald-500 transition-colors duration-300" />
-                    <Input
-                      id="export-postcode"
-                      placeholder="00000"
-                      value={exportRequest.postcode}
-                      onChange={(e) => setExportRequest({ postcode: e.target.value })}
-                      required
-                      maxLength={5}
-                      pattern="\d{5}"
-                      className="pl-14 font-mono text-2xl font-black tracking-[0.4em] bg-slate-50/50 border-slate-200/60 focus-visible:ring-emerald-500 h-16 rounded-[1.25rem] transition-all duration-300 hover:bg-white focus:bg-white shadow-inner focus:shadow-2xl focus:shadow-emerald-500/10"
-                    />
-                  </div>
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within/input:text-emerald-500 transition-colors duration-300 z-10" />
+                  <Input
+                    id="export-postcode"
+                    placeholder="00000"
+                    value={exportRequest.postcode}
+                    onChange={(e) => setExportRequest({ postcode: e.target.value })}
+                    required
+                    maxLength={5}
+                    pattern="\d{5}"
+                    className="pl-9 font-mono text-base font-black tracking-[0.3em] bg-slate-50/50 border-slate-200/60 focus-visible:ring-emerald-500 h-10 rounded-xl transition-all hover:bg-white focus:bg-white"
+                  />
                 </div>
-                <div className="flex flex-wrap gap-2 mt-4">
+                <div className="flex flex-wrap gap-1.5">
                   {quickPostcodes.map(pc => (
                     <button
                       key={pc}
                       type="button"
                       onClick={() => setExportRequest({ postcode: pc })}
                       className={cn(
-                        "text-[10px] font-black px-4 py-2 rounded-xl transition-all duration-300 uppercase tracking-widest border",
-                        exportRequest.postcode === pc 
-                          ? "bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-600/30 scale-105" 
+                        "text-[10px] font-black px-2.5 py-1 rounded-lg transition-all duration-200 uppercase tracking-wide border",
+                        exportRequest.postcode === pc
+                          ? "bg-emerald-600 text-white border-emerald-600 scale-105"
                           : "bg-white text-slate-500 border-slate-100 hover:border-emerald-200 hover:bg-emerald-50"
                       )}
                     >
@@ -144,19 +138,19 @@ export function ExportForm() {
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-1.5">
                 <Label htmlFor="export-preferredTerminal" className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Inland Terminal</Label>
                 <Select
                   value={exportRequest.preferredTerminal || 'Auto'}
                   onValueChange={(val) => setExportRequest({ preferredTerminal: val })}
                 >
-                  <SelectTrigger id="export-preferredTerminal" className="bg-slate-50/50 border-slate-200/60 focus:ring-emerald-500 h-16 rounded-[1.25rem] hover:bg-white transition-all duration-300 font-black text-maersk-dark text-xs uppercase tracking-widest shadow-inner">
+                  <SelectTrigger id="export-preferredTerminal" className="bg-slate-50/50 border-slate-200/60 focus:ring-emerald-500 h-10 rounded-xl hover:bg-white transition-all font-black text-maersk-dark text-xs px-3">
                     <SelectValue placeholder="Auto-assign" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-2xl border-slate-100 shadow-2xl p-2 backdrop-blur-xl bg-white/90">
-                    <SelectItem value="Auto" className="text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-xl focus:bg-emerald-50 focus:text-emerald-700">Auto-assign via Postcode</SelectItem>
+                  <SelectContent className="rounded-xl border-slate-100 shadow-xl p-1 backdrop-blur-xl bg-white/90">
+                    <SelectItem value="Auto" className="text-xs font-bold py-2 rounded-lg focus:bg-emerald-50 focus:text-emerald-700">Auto-assign via Postcode</SelectItem>
                     {['DUISBURG', 'KORNWESTHEIM', 'NUREMBERG', 'MUNICH', 'LEIPZIG'].map(t => (
-                      <SelectItem key={t} value={t} className="text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-xl focus:bg-emerald-50 focus:text-emerald-700">{t}</SelectItem>
+                      <SelectItem key={t} value={t} className="text-xs font-bold py-2 rounded-lg focus:bg-emerald-50 focus:text-emerald-700">{t}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -165,31 +159,29 @@ export function ExportForm() {
           </div>
 
           {/* Section: Cargo */}
-          <div className="space-y-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4 text-emerald-600">
-                <div className="p-2 bg-emerald-50 rounded-lg">
-                  <Box className="h-4 w-4" />
-                </div>
-                <span className="text-[11px] font-black uppercase tracking-[0.4em]">Cargo Specs</span>
+          <div className="space-y-3">
+            <div className="flex items-center space-x-3 text-emerald-600">
+              <div className="p-1.5 bg-emerald-50 rounded-lg">
+                <Box className="h-3.5 w-3.5" />
               </div>
-              <div className="h-px flex-1 bg-gradient-to-r from-slate-100 to-transparent ml-6" />
+              <span className="text-[10px] font-black uppercase tracking-[0.25em]">Cargo Specs</span>
+              <div className="h-px flex-1 bg-slate-100" />
             </div>
-            
-            <div className="grid grid-cols-1 gap-10">
-              <div className="space-y-4">
-                <Label htmlFor="export-containerType" className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Container Type</Label>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="export-containerType" className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Container</Label>
                 <Select
                   value={exportRequest.containerType}
                   onValueChange={(val) => setExportRequest({ containerType: val as ContainerType })}
                 >
-                  <SelectTrigger id="export-containerType" className="bg-slate-50/50 border-slate-200/60 focus:ring-emerald-500 h-16 rounded-[1.25rem] hover:bg-white transition-all duration-300 font-black text-maersk-dark text-xs uppercase tracking-widest shadow-inner">
+                  <SelectTrigger id="export-containerType" className="bg-slate-50/50 border-slate-200/60 focus:ring-emerald-500 h-10 rounded-xl hover:bg-white transition-all font-black text-maersk-dark text-xs px-3">
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-2xl border-slate-100 shadow-2xl p-2 backdrop-blur-xl bg-white/90">
+                  <SelectContent className="rounded-xl border-slate-100 shadow-xl p-1 backdrop-blur-xl bg-white/90">
                     {['20DC', '40DC', '40HC', '20RF', '40RF', 'IMO'].map(type => (
                       <SelectItem key={type} value={type} className={cn(
-                        "text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-xl focus:bg-emerald-50",
+                        "text-xs font-bold py-2 rounded-lg focus:bg-emerald-50",
                         type === 'IMO' ? "text-rose-600 focus:text-rose-700" : "text-maersk-dark focus:text-emerald-700"
                       )}>
                         {type} {type.includes('RF') ? 'Reefer' : type === 'IMO' ? 'Hazardous' : 'Dry'}
@@ -199,18 +191,18 @@ export function ExportForm() {
                 </Select>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-1.5">
                 <Label htmlFor="export-portTerminal" className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Port Terminal</Label>
                 <Select
                   value={terminalValue}
                   onValueChange={setTerminalValue}
                 >
-                  <SelectTrigger id="export-portTerminal" className="bg-slate-50/50 border-slate-200/60 focus:ring-emerald-500 h-16 rounded-[1.25rem] hover:bg-white transition-all duration-300 font-black text-maersk-dark text-xs uppercase tracking-widest shadow-inner">
+                  <SelectTrigger id="export-portTerminal" className="bg-slate-50/50 border-slate-200/60 focus:ring-emerald-500 h-10 rounded-xl hover:bg-white transition-all font-black text-maersk-dark text-xs px-3">
                     <SelectValue placeholder="Select terminal" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-2xl border-slate-100 shadow-2xl p-2 backdrop-blur-xl bg-white/90">
+                  <SelectContent className="rounded-xl border-slate-100 shadow-xl p-1 backdrop-blur-xl bg-white/90">
                     {TERMINAL_OPTIONS.map(t => (
-                      <SelectItem key={t.value} value={t.value} className="text-[10px] font-black uppercase tracking-[0.2em] py-4 rounded-xl focus:bg-emerald-50 focus:text-emerald-700">
+                      <SelectItem key={t.value} value={t.value} className="text-xs font-bold py-2 rounded-lg focus:bg-emerald-50 focus:text-emerald-700">
                         {t.label}
                       </SelectItem>
                     ))}
@@ -221,88 +213,73 @@ export function ExportForm() {
           </div>
 
           {/* Section: Timeline */}
-          <div className="space-y-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4 text-emerald-600">
-                <div className="p-2 bg-emerald-50 rounded-lg">
-                  <History className="h-4 w-4" />
-                </div>
-                <span className="text-[11px] font-black uppercase tracking-[0.4em]">Timeline</span>
+          <div className="space-y-3">
+            <div className="flex items-center space-x-3 text-emerald-600">
+              <div className="p-1.5 bg-emerald-50 rounded-lg">
+                <History className="h-3.5 w-3.5" />
               </div>
-              <div className="h-px flex-1 bg-gradient-to-r from-slate-100 to-transparent ml-6" />
+              <span className="text-[10px] font-black uppercase tracking-[0.25em]">Timeline</span>
+              <div className="h-px flex-1 bg-slate-100" />
             </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
-              <div className="space-y-4">
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
                 <Label htmlFor="loadingDate" className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Loading Date</Label>
                 <div className="relative group/input">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-maersk-blue/20 rounded-[1.5rem] blur opacity-0 group-focus-within/input:opacity-100 transition duration-500" />
-                  <div className="relative">
-                    <CalendarIcon className="absolute left-5 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-300 group-focus-within/input:text-emerald-500 transition-colors duration-300" />
-                    <Input
-                      id="loadingDate"
-                      type="date"
-                      value={exportRequest.loadingDate}
-                      onChange={(e) => setExportRequest({ loadingDate: e.target.value })}
-                      required
-                      className="pl-14 bg-slate-50/50 border-slate-200/60 focus-visible:ring-emerald-500 h-16 rounded-[1.25rem] transition-all duration-300 hover:bg-white font-black text-xs uppercase tracking-widest shadow-inner"
-                    />
-                  </div>
+                  <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within/input:text-emerald-500 transition-colors duration-300 z-10" />
+                  <Input
+                    id="loadingDate"
+                    type="date"
+                    value={exportRequest.loadingDate}
+                    onChange={(e) => setExportRequest({ loadingDate: e.target.value })}
+                    required
+                    className="pl-9 bg-slate-50/50 border-slate-200/60 focus-visible:ring-emerald-500 h-10 rounded-xl transition-all hover:bg-white font-black text-xs"
+                  />
                 </div>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-1.5">
                 <Label htmlFor="loadingTime" className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Loading Time</Label>
                 <div className="relative group/input">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-maersk-blue/20 rounded-[1.5rem] blur opacity-0 group-focus-within/input:opacity-100 transition duration-500" />
-                  <div className="relative">
-                    <Clock className="absolute left-5 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-300 group-focus-within/input:text-emerald-500 transition-colors duration-300" />
-                    <Input
-                      id="loadingTime"
-                      type="time"
-                      value={exportRequest.loadingTime}
-                      onChange={(e) => setExportRequest({ loadingTime: e.target.value })}
-                      required
-                      className="pl-14 bg-slate-50/50 border-slate-200/60 focus-visible:ring-emerald-500 h-16 rounded-[1.25rem] transition-all duration-300 hover:bg-white font-black text-xs uppercase tracking-widest shadow-inner"
-                    />
-                  </div>
+                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within/input:text-emerald-500 transition-colors duration-300 z-10" />
+                  <Input
+                    id="loadingTime"
+                    type="time"
+                    value={exportRequest.loadingTime}
+                    onChange={(e) => setExportRequest({ loadingTime: e.target.value })}
+                    required
+                    className="pl-9 bg-slate-50/50 border-slate-200/60 focus-visible:ring-emerald-500 h-10 rounded-xl transition-all hover:bg-white font-black text-xs"
+                  />
                 </div>
               </div>
             </div>
           </div>
         </div>
-        
-        <div className="flex flex-col space-y-8 px-10 py-12 bg-maersk-dark relative overflow-hidden">
+
+        <div className="flex items-center justify-between p-4 bg-maersk-dark relative overflow-hidden">
           <div className="absolute inset-0 bg-emerald-500/5 pointer-events-none" />
-          <div className="flex items-center justify-between w-full relative z-10">
-            <Button 
-              type="button" 
-              variant="ghost" 
-              onClick={resetExport} 
-              className="text-white/30 hover:text-white hover:bg-white/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] h-12 px-6 transition-all duration-300"
-            >
-              Reset System
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={loading || !exportRequest.postcode || exportRequest.postcode.length < 2} 
-              className="bg-emerald-600 hover:bg-emerald-50 text-white hover:text-emerald-700 shadow-[0_20px_50px_-10px_rgba(16,185,129,0.5)] px-12 h-20 rounded-[1.5rem] font-black text-sm uppercase tracking-[0.3em] transition-all duration-500 hover:scale-[1.05] active:scale-[0.95] group overflow-hidden relative"
-            >
-              <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
-              <div className="relative z-10 flex items-center">
-                {loading ? (
-                  <Loader2 className="mr-4 h-6 w-6 animate-spin" />
-                ) : (
-                  <TrendingUp className="mr-4 h-6 w-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-500" />
-                )}
-                Run Optimizer
-              </div>
-            </Button>
-          </div>
-          
-          <div className="flex items-center space-x-4 text-[10px] text-white/20 font-black uppercase tracking-[0.3em] justify-center relative z-10">
-            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,1)]" />
-            <span>Real-time Barge Congestion Data Integrated</span>
-          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={resetExport}
+            className="text-white/30 hover:text-white hover:bg-white/10 rounded-xl text-[10px] font-black uppercase tracking-[0.25em] h-8 px-4 relative z-10"
+          >
+            Reset
+          </Button>
+          <Button
+            type="submit"
+            disabled={loading || !exportRequest.postcode || exportRequest.postcode.length < 2}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 h-9 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all hover:scale-[1.03] active:scale-[0.97] group overflow-hidden relative z-10 shadow-lg shadow-emerald-600/30"
+          >
+            <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+            <div className="relative z-10 flex items-center space-x-2">
+              {loading ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <TrendingUp className="h-3.5 w-3.5" />
+              )}
+              <span>Run Optimizer</span>
+            </div>
+          </Button>
         </div>
       </form>
     </div>

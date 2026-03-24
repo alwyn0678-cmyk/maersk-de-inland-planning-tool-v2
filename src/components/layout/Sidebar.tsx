@@ -40,78 +40,78 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   return (
     <motion.div
       initial={false}
-      animate={{ width: isCollapsed ? 80 : 260 }}
+      animate={{ width: isCollapsed ? 64 : 220 }}
       className={cn(
         "relative flex flex-col h-screen bg-[#00243d] text-white border-r border-white/10 transition-all duration-300 z-50",
-        isCollapsed ? "px-3" : "px-6"
+        isCollapsed ? "px-2" : "px-4"
       )}
     >
       {/* Logo Section */}
       <div className={cn(
-        "flex items-center h-20 mb-8",
+        "flex items-center h-14 mb-4",
         isCollapsed ? "justify-center" : "justify-between"
       )}>
         {!isCollapsed && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex items-center space-x-3"
+            className="flex items-center space-x-2.5"
           >
-            <div className="p-2 bg-[#42b0d5] rounded-xl shadow-lg shadow-[#42b0d5]/20">
-              <Ship className="h-6 w-6 text-white" />
+            <div className="p-1.5 bg-[#42b0d5] rounded-lg shadow-lg shadow-[#42b0d5]/20">
+              <Ship className="h-4 w-4 text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-lg tracking-tight leading-none">Maersk</h1>
-              <p className="text-[10px] text-[#42b0d5] font-bold uppercase tracking-widest mt-1">Inland Ops</p>
+              <h1 className="font-bold text-sm tracking-tight leading-none">Maersk</h1>
+              <p className="text-[9px] text-[#42b0d5] font-bold uppercase tracking-widest mt-0.5">Inland Ops</p>
             </div>
           </motion.div>
         )}
         {isCollapsed && (
-          <div className="p-2 bg-[#42b0d5] rounded-xl">
-            <Ship className="h-6 w-6 text-white" />
+          <div className="p-1.5 bg-[#42b0d5] rounded-lg">
+            <Ship className="h-4 w-4 text-white" />
           </div>
         )}
       </div>
 
       {/* Main Navigation */}
-      <div className="flex-1 space-y-2">
+      <div className="flex-1 space-y-1">
         {menuItems.map((item) => (
           <button
             key={item.id}
             onClick={() => onTabChange(item.id)}
             className={cn(
-              "flex items-center w-full p-4 rounded-2xl transition-all duration-300 group relative",
-              activeTab === item.id 
-                ? "bg-white text-maersk-dark shadow-2xl shadow-black/20 scale-[1.05] ring-2 ring-white/20" 
+              "flex items-center w-full p-2.5 rounded-xl transition-all duration-300 group relative",
+              activeTab === item.id
+                ? "bg-white text-maersk-dark shadow-lg shadow-black/10 scale-[1.02]"
                 : "text-slate-100 hover:text-white hover:bg-white/20"
             )}
           >
             <item.icon className={cn(
-              "h-5 w-5 shrink-0 transition-transform duration-300 group-hover:scale-110",
+              "h-4 w-4 shrink-0 transition-transform duration-300 group-hover:scale-110",
               activeTab === item.id ? "text-maersk-blue" : "text-slate-300 group-hover:text-white",
-              !isCollapsed && "mr-4"
+              !isCollapsed && "mr-3"
             )} />
             {!isCollapsed && (
               <span className={cn(
-                "font-black text-sm tracking-tight",
+                "font-black text-xs tracking-tight",
                 activeTab === item.id ? "opacity-100" : "opacity-80 group-hover:opacity-100"
               )}>{item.label}</span>
             )}
             {activeTab === item.id && !isCollapsed && (
-              <motion.div 
+              <motion.div
                 layoutId="activeTabIndicator"
-                className="absolute right-4 h-1.5 w-1.5 rounded-full bg-maersk-blue shadow-glow"
+                className="absolute right-3 h-1.5 w-1.5 rounded-full bg-maersk-blue shadow-glow"
               />
             )}
             {isCollapsed && (
-              <div className="absolute left-full ml-4 px-3 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-all translate-x-[-10px] group-hover:translate-x-0 whitespace-nowrap z-50 shadow-2xl border border-white/10">
+              <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-all translate-x-[-8px] group-hover:translate-x-0 whitespace-nowrap z-50 shadow-xl border border-white/10">
                 {item.label}
               </div>
             )}
             {activeTab === item.id && (
-              <motion.div 
+              <motion.div
                 layoutId="activeTab"
-                className="absolute left-0 w-1 h-6 bg-white rounded-full ml-1"
+                className="absolute left-0 w-0.5 h-5 bg-white rounded-full ml-1"
               />
             )}
           </button>
@@ -119,43 +119,43 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       </div>
 
       {/* Secondary Navigation */}
-      <div className="pt-8 pb-8 space-y-2 border-t border-white/10">
+      <div className="pt-4 pb-4 space-y-1 border-t border-white/10">
         {secondaryItems.map((item) => (
           <button
             key={item.id}
             onClick={() => onTabChange(item.id)}
             className={cn(
-              "flex items-center w-full p-3.5 rounded-2xl transition-all duration-300 group relative",
-              activeTab === item.id 
-                ? "bg-[#42b0d5] text-white shadow-xl shadow-[#42b0d5]/40 scale-[1.02]" 
+              "flex items-center w-full p-2.5 rounded-xl transition-all duration-300 group relative",
+              activeTab === item.id
+                ? "bg-[#42b0d5] text-white shadow-lg shadow-[#42b0d5]/30"
                 : "text-slate-200 hover:text-white hover:bg-white/10"
             )}
           >
             <item.icon className={cn(
-              "h-5 w-5 shrink-0 transition-transform duration-300 group-hover:scale-110",
+              "h-4 w-4 shrink-0 transition-transform duration-300 group-hover:scale-110",
               activeTab === item.id ? "text-white" : "text-slate-300 group-hover:text-white",
               !isCollapsed && "mr-3"
             )} />
             {!isCollapsed && (
               <span className={cn(
-                "font-bold text-sm tracking-tight",
+                "font-bold text-xs tracking-tight",
                 activeTab === item.id ? "opacity-100" : "opacity-80 group-hover:opacity-100"
               )}>{item.label}</span>
             )}
           </button>
         ))}
-        
+
         <button
           className={cn(
-            "flex items-center w-full p-3 rounded-xl transition-all duration-200 group relative text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 mt-4"
+            "flex items-center w-full p-2.5 rounded-xl transition-all duration-200 group relative text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 mt-2"
           )}
         >
           <LogOut className={cn(
-            "h-5 w-5 shrink-0",
+            "h-4 w-4 shrink-0",
             !isCollapsed && "mr-3"
           )} />
           {!isCollapsed && (
-            <span className="font-medium text-sm">Sign Out</span>
+            <span className="font-medium text-xs">Sign Out</span>
           )}
         </button>
       </div>
@@ -163,7 +163,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       {/* Collapse Toggle */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-3 top-24 h-6 w-6 bg-[#42b0d5] rounded-full flex items-center justify-center border-2 border-[#00243d] text-white hover:scale-110 transition-transform shadow-lg"
+        className="absolute -right-3 top-20 h-5 w-5 bg-[#42b0d5] rounded-full flex items-center justify-center border-2 border-[#00243d] text-white hover:scale-110 transition-transform shadow-lg"
       >
         {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
       </button>

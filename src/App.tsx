@@ -78,46 +78,46 @@ export default function App() {
         </div>
 
         {/* Top Navigation Bar */}
-        <header className="h-20 border-b border-maersk-blue/20 glass flex items-center justify-between px-8 shrink-0 z-40 shadow-md">
-          <div className="flex items-center flex-1 max-w-xl">
+        <header className="h-14 border-b border-maersk-blue/20 glass flex items-center justify-between px-6 shrink-0 z-40 shadow-sm">
+          <div className="flex items-center flex-1 max-w-md">
             <div className="relative w-full group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 group-focus-within:text-maersk-blue transition-all" />
-              <Input 
-                placeholder="Search routes, schedules, or documentation..." 
-                className="pl-12 bg-white border-slate-200 focus-visible:ring-2 focus-visible:ring-maersk-blue/50 h-12 rounded-2xl transition-all shadow-sm text-maersk-dark font-medium placeholder:text-slate-400"
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-maersk-blue transition-all" />
+              <Input
+                placeholder="Search routes, schedules..."
+                className="pl-9 bg-white border-slate-200 focus-visible:ring-2 focus-visible:ring-maersk-blue/50 h-8 rounded-xl transition-all shadow-sm text-sm text-maersk-dark font-medium placeholder:text-slate-400"
               />
             </div>
           </div>
 
-          <div className="flex items-center space-x-6 ml-8">
-            <div className="flex items-center space-x-2">
-              <Button variant="ghost" size="icon" className="text-slate-600 hover:text-maersk-dark hover:bg-white rounded-2xl relative transition-all hover-glow border border-transparent hover:border-maersk-blue/10">
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-3 right-3 h-2.5 w-2.5 bg-maersk-accent rounded-full border-2 border-white animate-pulse" />
+          <div className="flex items-center space-x-4 ml-6">
+            <div className="flex items-center space-x-1">
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600 hover:text-maersk-dark hover:bg-white rounded-xl relative transition-all border border-transparent hover:border-maersk-blue/10">
+                <Bell className="h-4 w-4" />
+                <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-maersk-accent rounded-full border border-white animate-pulse" />
               </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className={`text-slate-600 hover:text-maersk-dark hover:bg-white rounded-2xl transition-all hover-glow border border-transparent hover:border-maersk-blue/10 ${activeTab === 'settings' ? 'bg-white shadow-sm text-maersk-dark border-maersk-blue/20' : ''}`}
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`h-8 w-8 text-slate-600 hover:text-maersk-dark hover:bg-white rounded-xl transition-all border border-transparent hover:border-maersk-blue/10 ${activeTab === 'settings' ? 'bg-white shadow-sm text-maersk-dark border-maersk-blue/20' : ''}`}
                 onClick={() => setActiveTab('settings')}
               >
-                <SettingsIcon className="h-5 w-5" />
+                <SettingsIcon className="h-4 w-4" />
               </Button>
             </div>
-            
-            <div className="h-8 w-px bg-slate-200 mx-2" />
-            
-            <div className="flex items-center space-x-4 pl-2 group cursor-pointer">
+
+            <div className="h-6 w-px bg-slate-200" />
+
+            <div className="flex items-center space-x-3 group cursor-pointer">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-black text-maersk-dark leading-none tracking-tight group-hover:text-maersk-blue transition-colors">Alwyn</p>
-                <p className="text-[10px] font-black text-maersk-blue uppercase tracking-[0.2em] mt-1.5 opacity-90">Senior Planner</p>
+                <p className="text-xs font-black text-maersk-dark leading-none tracking-tight group-hover:text-maersk-blue transition-colors">Alwyn</p>
+                <p className="text-[9px] font-black text-maersk-blue uppercase tracking-[0.2em] mt-1 opacity-90">Senior Planner</p>
               </div>
-              <motion.div 
+              <motion.div
                 whileHover={{ scale: 1.05 }}
-                className="h-12 w-12 rounded-2xl bg-gradient-to-br from-maersk-dark to-maersk-blue p-0.5 shadow-xl shadow-maersk-dark/20 cursor-pointer hover-glow"
+                className="h-8 w-8 rounded-xl bg-gradient-to-br from-maersk-dark to-maersk-blue p-0.5 shadow-md cursor-pointer"
               >
-                <div className="h-full w-full rounded-[14px] bg-white flex items-center justify-center overflow-hidden">
-                  <User className="h-6 w-6 text-maersk-dark" />
+                <div className="h-full w-full rounded-[9px] bg-white flex items-center justify-center overflow-hidden">
+                  <User className="h-4 w-4 text-maersk-dark" />
                 </div>
               </motion.div>
             </div>
@@ -125,7 +125,7 @@ export default function App() {
         </header>
 
         {/* Scrollable Content */}
-        <main className="flex-1 overflow-y-auto p-8 relative scroll-smooth">
+        <main className="flex-1 overflow-y-auto p-6 relative scroll-smooth">
           <div className="max-w-7xl mx-auto">
             <AnimatePresence mode="wait">
               <motion.div
