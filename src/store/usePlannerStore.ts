@@ -112,8 +112,9 @@ export const usePlannerStore = create<PlannerState>()(
       },
       cycyRequest: {
         direction: undefined,
-        originTerminal: 'Rotterdam',
-        destinationTerminal: 'DUISBURG',
+        zip: '',
+        originTerminal: 'RTM',
+        destinationTerminal: 'NLROTTM|5|RTM',
         containerType: '40HC',
         date: new Date().toISOString().split('T')[0],
         time: '12:00',
@@ -181,8 +182,9 @@ export const usePlannerStore = create<PlannerState>()(
       resetCYCY: () => set({
         cycyRequest: {
           direction: undefined,
+          zip: '',
           originTerminal: 'RTM',
-          destinationTerminal: 'DEDUI01',
+          destinationTerminal: 'NLROTTM|5|RTM',
           containerType: '40HC',
           date: new Date().toISOString().split('T')[0],
           time: '12:00',

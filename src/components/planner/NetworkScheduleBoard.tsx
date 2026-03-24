@@ -161,8 +161,8 @@ export function NetworkScheduleBoard({ direction }: Props) {
       </div>
 
       {/* Column headers */}
-      <div className="grid grid-cols-[80px_90px_1fr_60px_90px] gap-0 bg-[#0d1e35] px-5 py-2 border-b border-white/5">
-        {['Mode', 'ETD', 'Route', 'T+', 'ETA'].map(h => (
+      <div className="grid grid-cols-[72px_1fr_40px_104px] gap-0 bg-[#0d1e35] px-5 py-2 border-b border-white/5">
+        {['Mode', 'Route & ETD', 'T+', 'ETA'].map(h => (
           <span key={h} className="text-[9px] font-black text-white/30 uppercase tracking-widest">{h}</span>
         ))}
       </div>
@@ -180,12 +180,12 @@ export function NetworkScheduleBoard({ direction }: Props) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: i * 0.025, duration: 0.3 }}
-              className="grid grid-cols-[80px_90px_1fr_60px_90px] gap-0 px-5 py-3 hover:bg-white/5 transition-colors duration-150 group"
+              className="grid grid-cols-[72px_1fr_40px_104px] gap-0 px-5 py-2.5 hover:bg-white/5 transition-colors duration-150 group"
             >
               {/* Mode badge */}
               <div className="flex items-center">
                 <span className={cn(
-                  'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider',
+                  'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider whitespace-nowrap',
                   dep.mod === 'Barge'
                     ? 'bg-maersk-blue/20 text-maersk-blue border border-maersk-blue/30'
                     : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
@@ -193,35 +193,33 @@ export function NetworkScheduleBoard({ direction }: Props) {
                   {dep.mod === 'Barge'
                     ? <Anchor className="h-2.5 w-2.5" />
                     : <Train className="h-2.5 w-2.5" />}
-                  {dep.mod === 'Barge' ? 'BRG' : 'RAIL'}
+                  {dep.mod === 'Barge' ? 'Barge' : 'Rail'}
                 </span>
               </div>
 
-              {/* ETD */}
-              <div>
-                <p className={cn('text-xs font-black', urgencyColor(dep.daysAhead))}>
+              {/* Route + ETD combined */}
+              <div className="min-w-0 pr-3">
+                <div className="flex items-center gap-1 min-w-0">
+                  <span className="text-[11px] font-bold text-white/50 truncate shrink-0 max-w-[38%]">{dep.origin}</span>
+                  <ArrowRight className="h-2.5 w-2.5 text-white/20 flex-none" />
+                  <span className="text-[11px] font-black text-white truncate">{dep.destination}</span>
+                </div>
+                <p className={cn('text-[9px] font-black mt-0.5', urgencyColor(dep.daysAhead))}>
                   {fmtShort(dep.etdDate)}
+                  <span className="text-white/30 font-bold ml-1.5">
+                    {dep.daysAhead === 0 ? '· Today' : dep.daysAhead === 1 ? '· Tomorrow' : `· in ${dep.daysAhead}d`}
+                  </span>
                 </p>
-                <p className="text-[9px] text-white/30 font-bold">
-                  {dep.daysAhead === 1 ? 'Tomorrow' : dep.daysAhead === 0 ? 'Today' : `in ${dep.daysAhead}d`}
-                </p>
-              </div>
-
-              {/* Route */}
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className="text-[11px] font-bold text-white/60 truncate flex-none max-w-[100px]">{dep.origin}</span>
-                <ArrowRight className="h-3 w-3 text-white/20 flex-none" />
-                <span className="text-[11px] font-black text-white truncate">{dep.destination}</span>
               </div>
 
               {/* Transit */}
-              <div>
+              <div className="flex items-center">
                 <p className="text-xs font-black text-emerald-400">{dep.transitDays}d</p>
               </div>
 
               {/* ETA */}
-              <div>
-                <p className="text-xs font-black text-white/60">{fmtShort(dep.etaDate)}</p>
+              <div className="flex items-center">
+                <p className="text-[11px] font-black text-white/60">{fmtShort(dep.etaDate)}</p>
               </div>
             </motion.div>
           ))

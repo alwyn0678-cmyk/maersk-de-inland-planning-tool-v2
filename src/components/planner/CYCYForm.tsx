@@ -6,10 +6,12 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Loader2, Calendar as CalendarIcon, TrendingUp, Box, Navigation, History, Clock, ArrowRightLeft } from 'lucide-react';
+import { Loader2, Calendar as CalendarIcon, TrendingUp, Box, MapPin, Clock, ArrowRightLeft } from 'lucide-react';
 import { impFindScheds } from '../../logic/import/scheduleFinder';
 import { impComputeInst, ImpInstance } from '../../logic/import/computeInstances';
+import { impLookupTerms } from '../../logic/import/zipLookup';
 import { expGetNextDeps } from '../../logic/export/getNextDepartures';
+import { expFindRule } from '../../logic/export/ruleLookup';
 import { ExpCard } from '../../logic/export/expRun';
 import { EXP_DEPOTS, EXP_TERM_NAMES } from '../../data/export/depotNames';
 import { IMP_TERM_NAMES } from '../../data/import/terminalNames';
@@ -21,24 +23,13 @@ const PORT_OPTIONS = [
   { value: 'ANR', label: 'Antwerp' },
 ];
 
-const INLAND_TERMINALS = [
-  { value: 'DEDUI01', label: 'Duisburg — Hutchison Ports' },
-  { value: 'DEGRH01', label: 'Germersheim — DPW' },
-  { value: 'DEG4TG',  label: 'Gustavsburg — Contargo' },
-  { value: 'DEBNX01', label: 'Bonn — AZS' },
-  { value: 'NUE02',   label: 'Nuernberg — CDN' },
-  { value: 'DEMHG02', label: 'Mannheim — DPW' },
-  { value: 'DEAJHRA', label: 'Andernach — Rheinhafen' },
-  { value: 'DEMNZ01', label: 'Mainz — Frankenbach' },
-];
-
 const PORT_TERMINALS = [
-  { value: 'NLROTTM|5|RTM',  label: 'Rotterdam — APM Terminals' },
-  { value: 'NLROTWG|7|RTM',  label: 'Rotterdam — World Gateway (RWG)' },
-  { value: 'NLROT01|8|RTM',  label: 'Rotterdam — Hutchison Ports Delta II' },
-  { value: 'NLROT21|8|RTM',  label: 'Rotterdam — ECT Delta' },
-  { value: 'BEANT869|7|ANR', label: 'Antwerp — PSA Europa Terminal' },
-  { value: 'BEANT913|7|ANR', label: 'Antwerp — PSA Noordzee Terminal' },
+  { value: 'NLROTTM|5|RTM',  label: 'APM Terminals Rotterdam',       port: 'RTM' },
+  { value: 'NLROTWG|7|RTM',  label: 'Rotterdam World Gateway (RWG)', port: 'RTM' },
+  { value: 'NLROT01|8|RTM',  label: 'Hutchison Ports Delta II',      port: 'RTM' },
+  { value: 'NLROT21|8|RTM',  label: 'ECT Delta Terminal',            port: 'RTM' },
+  { value: 'BEANT869|7|ANR', label: 'PSA Europa Terminal (ANR)',     port: 'ANR' },
+  { value: 'BEANT913|7|ANR', label: 'PSA Noordzee Terminal (ANR)',   port: 'ANR' },
 ];
 
 export function CYCYForm() {
@@ -47,8 +38,6 @@ export function CYCYForm() {
   const [error, setError] = useState<string | null>(null);
 
   const isImport = cycyRequest.direction === 'Import';
-  const originOptions = isImport ? PORT_OPTIONS : INLAND_TERMINALS;
-  const destinationOptions = isImport ? INLAND_TERMINALS : PORT_TERMINALS;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,15 +45,32 @@ export function CYCYForm() {
     setLoading(true);
 
     try {
+      const zip = cycyRequest.zip || '';
+      if (!zip || zip.length < 4) {
+        setError('Enter a valid German postcode (4–5 digits)');
+        setLoading(false);
+        return;
+      }
       if (!cycyRequest.date) {
-        setError('Target date is required');
+        setError('Date is required');
         setLoading(false);
         return;
       }
 
       if (isImport) {
         const portCode = (cycyRequest.originTerminal || 'RTM') as 'RTM' | 'ANR';
-        const termCode = cycyRequest.destinationTerminal || 'DEDUI01';
+
+        // Auto-determine inland terminal from ZIP
+        const terms = impLookupTerms(zip, portCode);
+        if (!terms || !terms.b) {
+          setError(`No barge terminal found for postcode ${zip} via ${portCode === 'RTM' ? 'Rotterdam' : 'Antwerp'}`);
+          setLoading(false);
+          return;
+        }
+        const termCode = terms.b;
+        const termName = IMP_TERM_NAMES[termCode] || termCode;
+        const portName = portCode === 'RTM' ? 'Rotterdam' : 'Antwerp';
+
         const vesselETD = parseDate(cycyRequest.date);
         const now = new Date(); now.setHours(0, 0, 0, 0);
         const isFuture = vesselETD > now;
@@ -84,8 +90,6 @@ export function CYCYForm() {
         }
 
         const maxCards = termCode === 'DEDUI01' ? 3 : 2;
-        const termName = IMP_TERM_NAMES[termCode] || termCode;
-        const portName = portCode === 'RTM' ? 'Rotterdam' : 'Antwerp';
 
         setCycyRunResult({
           direction: 'Import',
@@ -98,17 +102,32 @@ export function CYCYForm() {
           instances: deduped,
           maxCards,
         });
+
       } else {
-        const depotCode = cycyRequest.originTerminal || 'DEDUI01';
         const terminalValue = cycyRequest.destinationTerminal || 'NLROTTM|5|RTM';
         const [termCode, yotStr, portStr] = terminalValue.split('|');
         const yot = parseInt(yotStr, 10);
         const port = portStr as 'RTM' | 'ANR';
-        const loadingDate = parseDate(cycyRequest.date);
-        const loadTime = cycyRequest.time || '08:00';
 
+        // Auto-determine inland depot from ZIP
+        const rule = expFindRule(zip);
+        if (!rule) {
+          setError(`Postcode ${zip} is not in the depot matrix`);
+          setLoading(false);
+          return;
+        }
+        const portRule = port === 'ANR' ? rule.anr : rule.rtm;
+        if (!portRule?.p1) {
+          setError(`Postcode ${zip} is not serviced via ${port === 'ANR' ? 'Antwerp' : 'Rotterdam'}`);
+          setLoading(false);
+          return;
+        }
+        const depotCode = portRule.p1;
         const depotName = EXP_DEPOTS[depotCode] || depotCode;
         const termName = EXP_TERM_NAMES[termCode] || termCode;
+
+        const loadingDate = parseDate(cycyRequest.date);
+        const loadTime = cycyRequest.time || '08:00';
 
         const result = expGetNextDeps(depotCode, port, loadingDate, loadTime, 3, termCode);
 
@@ -177,7 +196,9 @@ export function CYCYForm() {
               <h3 className="text-base font-black text-maersk-dark tracking-tight uppercase italic">
                 CY/CY <span className={cn('transition-colors duration-700', isImport ? 'text-maersk-blue' : 'text-emerald-500')}>Config</span>
               </h3>
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Terminal-to-Terminal · Live Schedule Data</p>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                {isImport ? 'Port → Inland — ZIP auto-assigns terminal' : 'Inland → Port — ZIP auto-assigns depot'}
+              </p>
             </div>
           </div>
           <div className={cn(
@@ -193,50 +214,74 @@ export function CYCYForm() {
       <form onSubmit={handleSubmit}>
         <div className="px-5 py-4 space-y-4">
 
-          {/* Network Nodes */}
+          {/* ZIP + Port/Port Terminal */}
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
-              <Navigation className="h-3.5 w-3.5 text-slate-400" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Network Nodes</span>
+              <MapPin className="h-3.5 w-3.5 text-slate-400" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">
+                {isImport ? 'Customer ZIP & Origin Port' : 'Customer ZIP & Destination Terminal'}
+              </span>
               <div className="h-px flex-1 bg-slate-100" />
             </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  {isImport ? 'Origin Port' : 'Origin Depot'}
-                </Label>
-                <Select
-                  value={cycyRequest.originTerminal || ''}
-                  onValueChange={(val) => setCYCYRequest({ originTerminal: val })}
-                >
-                  <SelectTrigger className="bg-slate-50 border-slate-200 h-10 rounded-xl font-bold text-xs text-maersk-dark">
-                    <SelectValue placeholder="Select origin" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl border-slate-100 shadow-xl">
-                    {originOptions.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value} className="text-xs font-bold">{opt.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Customer Postcode</Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 z-10" />
+                  <Input
+                    type="text"
+                    placeholder="e.g. 47051"
+                    value={cycyRequest.zip || ''}
+                    onChange={(e) => setCYCYRequest({ zip: e.target.value })}
+                    maxLength={5}
+                    pattern="\d{4,5}"
+                    required
+                    className="pl-9 bg-slate-50 border-slate-200 h-10 rounded-xl font-mono font-black text-sm tracking-widest"
+                  />
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  {isImport ? 'Destination Terminal' : 'Destination Port Terminal'}
-                </Label>
-                <Select
-                  value={cycyRequest.destinationTerminal || ''}
-                  onValueChange={(val) => setCYCYRequest({ destinationTerminal: val })}
-                >
-                  <SelectTrigger className="bg-slate-50 border-slate-200 h-10 rounded-xl font-bold text-xs text-maersk-dark">
-                    <SelectValue placeholder="Select destination" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl border-slate-100 shadow-xl">
-                    {destinationOptions.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value} className="text-xs font-bold">{opt.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+
+              {isImport ? (
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Origin Port</Label>
+                  <Select
+                    value={cycyRequest.originTerminal || 'RTM'}
+                    onValueChange={(val) => setCYCYRequest({ originTerminal: val })}
+                  >
+                    <SelectTrigger className="bg-slate-50 border-slate-200 h-10 rounded-xl font-bold text-xs text-maersk-dark">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-slate-100 shadow-xl">
+                      {PORT_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value} className="text-xs font-bold">{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Port Terminal</Label>
+                  <Select
+                    value={cycyRequest.destinationTerminal || 'NLROTTM|5|RTM'}
+                    onValueChange={(val) => setCYCYRequest({ destinationTerminal: val })}
+                  >
+                    <SelectTrigger className="bg-slate-50 border-slate-200 h-10 rounded-xl font-bold text-xs text-maersk-dark">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-slate-100 shadow-xl min-w-[300px]">
+                      <div className="px-2 py-1 text-[9px] font-black text-slate-400 uppercase tracking-widest">Rotterdam</div>
+                      {PORT_TERMINALS.filter(t => t.port === 'RTM').map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value} className="text-xs font-bold">{opt.label}</SelectItem>
+                      ))}
+                      <div className="px-2 py-1 text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Antwerp</div>
+                      {PORT_TERMINALS.filter(t => t.port === 'ANR').map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value} className="text-xs font-bold">{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
           </div>
 

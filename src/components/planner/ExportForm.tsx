@@ -138,23 +138,6 @@ export function ExportForm() {
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="export-preferredTerminal" className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Inland Terminal</Label>
-                <Select
-                  value={exportRequest.preferredTerminal || 'Auto'}
-                  onValueChange={(val) => setExportRequest({ preferredTerminal: val })}
-                >
-                  <SelectTrigger id="export-preferredTerminal" className="bg-slate-50/50 border-slate-200/60 focus:ring-emerald-500 h-10 rounded-xl hover:bg-white transition-all font-black text-maersk-dark text-xs px-3">
-                    <SelectValue placeholder="Auto-assign" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl border-slate-100 shadow-xl p-1 backdrop-blur-xl bg-white/90">
-                    <SelectItem value="Auto" className="text-xs font-bold py-2 rounded-lg focus:bg-emerald-50 focus:text-emerald-700">Auto-assign via Postcode</SelectItem>
-                    {['DUISBURG', 'KORNWESTHEIM', 'NUREMBERG', 'MUNICH', 'LEIPZIG'].map(t => (
-                      <SelectItem key={t} value={t} className="text-xs font-bold py-2 rounded-lg focus:bg-emerald-50 focus:text-emerald-700">{t}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
           </div>
 
@@ -168,9 +151,9 @@ export function ExportForm() {
               <div className="h-px flex-1 bg-slate-100" />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-3">
               <div className="space-y-1.5">
-                <Label htmlFor="export-containerType" className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Container</Label>
+                <Label htmlFor="export-containerType" className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Container Type</Label>
                 <Select
                   value={exportRequest.containerType}
                   onValueChange={(val) => setExportRequest({ containerType: val as ContainerType })}
@@ -200,10 +183,17 @@ export function ExportForm() {
                   <SelectTrigger id="export-portTerminal" className="bg-slate-50/50 border-slate-200/60 focus:ring-emerald-500 h-10 rounded-xl hover:bg-white transition-all font-black text-maersk-dark text-xs px-3">
                     <SelectValue placeholder="Select terminal" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl border-slate-100 shadow-xl p-1 backdrop-blur-xl bg-white/90">
-                    {TERMINAL_OPTIONS.map(t => (
+                  <SelectContent className="rounded-xl border-slate-100 shadow-xl p-1 backdrop-blur-xl bg-white/90 min-w-[320px]">
+                    <div className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Rotterdam</div>
+                    {TERMINAL_OPTIONS.filter(t => t.port === 'RTM').map(t => (
                       <SelectItem key={t.value} value={t.value} className="text-xs font-bold py-2 rounded-lg focus:bg-emerald-50 focus:text-emerald-700">
-                        {t.label}
+                        {t.label} <span className="text-[10px] text-slate-400 ml-1">YOT {t.value.split('|')[1]}d</span>
+                      </SelectItem>
+                    ))}
+                    <div className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Antwerp</div>
+                    {TERMINAL_OPTIONS.filter(t => t.port === 'ANR').map(t => (
+                      <SelectItem key={t.value} value={t.value} className="text-xs font-bold py-2 rounded-lg focus:bg-emerald-50 focus:text-emerald-700">
+                        {t.label} <span className="text-[10px] text-slate-400 ml-1">YOT {t.value.split('|')[1]}d</span>
                       </SelectItem>
                     ))}
                   </SelectContent>

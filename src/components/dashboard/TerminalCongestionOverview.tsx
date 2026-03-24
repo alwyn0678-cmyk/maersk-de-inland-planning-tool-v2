@@ -70,8 +70,8 @@ export function TerminalCongestionOverview() {
   const avgAntwerp = Math.round(antwerpTerminals.reduce((acc, curr) => acc + curr.waitingTime, 0) / antwerpTerminals.length);
 
   return (
-    <Card className="lg:col-span-12 border-none bg-maersk-dark shadow-2xl overflow-hidden group rounded-[3rem]">
-      <CardHeader className="pb-10 border-b border-white/10 bg-white/5 relative overflow-hidden">
+    <Card className="lg:col-span-12 border-none bg-maersk-dark shadow-2xl overflow-hidden group rounded-2xl">
+      <CardHeader className="pb-5 pt-5 border-b border-white/10 bg-white/5 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-20 opacity-5 pointer-events-none">
           <Ship className="h-64 w-64 text-white rotate-12" />
         </div>
@@ -124,57 +124,57 @@ export function TerminalCongestionOverview() {
       <CardContent className="p-0">
         <div className="grid lg:grid-cols-2 divide-x divide-white/10">
           {/* Rotterdam Section */}
-          <div className="p-12 space-y-10 bg-gradient-to-br from-maersk-dark to-[#002a4a]">
+          <div className="p-6 space-y-4 bg-gradient-to-br from-maersk-dark to-[#002a4a]">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-maersk-blue/20 rounded-2xl border border-maersk-blue/30">
-                  <Globe className="h-6 w-6 text-maersk-blue" />
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-maersk-blue/20 rounded-xl border border-maersk-blue/30">
+                  <Globe className="h-4 w-4 text-maersk-blue" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black text-white tracking-tighter uppercase">Rotterdam Hub</h3>
-                  <p className="text-[10px] font-bold text-maersk-blue uppercase tracking-widest">Main Port Operations</p>
+                  <h3 className="text-base font-black text-white tracking-tight uppercase">Rotterdam Hub</h3>
+                  <p className="text-[9px] font-bold text-maersk-blue uppercase tracking-widest">Main Port Operations</p>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-4xl font-black text-white tracking-tighter">{avgRotterdam}h</div>
-                <div className="text-[9px] font-black text-white/40 uppercase tracking-widest">Avg. Wait Time</div>
+                <div className="text-2xl font-black text-white tracking-tighter">{avgRotterdam}h</div>
+                <div className="text-[9px] font-black text-white/40 uppercase tracking-widest">Avg. Wait</div>
               </div>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-6">
+            <div className="grid sm:grid-cols-2 gap-3">
               {rotterdamTerminals.map((item, i) => (
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: i * 0.1 }}
-                  whileHover={{ y: -5, scale: 1.02 }}
-                  className="p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:border-maersk-blue/50 hover:bg-white/10 transition-all duration-500 group/card relative overflow-hidden"
+                  whileHover={{ y: -3, scale: 1.01 }}
+                  className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-maersk-blue/50 hover:bg-white/10 transition-all duration-300 group/card relative overflow-hidden"
                 >
-                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover/card:opacity-20 transition-opacity">
-                    <Gauge className="h-12 w-12 text-white" />
+                  <div className="absolute top-0 right-0 p-3 opacity-5 group-hover/card:opacity-15 transition-opacity">
+                    <Gauge className="h-10 w-10 text-white" />
                   </div>
-                  
-                  <div className="flex items-start justify-between mb-8 relative z-10">
-                    <span className="text-xs font-black text-maersk-blue uppercase tracking-[0.2em]">{item.terminal}</span>
-                    <Badge className={cn("font-black text-[9px] uppercase tracking-widest px-2.5 py-1 rounded-lg border-none shadow-lg", getStatusColor(item.status))}>
+
+                  <div className="flex items-start justify-between mb-3 relative z-10">
+                    <span className="text-[10px] font-black text-maersk-blue uppercase tracking-wider leading-tight pr-2">{item.terminal}</span>
+                    <Badge className={cn("font-black text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-lg border-none shadow-md flex-none", getStatusColor(item.status))}>
                       {item.status}
                     </Badge>
                   </div>
-                  
-                  <div className="flex items-baseline space-x-2 mb-8 relative z-10">
-                    <span className="text-5xl font-black text-white tracking-tighter drop-shadow-2xl">{item.waitingTime}</span>
-                    <span className="text-lg font-bold text-white/40 uppercase tracking-widest">Hrs</span>
+
+                  <div className="flex items-baseline space-x-1.5 mb-3 relative z-10">
+                    <span className="text-3xl font-black text-white tracking-tighter">{item.waitingTime}</span>
+                    <span className="text-sm font-bold text-white/40 uppercase">hrs</span>
                   </div>
-                  
-                  <div className="space-y-3 relative z-10">
+
+                  <div className="space-y-1.5 relative z-10">
                     <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                      <motion.div 
+                      <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${Math.min((item.waitingTime / 48) * 100, 100)}%` }}
                         className={cn(
                           "h-full rounded-full",
-                          item.status === 'High' ? 'bg-rose-500' : 
+                          item.status === 'High' ? 'bg-rose-500' :
                           item.status === 'Medium' ? 'bg-amber-500' : 'bg-emerald-500'
                         )}
                       />
@@ -190,57 +190,57 @@ export function TerminalCongestionOverview() {
           </div>
 
           {/* Antwerp Section */}
-          <div className="p-12 space-y-10 bg-gradient-to-bl from-maersk-dark to-[#003559]">
+          <div className="p-6 space-y-4 bg-gradient-to-bl from-maersk-dark to-[#003559]">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-[#42b0d5]/20 rounded-2xl border border-[#42b0d5]/30">
-                  <Anchor className="h-6 w-6 text-[#42b0d5]" />
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-[#42b0d5]/20 rounded-xl border border-[#42b0d5]/30">
+                  <Anchor className="h-4 w-4 text-[#42b0d5]" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black text-white tracking-tighter uppercase">Antwerp Hub</h3>
-                  <p className="text-[10px] font-bold text-[#42b0d5] uppercase tracking-widest">Secondary Port Operations</p>
+                  <h3 className="text-base font-black text-white tracking-tight uppercase">Antwerp Hub</h3>
+                  <p className="text-[9px] font-bold text-[#42b0d5] uppercase tracking-widest">Secondary Port Operations</p>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-4xl font-black text-white tracking-tighter">{avgAntwerp}h</div>
-                <div className="text-[9px] font-black text-white/40 uppercase tracking-widest">Avg. Wait Time</div>
+                <div className="text-2xl font-black text-white tracking-tighter">{avgAntwerp}h</div>
+                <div className="text-[9px] font-black text-white/40 uppercase tracking-widest">Avg. Wait</div>
               </div>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-6">
+            <div className="grid sm:grid-cols-2 gap-3">
               {antwerpTerminals.map((item, i) => (
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: (i + 4) * 0.1 }}
-                  whileHover={{ y: -5, scale: 1.02 }}
-                  className="p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:border-[#42b0d5]/50 hover:bg-white/10 transition-all duration-500 group/card relative overflow-hidden"
+                  whileHover={{ y: -3, scale: 1.01 }}
+                  className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[#42b0d5]/50 hover:bg-white/10 transition-all duration-300 group/card relative overflow-hidden"
                 >
-                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover/card:opacity-20 transition-opacity">
-                    <Gauge className="h-12 w-12 text-white" />
+                  <div className="absolute top-0 right-0 p-3 opacity-5 group-hover/card:opacity-15 transition-opacity">
+                    <Gauge className="h-10 w-10 text-white" />
                   </div>
 
-                  <div className="flex items-start justify-between mb-8 relative z-10">
-                    <span className="text-xs font-black text-[#42b0d5] uppercase tracking-[0.2em]">{item.terminal}</span>
-                    <Badge className={cn("font-black text-[9px] uppercase tracking-widest px-2.5 py-1 rounded-lg border-none shadow-lg", getStatusColor(item.status))}>
+                  <div className="flex items-start justify-between mb-3 relative z-10">
+                    <span className="text-[10px] font-black text-[#42b0d5] uppercase tracking-wider leading-tight pr-2">{item.terminal}</span>
+                    <Badge className={cn("font-black text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-lg border-none shadow-md flex-none", getStatusColor(item.status))}>
                       {item.status}
                     </Badge>
                   </div>
-                  
-                  <div className="flex items-baseline space-x-2 mb-8 relative z-10">
-                    <span className="text-5xl font-black text-white tracking-tighter drop-shadow-2xl">{item.waitingTime}</span>
-                    <span className="text-lg font-bold text-white/40 uppercase tracking-widest">Hrs</span>
+
+                  <div className="flex items-baseline space-x-1.5 mb-3 relative z-10">
+                    <span className="text-3xl font-black text-white tracking-tighter">{item.waitingTime}</span>
+                    <span className="text-sm font-bold text-white/40 uppercase">hrs</span>
                   </div>
-                  
-                  <div className="space-y-3 relative z-10">
+
+                  <div className="space-y-1.5 relative z-10">
                     <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                      <motion.div 
+                      <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${Math.min((item.waitingTime / 48) * 100, 100)}%` }}
                         className={cn(
                           "h-full rounded-full",
-                          item.status === 'High' ? 'bg-rose-500' : 
+                          item.status === 'High' ? 'bg-rose-500' :
                           item.status === 'Medium' ? 'bg-amber-500' : 'bg-emerald-500'
                         )}
                       />
@@ -257,7 +257,7 @@ export function TerminalCongestionOverview() {
         </div>
 
         {/* Footer Advisory */}
-        <div className="p-8 bg-white/5 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="p-4 bg-white/5 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-3">
           <div className="flex items-center space-x-4">
             <div className="p-2 bg-rose-500/20 rounded-xl border border-rose-500/30">
               <AlertCircle className="h-5 w-5 text-rose-500" />

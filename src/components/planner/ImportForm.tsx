@@ -122,25 +122,6 @@ export function ImportForm() {
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="preferredTerminal" className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] ml-1">Inland Terminal</Label>
-                <Select
-                  value={importRequest.preferredTerminal || 'Auto'}
-                  onValueChange={(val) => setImportRequest({ preferredTerminal: val })}
-                >
-                  <SelectTrigger id="preferredTerminal" className="bg-slate-50/50 border-slate-200 focus:ring-maersk-blue/30 h-10 rounded-xl hover:bg-white transition-all font-black text-slate-700 text-xs px-3">
-                    <SelectValue placeholder="Auto-assign" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl border-slate-100 shadow-xl p-1 bg-white/95 backdrop-blur-xl">
-                    <SelectItem value="Auto" className="text-xs font-bold py-2 rounded-lg focus:bg-maersk-blue/10">Auto-assign via Postcode</SelectItem>
-                    <SelectItem value="DUISBURG" className="text-xs font-bold py-2 rounded-lg focus:bg-maersk-blue/10">Duisburg D3T</SelectItem>
-                    <SelectItem value="KORNWESTHEIM" className="text-xs font-bold py-2 rounded-lg focus:bg-maersk-blue/10">Kornwestheim DUSS</SelectItem>
-                    <SelectItem value="NUREMBERG" className="text-xs font-bold py-2 rounded-lg focus:bg-maersk-blue/10">Nuremberg TriCon</SelectItem>
-                    <SelectItem value="MUNICH" className="text-xs font-bold py-2 rounded-lg focus:bg-maersk-blue/10">Munich DUSS</SelectItem>
-                    <SelectItem value="LEIPZIG" className="text-xs font-bold py-2 rounded-lg focus:bg-maersk-blue/10">Leipzig DUSS</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
           </div>
 

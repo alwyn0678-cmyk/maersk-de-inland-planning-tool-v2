@@ -200,7 +200,7 @@ export function DashboardOverview() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Truck Capacity Forecast */}
-        <Card className="lg:col-span-12 border-none bg-white/60 backdrop-blur-xl overflow-hidden group rounded-[2.5rem] shadow-xl border border-white/40">
+        <Card className="lg:col-span-12 border border-slate-100 bg-white overflow-hidden group rounded-2xl shadow-lg">
           <CardHeader className="pb-6 border-b border-slate-200/50 bg-white/80">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
@@ -329,9 +329,9 @@ export function DashboardOverview() {
                           )}
                         </motion.div>
 
-                        {/* Date */}
-                        <span className="text-[9px] font-black text-slate-400 mt-1 group-hover/day:text-maersk-blue transition-colors">
-                          {days[i].date.split('/')[0]}
+                        {/* Month/Day under block */}
+                        <span className="text-[8px] font-bold text-slate-400 mt-0.5 group-hover/day:text-maersk-blue transition-colors">
+                          {days[i].date.split('/')[1]}/{days[i].date.split('/')[0]}
                         </span>
                       </div>
                     ))}
@@ -356,7 +356,7 @@ export function DashboardOverview() {
         </Card>
 
         {/* Rhine Water Levels Monitor */}
-        <Card className="lg:col-span-12 border-none bg-maersk-dark shadow-2xl overflow-hidden group rounded-[2.5rem]">
+        <Card className="lg:col-span-12 border-none bg-maersk-dark shadow-2xl overflow-hidden group rounded-2xl">
           <CardHeader className="pb-6 border-b border-white/10 bg-white/5">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">

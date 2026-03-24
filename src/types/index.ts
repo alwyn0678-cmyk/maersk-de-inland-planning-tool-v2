@@ -80,8 +80,9 @@ export interface ExportResult {
 
 export interface CYCYRequest {
   direction: 'Import' | 'Export';
-  originTerminal: string;
-  destinationTerminal: string;
+  zip?: string;                // customer postcode — drives auto terminal/depot lookup
+  originTerminal: string;      // Import: port code (RTM|ANR)
+  destinationTerminal: string; // Export: port terminal value (CODE|YOT|PORT)
   containerType: ContainerType;
   date: string;
   time: string;
