@@ -1,0 +1,33 @@
+export const IMP_TERM_NAMES: Record<string, string> = {
+  'DEDUI01': 'Hutchison Ports Duisburg',
+  'DEGRH01': 'Germersheim DPW',
+  'DEMNZ01': 'Frankenbach Mainz',
+  'DEG4TG':  'Gustavsburg Contargo',
+  'DE9G4TG': 'Gustavsburg Contargo',
+  'DEBNX01': 'Bonn AZS',
+  'DENUE02': 'Nuernberg CDN',
+  'NUE02':   'Nuernberg CDN',
+  'DEMHG02': 'Mannheim DPW',
+  'DEAJHRA': 'Rheinhafen Andernach',
+  'DETREAZ': 'AZS Trier',
+  'DEDTM01': 'CTD Dortmund',
+  'DEMUNU1': 'DUSS Muenchen',
+  'DELJZU1': 'Leipzig Wahren',
+};
+
+export const IMP_TRUCK_BY_TERM: Record<string, string> = {
+  'DEDUI01': 'HP Duisburg',
+  'DEGRH01': 'DP World Germersheim',
+  'DEMNZ01': 'Frankenbach Mainz',
+  'DEG4TG':  'Contargo Gustavsburg',
+  'DE9G4TG': 'Contargo Gustavsburg',
+  'DEBNX01': 'AZS Bonn',
+  'DENUE02': 'HPE Nuernberg',
+  'NUE02':   'HPE Nuernberg',
+  'DEMHG02': 'DPW Mannheim',
+  'DEAJHRA': 'Rheinhafen Andernach',
+  'DETREAZ': 'AZS Trier',
+  'DEDTM01': 'CTD Dortmund',
+  'DELJZU1': 'Hub Trucker Leipzig',
+  'DEMUNU1': 'DUSS Muenchen',
+};

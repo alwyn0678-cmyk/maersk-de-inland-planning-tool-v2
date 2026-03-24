@@ -1,0 +1,5 @@
+{
+  "name": "Maersk DE Inland Planning Tool",
+  "description": "Internal operations web app for Maersk DE Inland Operations to calculate import and export schedules, feasible departures, and deadlines.",
+  "requestFramePermissions": []
+}
