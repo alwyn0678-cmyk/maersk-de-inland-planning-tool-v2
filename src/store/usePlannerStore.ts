@@ -130,12 +130,12 @@ export const usePlannerStore = create<PlannerState>()(
         { location: 'Germersheim', forecast: [1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1] },
       ],
       terminalCongestionData: [
-        { id: 'r1', port: 'Rotterdam', terminal: 'Apm2', waitingTime: 12, status: 'Medium', lastUpdated: new Date().toISOString() },
-        { id: 'r2', port: 'Rotterdam', terminal: 'Hpd2', waitingTime: 4, status: 'Low', lastUpdated: new Date().toISOString() },
-        { id: 'r3', port: 'Rotterdam', terminal: 'ECT Delta', waitingTime: 24, status: 'High', lastUpdated: new Date().toISOString() },
-        { id: 'r4', port: 'Rotterdam', terminal: 'RWG', waitingTime: 8, status: 'Low', lastUpdated: new Date().toISOString() },
-        { id: 'a1', port: 'Antwerp', terminal: 'Quay 913', waitingTime: 16, status: 'Medium', lastUpdated: new Date().toISOString() },
-        { id: 'a2', port: 'Antwerp', terminal: 'Quay 869', waitingTime: 6, status: 'Low', lastUpdated: new Date().toISOString() },
+        { id: 'r1', port: 'Rotterdam', terminal: 'APM Terminals (NLROTTM)', waitingTime: 12, status: 'Medium', lastUpdated: new Date().toISOString() },
+        { id: 'r2', port: 'Rotterdam', terminal: 'Hutchison Ports Delta II (NLROT01)', waitingTime: 4, status: 'Low', lastUpdated: new Date().toISOString() },
+        { id: 'r3', port: 'Rotterdam', terminal: 'ECT Delta (NLROT21)', waitingTime: 24, status: 'High', lastUpdated: new Date().toISOString() },
+        { id: 'r4', port: 'Rotterdam', terminal: 'Rotterdam World Gateway (NLROTWG)', waitingTime: 8, status: 'Low', lastUpdated: new Date().toISOString() },
+        { id: 'a1', port: 'Antwerp', terminal: 'PSA Noordzee Terminal (BEANT913)', waitingTime: 16, status: 'Medium', lastUpdated: new Date().toISOString() },
+        { id: 'a2', port: 'Antwerp', terminal: 'PSA Europa Terminal (BEANT869)', waitingTime: 6, status: 'Low', lastUpdated: new Date().toISOString() },
       ],
       schedules: [
         { id: '1', type: 'Barge', direction: 'Import', origin: 'Rotterdam', destination: 'Duisburg', departure: '2026-03-25T10:00', arrival: '2026-03-26T14:00', capacity: 120, status: 'On Time' },
@@ -193,6 +193,17 @@ export const usePlannerStore = create<PlannerState>()(
     }),
     {
       name: 'maersk-planner-storage',
+      partialize: (state) => ({
+        activeTab: state.activeTab,
+        importRequest: state.importRequest,
+        exportRequest: state.exportRequest,
+        cycyRequest: state.cycyRequest,
+        truckCapacityData: state.truckCapacityData,
+        terminalCongestionData: state.terminalCongestionData,
+        schedules: state.schedules,
+        // Computed run results intentionally excluded — contain Date objects
+        // that would be serialised to strings and crash on reload
+      }),
     }
   )
 );
