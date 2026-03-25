@@ -32,7 +32,7 @@ const PORT_TERMINALS = [
   { value: 'BEANT913|7|ANR', label: 'PSA Noordzee Terminal (ANR)',   port: 'ANR' },
 ];
 
-export function CYCYForm() {
+export function CYCYForm({ onSuccess }: { onSuccess?: () => void }) {
   const { cycyRequest, setCYCYRequest, setCycyRunResult, resetCYCY } = usePlannerStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -67,7 +67,10 @@ export function CYCYForm() {
           setLoading(false);
           return;
         }
-        const termCode = terms.b;
+        // CY/CY only: Mannheim (67xxx–69xxx) overrides Germersheim
+        const prefix2 = zip.slice(0, 2);
+        const rawTermCode = terms.b;
+        const termCode = (rawTermCode === 'DEGRH01' && ['67','68','69'].includes(prefix2)) ? 'DEMHG02' : rawTermCode;
         const termName = IMP_TERM_NAMES[termCode] || termCode;
         const portName = portCode === 'RTM' ? 'Rotterdam' : 'Antwerp';
 
@@ -102,6 +105,7 @@ export function CYCYForm() {
           instances: deduped,
           maxCards,
         });
+        onSuccess?.();
 
       } else {
         const terminalValue = cycyRequest.destinationTerminal || 'NLROTTM|5|RTM';
@@ -122,7 +126,10 @@ export function CYCYForm() {
           setLoading(false);
           return;
         }
-        const depotCode = portRule.p1;
+        // CY/CY only: Mannheim (67xxx–69xxx) overrides Germersheim
+        const prefix2 = zip.slice(0, 2);
+        const rawDepotCode = portRule.p1;
+        const depotCode = (rawDepotCode === 'DEGRH01' && ['67','68','69'].includes(prefix2)) ? 'DEMHG02' : rawDepotCode;
         const depotName = EXP_DEPOTS[depotCode] || depotCode;
         const termName = EXP_TERM_NAMES[termCode] || termCode;
 
@@ -141,6 +148,7 @@ export function CYCYForm() {
             orderDL: result.orderDL,
             skipped: result.skipped,
           });
+          onSuccess?.();
         } else {
           const sorted = [...result.deps].sort((a, b) => {
             if (a.mod !== b.mod) return a.mod === 'Rail' ? -1 : 1;
@@ -173,6 +181,7 @@ export function CYCYForm() {
             customsDeadline,
             skipped: result.skipped,
           });
+          onSuccess?.();
         }
       }
     } catch (err) {
@@ -194,7 +203,7 @@ export function CYCYForm() {
             </div>
             <div>
               <h3 className="text-base font-black text-maersk-dark tracking-tight uppercase italic">
-                CY/CY <span className={cn('transition-colors duration-700', isImport ? 'text-maersk-blue' : 'text-emerald-500')}>Config</span>
+                CY/CY <span className={cn('transition-colors duration-700', isImport ? 'text-maersk-blue' : 'text-emerald-500')}>Booking</span>
               </h3>
               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
                 {isImport ? 'Port → Inland — ZIP auto-assigns terminal' : 'Inland → Port — ZIP auto-assigns depot'}

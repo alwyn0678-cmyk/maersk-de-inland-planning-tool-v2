@@ -16,7 +16,14 @@ import { Button } from './components/ui/button';
 import { usePlannerStore } from './store/usePlannerStore';
 
 export default function App() {
-  const { activeTab, setActiveTab } = usePlannerStore();
+  const { activeTab, setActiveTab, resetImport, resetExport, resetCYCY } = usePlannerStore();
+
+  function handleTabChange(tab: string) {
+    if (tab === 'import') resetImport();
+    else if (tab === 'export') resetExport();
+    else if (tab === 'cycy') resetCYCY();
+    setActiveTab(tab);
+  }
 
   const renderContent = () => {
     switch (activeTab) {
@@ -44,7 +51,7 @@ export default function App() {
   return (
     <div className="flex h-screen bg-maersk-light font-sans overflow-hidden selection:bg-maersk-blue/30 selection:text-maersk-dark">
       {/* Sidebar Navigation */}
-      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+      <Sidebar activeTab={activeTab} onTabChange={handleTabChange} />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
@@ -110,20 +117,14 @@ export default function App() {
 
             <div className="h-6 w-px bg-slate-200" />
 
-            <div className="flex items-center space-x-3 group cursor-pointer">
-              <div className="text-right hidden sm:block">
-                <p className="text-xs font-black text-maersk-dark leading-none tracking-tight group-hover:text-maersk-blue transition-colors">Alwyn</p>
-                <p className="text-[9px] font-black text-maersk-blue uppercase tracking-[0.2em] mt-1 opacity-90">Senior Planner</p>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="h-8 w-8 rounded-xl bg-gradient-to-br from-maersk-dark to-maersk-blue p-0.5 shadow-md cursor-pointer"
+            >
+              <div className="h-full w-full rounded-[9px] bg-white flex items-center justify-center overflow-hidden">
+                <User className="h-4 w-4 text-maersk-dark" />
               </div>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className="h-8 w-8 rounded-xl bg-gradient-to-br from-maersk-dark to-maersk-blue p-0.5 shadow-md cursor-pointer"
-              >
-                <div className="h-full w-full rounded-[9px] bg-white flex items-center justify-center overflow-hidden">
-                  <User className="h-4 w-4 text-maersk-dark" />
-                </div>
-              </motion.div>
-            </div>
+            </motion.div>
           </div>
         </header>
 

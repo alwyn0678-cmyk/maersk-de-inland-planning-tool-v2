@@ -456,10 +456,10 @@ export function DashboardOverview() {
               /* Loading skeleton */
               <div className="grid md:grid-cols-5 divide-x divide-white/10">
                 {[0,1,2,3,4].map(i => (
-                  <div key={i} className="p-6 flex flex-col space-y-4">
+                  <div key={i} className="p-5 flex flex-col space-y-4">
                     <div className="h-3 w-16 bg-white/10 rounded animate-pulse" />
                     <div className="h-8 w-20 bg-white/10 rounded animate-pulse" />
-                    <div className="h-20 w-full bg-white/5 rounded-lg animate-pulse" />
+                    <div className="h-24 w-full bg-white/5 rounded-lg animate-pulse" />
                     <div className="h-3 w-12 bg-white/10 rounded animate-pulse" />
                   </div>
                 ))}
@@ -486,9 +486,9 @@ export function DashboardOverview() {
                   const maxVal = Math.max(...chartData.map(d => d.val)) * 1.03;
 
                   return (
-                    <div key={i} className="p-4 hover:bg-white/5 transition-all duration-500 flex flex-col group/site relative">
-                      <div className="flex items-center justify-between mb-2 relative z-10">
-                        <span className="text-[10px] font-black text-[#42b0d5] uppercase tracking-[0.25em]">{item.site}</span>
+                    <div key={i} className="p-5 hover:bg-white/5 transition-all duration-500 flex flex-col group/site relative">
+                      <div className="flex items-center justify-between mb-2.5 relative z-10">
+                        <span className="text-[11px] font-black text-[#42b0d5] uppercase tracking-[0.25em]">{item.site}</span>
                         <div className={cn(
                           "px-2 py-0.5 rounded-md font-black text-[9px] uppercase tracking-wider",
                           item.error ? 'bg-white/10 text-white/40' :
@@ -500,11 +500,11 @@ export function DashboardOverview() {
                         </div>
                       </div>
 
-                      <div className="flex items-baseline space-x-1 mb-2 relative z-10">
-                        <span className="text-xl font-black text-white tracking-tighter">
+                      <div className="flex items-baseline space-x-1.5 mb-3 relative z-10">
+                        <span className="text-2xl font-black text-white tracking-tighter">
                           {item.error ? '—' : item.level?.toFixed(2) ?? '—'}
                         </span>
-                        <span className="text-xs font-bold text-white/50">m</span>
+                        <span className="text-sm font-bold text-white/50">m</span>
                         <span className={cn(
                           "ml-auto text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded",
                           item.status === 'Normal' ? 'bg-emerald-500/80 text-white' :
@@ -514,7 +514,7 @@ export function DashboardOverview() {
                       </div>
 
                       {/* Water level chart — always renders */}
-                      <div className="h-16 w-full relative z-10">
+                      <div className="h-20 w-full relative z-10">
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={chartData} margin={{ top: 4, right: 2, left: 2, bottom: 0 }}>
                             <defs>

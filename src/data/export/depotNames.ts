@@ -7,6 +7,7 @@ export const EXP_DEPOTS: Record<string, string> = {
   'DEG4TG':  'Gustavsburg Contargo',
   'DEMNZ01': 'Mainz Frankenbach',
   'DEGRH01': 'Germersheim DPW',
+  'DEMHG02': 'Mannheim DPW',
   'DEMUN01': 'Muenchen (Rail Hub)',
   'DENUE02': 'Nuernberg CDN',
 };

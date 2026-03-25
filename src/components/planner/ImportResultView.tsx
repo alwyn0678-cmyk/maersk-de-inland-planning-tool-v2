@@ -84,7 +84,7 @@ function ImportCard({ inst, result, idx }: { inst: ImpInstance; result: ImpRunRe
           : "border-slate-200 shadow-sm"
       )}>
         {inst.rec && (
-          <div className="bg-amber-400 px-5 py-2 flex items-center gap-2">
+          <div className="bg-amber-400 px-5 py-2.5 flex items-center gap-2">
             <CheckCircle2 className="h-3.5 w-3.5 text-amber-900" />
             <span className="text-[11px] font-black text-amber-900 uppercase tracking-[0.2em]">★ Recommended — Best Available Option</span>
           </div>
@@ -93,14 +93,14 @@ function ImportCard({ inst, result, idx }: { inst: ImpInstance; result: ImpRunRe
         <div className="flex flex-col sm:flex-row">
           {/* Left: dark modality panel */}
           <div className={cn(
-            "sm:w-44 flex-none flex flex-col justify-between p-3",
+            "sm:w-52 flex-none flex flex-col justify-between p-4",
             isBarge
-              ? "bg-gradient-to-br from-[#00243d] to-[#00375c]"
+              ? "bg-gradient-to-br from-[#001e33] to-[#00375c]"
               : "bg-gradient-to-br from-purple-950 to-purple-800"
           )}>
             <div>
               <div className={cn(
-                "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg mb-2 border",
+                "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl mb-3 border",
                 isBarge ? "bg-[#42b0d5]/20 border-[#42b0d5]/30" : "bg-purple-400/20 border-purple-400/30"
               )}>
                 {isBarge
@@ -112,10 +112,10 @@ function ImportCard({ inst, result, idx }: { inst: ImpInstance; result: ImpRunRe
                   isBarge ? "text-[#42b0d5]" : "text-purple-300"
                 )}>{inst.mod}</span>
               </div>
-              <p className="text-xs font-black text-white leading-tight">{impTName(inst.loc)}</p>
-              <p className="font-mono text-[9px] text-white/30 mt-0.5">{inst.loc}</p>
+              <p className="text-sm font-black text-white leading-snug">{impTName(inst.loc)}</p>
+              <p className="font-mono text-[10px] text-white/30 mt-0.5">{inst.loc}</p>
             </div>
-            <div className="mt-3">
+            <div className="mt-4">
               <CopyButton text={buildCopyText(inst, result)} />
             </div>
           </div>
@@ -123,44 +123,44 @@ function ImportCard({ inst, result, idx }: { inst: ImpInstance; result: ImpRunRe
           {/* Right: info panel */}
           <CardContent className="flex-1 p-0">
             {/* Journey row */}
-            <div className="px-4 py-4">
-              <div className="flex items-center gap-2">
+            <div className="px-5 py-5">
+              <div className="flex items-center gap-3">
                 <div className="flex-1 min-w-0">
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Terminal ETD</p>
-                  <p className="text-sm font-black text-maersk-dark leading-tight">{fmtS(inst.etd)}</p>
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Terminal ETD</p>
+                  <p className="text-base font-black text-maersk-dark leading-tight">{fmtS(inst.etd)}</p>
                 </div>
-                <ArrowRight className="h-3.5 w-3.5 text-slate-300 flex-none" />
+                <ArrowRight className="h-4 w-4 text-slate-300 flex-none" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Depot Arrival</p>
-                  <p className="text-sm font-black text-emerald-600 leading-tight">{fmtS(inst.eta)}</p>
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Depot Arrival</p>
+                  <p className="text-base font-black text-emerald-600 leading-tight">{fmtS(inst.eta)}</p>
                 </div>
-                <ArrowRight className="h-3.5 w-3.5 text-slate-300 flex-none" />
+                <ArrowRight className="h-4 w-4 text-slate-300 flex-none" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Customer Delivery</p>
-                  <p className="text-sm font-black text-maersk-dark leading-tight">{fmtS(inst.custDel)}</p>
-                  {isDui && <p className="text-[9px] text-amber-500 font-black">after 12:00</p>}
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Customer Delivery</p>
+                  <p className="text-base font-black text-maersk-dark leading-tight">{fmtS(inst.custDel)}</p>
+                  {isDui && <p className="text-[10px] text-amber-500 font-black mt-0.5">after 12:00</p>}
                 </div>
               </div>
             </div>
 
-            <div className="h-px bg-slate-100 mx-4" />
+            <div className="h-px bg-slate-100 mx-5" />
 
             {/* Deadlines & transport */}
-            <div className="px-4 py-4 flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2">
+            <div className="px-5 py-4 flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2.5">
                 <div>
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Order Deadline</p>
-                  <p className="text-sm font-black text-maersk-dark">{fmtS(inst.orderDL)}</p>
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Order Deadline</p>
+                  <p className="text-base font-black text-maersk-dark">{fmtS(inst.orderDL)}</p>
                 </div>
                 <UrgencyBadge date={inst.orderDL} />
               </div>
 
               {inst.custDL && (
-                <div className="flex items-center gap-2 px-2.5 py-1 bg-amber-50 border border-amber-200 rounded-lg">
-                  <AlertTriangle className="h-3 w-3 text-amber-600 flex-none" />
+                <div className="flex items-center gap-2.5 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl">
+                  <AlertTriangle className="h-3.5 w-3.5 text-amber-600 flex-none" />
                   <div>
-                    <p className="text-[8px] font-black text-amber-600 uppercase tracking-widest mb-0">Customs DL</p>
-                    <p className="text-xs font-black text-amber-800">
+                    <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-0">Customs DL</p>
+                    <p className="text-sm font-black text-amber-800">
                       {fmtS(inst.custDL)} {inst.custDL.getHours().toString().padStart(2,'0')}:{inst.custDL.getMinutes().toString().padStart(2,'0')}
                     </p>
                   </div>
@@ -169,19 +169,19 @@ function ImportCard({ inst, result, idx }: { inst: ImpInstance; result: ImpRunRe
               )}
 
               <div className="ml-auto text-right hidden sm:block">
-                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0">Transport</p>
-                <p className="text-xs font-black text-maersk-dark">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Transport Remarks</p>
+                <p className="text-sm font-black text-maersk-dark">
                   {inst.mod.toLowerCase()} ETD {inst.etdDay} {inst.etd.getDate().toString().padStart(2,'0')}/{(inst.etd.getMonth()+1).toString().padStart(2,'0')}
                 </p>
               </div>
             </div>
 
             {/* Customs doc reminder — prominent banner */}
-            <div className="mx-4 mb-3 px-2.5 py-2 bg-maersk-blue/8 border border-maersk-blue/25 rounded-lg flex items-center gap-2">
-              <Mail className="h-3 w-3 text-maersk-blue shrink-0" />
-              <p className="text-[9px] font-black text-maersk-blue leading-tight">
+            <div className="mx-5 mb-4 px-3 py-2.5 bg-maersk-blue/8 border border-maersk-blue/25 rounded-xl flex items-center gap-2.5">
+              <Mail className="h-3.5 w-3.5 text-maersk-blue shrink-0" />
+              <p className="text-[10px] font-black text-maersk-blue leading-snug">
                 Customs doc → <span className="underline underline-offset-1">nlaopsinlrbc@maersk.com</span>
-                <span className="font-bold text-slate-500 ml-1.5">· ATA 2d before delivery for multistop</span>
+                <span className="font-bold text-slate-500 ml-2">· ATA 2d before delivery for multistop</span>
               </p>
             </div>
           </CardContent>
@@ -211,7 +211,7 @@ export function ImportResultView({ result }: { result: ImpRunResult }) {
   return (
     <div className="space-y-4">
       {/* Summary strip — horizontal flex */}
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 px-5 py-4 bg-white border border-slate-100 rounded-2xl shadow-sm max-w-4xl mx-auto">
+      <div className="flex flex-wrap items-center gap-x-8 gap-y-3 px-6 py-5 bg-white border border-slate-200 rounded-2xl shadow-sm max-w-5xl mx-auto">
         {[
           { label: 'PLZ / Region', value: `${result.zip} · ${result.region}` },
           { label: 'Container', value: `${result.size}' ${result.type.toUpperCase()}` },
@@ -220,19 +220,19 @@ export function ImportResultView({ result }: { result: ImpRunResult }) {
           { label: 'Status', value: result.isFuture ? 'Future Booking' : 'Discharged' },
           { label: 'Options', value: `${show.length} found` },
         ].map(({ label, value }, i, arr) => (
-          <div key={label} className="flex items-center gap-4">
+          <div key={label} className="flex items-center gap-5">
             <div>
-              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">{label}</p>
-              <p className="text-sm font-black text-maersk-dark">{value}</p>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{label}</p>
+              <p className="text-base font-black text-maersk-dark">{value}</p>
             </div>
-            {i < arr.length - 1 && <div className="h-8 w-px bg-slate-100" />}
+            {i < arr.length - 1 && <div className="h-9 w-px bg-slate-100" />}
           </div>
         ))}
       </div>
 
       {/* Terminal info bar */}
       {result.terms && (
-        <div className="flex flex-wrap items-center gap-2 px-4 py-3 bg-white border border-slate-100 rounded-xl max-w-4xl mx-auto">
+        <div className="flex flex-wrap items-center gap-2.5 px-5 py-3.5 bg-white border border-slate-200 rounded-xl max-w-5xl mx-auto">
           {result.terms.b && (
             <div className="flex items-center gap-1.5">
               <span className="text-[8px] font-black uppercase bg-maersk-blue/10 text-maersk-blue px-2 py-0.5 rounded-md">Barge</span>
@@ -275,7 +275,7 @@ export function ImportResultView({ result }: { result: ImpRunResult }) {
 
       {/* Depot selector (prefix 56) */}
       {result.hasB2 && result.terms && (
-        <div className="flex items-center gap-2 max-w-4xl mx-auto">
+        <div className="flex items-center gap-2 max-w-5xl mx-auto">
           <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Select Depot:</span>
           {[result.terms.b!, result.terms.b2!].map((code, rank) => (
             <button
@@ -297,7 +297,7 @@ export function ImportResultView({ result }: { result: ImpRunResult }) {
 
       {/* Empty return depot — shown ABOVE schedules (same as Export) */}
       {result.emptyDepot && (
-        <div className="px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm max-w-4xl mx-auto">
+        <div className="px-5 py-4 bg-white border border-slate-200 rounded-xl shadow-sm max-w-5xl mx-auto">
           <div className="flex items-center gap-2 mb-2">
             <Package className="h-3.5 w-3.5 text-maersk-blue" />
             <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Empty Return Depot ({result.emptyLabel})</span>
@@ -317,7 +317,7 @@ export function ImportResultView({ result }: { result: ImpRunResult }) {
           <p className="text-xs text-slate-400 mt-1">Contact inland operations.</p>
         </div>
       ) : (
-        <div className="space-y-3 max-w-4xl mx-auto">
+        <div className="space-y-4 max-w-5xl mx-auto">
           {show.map((inst, idx) => (
             <ImportCard key={`${fmtDateISO(inst.etd)}-${inst.mod}-${inst.loc}`} inst={inst} result={result} idx={idx} />
           ))}

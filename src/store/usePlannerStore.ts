@@ -198,7 +198,6 @@ export const usePlannerStore = create<PlannerState>()(
     {
       name: 'maersk-planner-storage',
       partialize: (state) => ({
-        activeTab: state.activeTab,
         importRequest: state.importRequest,
         exportRequest: state.exportRequest,
         cycyRequest: state.cycyRequest,

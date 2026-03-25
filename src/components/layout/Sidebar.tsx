@@ -1,8 +1,8 @@
 import { motion } from 'motion/react';
 import {
   LayoutDashboard,
-  Download,
-  Upload,
+  Anchor,
+  Send,
   FileText,
   Settings,
   HelpCircle,
@@ -24,9 +24,9 @@ interface SidebarProps {
 
 const menuItems = [
   { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
-  { id: 'import', label: 'Import Planner', icon: Download },
-  { id: 'export', label: 'Export Planner', icon: Upload },
-  { id: 'cycy', label: 'CY/CY Planner', icon: ArrowRightLeft },
+  { id: 'import', label: 'Import Booking', icon: Anchor },
+  { id: 'export', label: 'Export Booking', icon: Send },
+  { id: 'cycy', label: 'CY/CY Booking', icon: ArrowRightLeft },
   { id: 'schedules', label: 'Network Schedules', icon: CalendarDays },
   { id: 'prd', label: 'Specifications', icon: FileText },
 ];
