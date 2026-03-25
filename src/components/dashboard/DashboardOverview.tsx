@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useRhineWaterLevels } from '../../hooks/useRhineWaterLevels';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { usePlannerStore } from '../../store/usePlannerStore';
-import { expRun, ExpRunResult } from '../../logic/export/expRun';
+import { expRun } from '../../logic/export/expRun';
 import {
   Dialog,
   DialogContent,
@@ -21,18 +21,13 @@ import {
   Waves,
   Truck,
   Info,
-  ExternalLink,
   CheckCircle2,
   Download,
   Upload,
-  Clock,
   MapPin,
   Anchor,
-  Train,
   ArrowRight,
-  Star,
   ChevronLeft,
-  Loader2,
   TrendingUp,
   TrendingDown,
   Minus,
@@ -114,9 +109,6 @@ export function DashboardOverview() {
   const { data: waterLevelData, loading: waterLoading, lastRefresh } = useRhineWaterLevels(30 * 60 * 1000);
   const [selectedDay, setSelectedDay] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [bookingStep, setBookingStep] = useState<'form' | 'results'>('form');
-  const [bookingLoading, setBookingLoading] = useState(false);
-  const [expResult, setExpResult] = useState<ExpRunResult | null>(null);
   const [bookingInfo, setBookingInfo] = useState({
     zipcode: '',
     containerType: '40HC',
@@ -127,15 +119,12 @@ export function DashboardOverview() {
   const handleDayClick = (day: any, status: number) => {
     if (status === 1) {
       setSelectedDay(day);
-      setBookingStep('form');
-      setExpResult(null);
       setIsDialogOpen(true);
     }
   };
 
   const handleFindSchedules = () => {
     if (!bookingInfo.zipcode || !selectedDay) return;
-    setBookingLoading(true);
     const [dd, mm] = selectedDay.date.split('/');
     const loadDate = new Date(new Date().getFullYear(), parseInt(mm) - 1, parseInt(dd)).toISOString().split('T')[0];
     const { size, type } = containerToSizeType(bookingInfo.containerType);
@@ -152,23 +141,9 @@ export function DashboardOverview() {
       containerType: bookingInfo.containerType as any,
       loadingDate: loadDate,
       loadingTime: bookingInfo.loadingTime,
+      portTerminal: bookingInfo.terminalValue,
     });
     setExpRunResult(result);
-    setExpResult(result);
-    setBookingStep('results');
-    setBookingLoading(false);
-  };
-
-  const handleOpenInPlanner = () => {
-    if (!expResult || !selectedDay) return;
-    const [dd, mm] = selectedDay.date.split('/');
-    setExportRequest({
-      postcode: bookingInfo.zipcode,
-      containerType: bookingInfo.containerType as any,
-      loadingDate: new Date(new Date().getFullYear(), parseInt(mm) - 1, parseInt(dd)).toISOString().split('T')[0],
-      loadingTime: bookingInfo.loadingTime,
-    });
-    setExpRunResult(expResult);
     setIsDialogOpen(false);
     setActiveTab('export');
   };
@@ -705,166 +680,85 @@ export function DashboardOverview() {
                   </div>
                   <div>
                     <DialogTitle className="text-xl font-black tracking-tight text-maersk-dark">
-                      {bookingStep === 'form' ? 'Export Schedule Lookup' : 'Available Departures'}
+                      Export Schedule Lookup
                     </DialogTitle>
                     <DialogDescription className="font-semibold text-slate-500 text-xs mt-0.5">
                       Loading: <span className="text-maersk-blue font-black">{selectedDay?.dayName} {selectedDay?.date}</span>
                     </DialogDescription>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <div className={cn("h-1.5 w-5 rounded-full transition-colors duration-300", bookingStep === 'form' ? 'bg-maersk-blue' : 'bg-slate-200')} />
-                  <div className={cn("h-1.5 w-5 rounded-full transition-colors duration-300", bookingStep === 'results' ? 'bg-maersk-blue' : 'bg-slate-200')} />
-                </div>
               </div>
             </DialogHeader>
 
-            <AnimatePresence mode="wait">
-              {bookingStep === 'form' ? (
-                <motion.div key="form" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.2 }}>
-                  <div className="space-y-4">
-                    <div className="space-y-1.5">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Customer ZIP Code (PLZ)</Label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                        <Input
-                          placeholder="e.g. 40210"
-                          className="pl-10 h-11 bg-slate-50 border-slate-200 focus-visible:ring-maersk-blue/50 rounded-xl font-bold"
-                          value={bookingInfo.zipcode}
-                          onChange={(e) => setBookingInfo({...bookingInfo, zipcode: e.target.value})}
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1.5">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Container Type</Label>
-                        <Select value={bookingInfo.containerType} onValueChange={(v) => setBookingInfo({...bookingInfo, containerType: v})}>
-                          <SelectTrigger className="h-11 bg-slate-50 border-slate-200 rounded-xl font-bold">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="rounded-xl">
-                            <SelectItem value="20DC">20' Standard</SelectItem>
-                            <SelectItem value="40DC">40' Standard</SelectItem>
-                            <SelectItem value="40HC">40' High Cube</SelectItem>
-                            <SelectItem value="20RF">20' Reefer</SelectItem>
-                            <SelectItem value="40RF">40' Reefer</SelectItem>
-                            <SelectItem value="IMO">IMO</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Loading Time</Label>
-                        <Input
-                          type="time"
-                          className="h-11 bg-slate-50 border-slate-200 rounded-xl font-bold"
-                          value={bookingInfo.loadingTime}
-                          onChange={(e) => setBookingInfo({...bookingInfo, loadingTime: e.target.value})}
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Port Terminal</Label>
-                      <Select value={bookingInfo.terminalValue} onValueChange={(v) => setBookingInfo({...bookingInfo, terminalValue: v})}>
-                        <SelectTrigger className="h-11 bg-slate-50 border-slate-200 rounded-xl font-bold">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl min-w-[300px]">
-                          <div className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Rotterdam</div>
-                          {TERMINAL_OPTIONS.filter(t => t.port === 'RTM').map(t => (
-                            <SelectItem key={t.value} value={t.value}>{t.label} <span className="text-slate-400 ml-1">· YOT {t.value.split('|')[1]}d</span></SelectItem>
-                          ))}
-                          <div className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest border-t border-slate-100 mt-1 pt-2">Antwerp</div>
-                          {TERMINAL_OPTIONS.filter(t => t.port === 'ANR').map(t => (
-                            <SelectItem key={t.value} value={t.value}>{t.label} <span className="text-slate-400 ml-1">· YOT {t.value.split('|')[1]}d</span></SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="mt-5 flex gap-3">
-                    <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="rounded-xl font-bold text-slate-500 hover:bg-slate-100 flex-none">Cancel</Button>
-                    <Button
-                      onClick={handleFindSchedules}
-                      disabled={!bookingInfo.zipcode || bookingInfo.zipcode.length < 4 || bookingLoading}
-                      className="flex-1 bg-maersk-dark text-white hover:bg-maersk-blue shadow-lg rounded-xl font-black h-11"
-                    >
-                      {bookingLoading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Finding...</> : <>Find Export Schedules <ArrowRight className="h-4 w-4 ml-2" /></>}
-                    </Button>
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.div key="results" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.2 }}>
-                  {expResult?.error && <div className="p-4 bg-rose-50 border border-rose-100 rounded-xl text-sm text-rose-700 font-bold">{expResult.error}</div>}
-                  {expResult?.notServicedAntwerp && <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl text-sm text-amber-700 font-bold">ZIP {bookingInfo.zipcode} is not serviced via Antwerp by barge. Please select a Rotterdam terminal.</div>}
-                  {expResult?.isrRequired && <div className="p-4 bg-rose-50 border border-rose-100 rounded-xl text-sm text-rose-700 font-bold">IMO / Reefer via Duisburg is on request only. An ISR must be raised before any booking.</div>}
-                  {expResult?.orderDLPassed && <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl text-sm text-amber-700 font-bold">Order deadline has passed for this loading date. No bookings can be made.</div>}
-                  {expResult && !expResult.error && !expResult.notServicedAntwerp && !expResult.isrRequired && !expResult.orderDLPassed && expResult.cards.length === 0 && (
-                    <div className="p-4 bg-slate-50 rounded-xl text-sm text-slate-500 font-bold text-center">No departures found. Contact the inland team.</div>
-                  )}
-                  {expResult && expResult.cards.length > 0 && (
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-xl border border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-500 flex-wrap">
-                        <MapPin className="h-3 w-3 text-maersk-blue flex-none" />
-                        <span>ZIP {expResult.zip}</span>
-                        <span className="text-slate-300">·</span>
-                        <span>{expResult.depotName}</span>
-                        <span className="text-slate-300">·</span>
-                        <span>{expResult.termName}</span>
-                      </div>
-                      {expResult.cards.map((card, i) => (
-                        <div key={i} className={cn(
-                          "p-4 rounded-2xl border",
-                          card.isRecommended ? "bg-maersk-dark border-maersk-blue/40 shadow-lg" : "bg-slate-50 border-slate-100"
-                        )}>
-                          <div className="flex items-center gap-2 mb-3">
-                            <span className={cn(
-                              "inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider",
-                              card.mod === 'Barge'
-                                ? card.isRecommended ? 'bg-maersk-blue/30 text-[#42b0d5] border border-maersk-blue/40' : 'bg-maersk-blue/10 text-maersk-blue border border-maersk-blue/20'
-                                : card.isRecommended ? 'bg-purple-500/30 text-purple-300 border border-purple-500/40' : 'bg-purple-500/10 text-purple-600 border border-purple-200'
-                            )}>
-                              {card.mod === 'Barge' ? <Anchor className="h-2.5 w-2.5" /> : <Train className="h-2.5 w-2.5" />}
-                              {card.mod}
-                            </span>
-                            {card.isRecommended && <span className="text-[9px] font-black text-emerald-400 uppercase tracking-wider flex items-center gap-1"><Star className="h-2.5 w-2.5 fill-emerald-400" />Recommended</span>}
-                          </div>
-                          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                            {[
-                              { label: 'ETD', val: fmtShortDate(card.etd), color: '' },
-                              { label: 'ETA at Port', val: fmtShortDate(card.eat), color: '' },
-                              { label: 'Earliest CCO', val: fmtShortDate(card.earliestCCO), color: 'emerald' },
-                              { label: 'Latest ETA', val: fmtShortDate(card.latestETA), color: 'blue' },
-                            ].map(({ label, val, color }) => (
-                              <div key={label}>
-                                <p className={cn("text-[9px] font-black uppercase tracking-widest", card.isRecommended ? 'text-white/40' : 'text-slate-400')}>{label}</p>
-                                <p className={cn("text-sm font-black", card.isRecommended
-                                  ? color === 'emerald' ? 'text-emerald-400' : color === 'blue' ? 'text-[#42b0d5]' : 'text-white'
-                                  : color === 'emerald' ? 'text-emerald-600' : color === 'blue' ? 'text-maersk-blue' : 'text-maersk-dark'
-                                )}>{val}</p>
-                              </div>
-                            ))}
-                          </div>
-                          {card.nextDayCutoff && <p className="mt-2 text-[9px] font-black text-amber-400 uppercase tracking-wider">⚠ Ensure loading complete before 12:00</p>}
-                        </div>
-                      ))}
-                      {expResult.orderDL && (
-                        <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-100 rounded-xl text-[10px] font-black text-amber-700 uppercase tracking-wider">
-                          <Clock className="h-3 w-3 flex-none" /> Order Deadline: {fmtDate(expResult.orderDL)}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  <div className="mt-5 flex gap-3">
-                    <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="rounded-xl font-bold text-slate-500 hover:bg-slate-100 flex-none">Close</Button>
-                    {expResult && expResult.cards.length > 0 && (
-                      <Button onClick={handleOpenInPlanner} className="flex-1 bg-maersk-dark text-white hover:bg-maersk-blue shadow-lg rounded-xl font-black h-11">
-                        Open in Export Booking <ExternalLink className="h-4 w-4 ml-2" />
-                      </Button>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Customer ZIP Code (PLZ)</Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input
+                    placeholder="e.g. 40210"
+                    className="pl-10 h-11 bg-slate-50 border-slate-200 focus-visible:ring-maersk-blue/50 rounded-xl font-bold"
+                    value={bookingInfo.zipcode}
+                    onChange={(e) => setBookingInfo({...bookingInfo, zipcode: e.target.value})}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Container Type</Label>
+                  <Select value={bookingInfo.containerType} onValueChange={(v) => setBookingInfo({...bookingInfo, containerType: v})}>
+                    <SelectTrigger className="h-11 bg-slate-50 border-slate-200 rounded-xl font-bold">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl">
+                      <SelectItem value="20DC">20' Standard</SelectItem>
+                      <SelectItem value="40DC">40' Standard</SelectItem>
+                      <SelectItem value="40HC">40' High Cube</SelectItem>
+                      <SelectItem value="20RF">20' Reefer</SelectItem>
+                      <SelectItem value="40RF">40' Reefer</SelectItem>
+                      <SelectItem value="IMO">IMO</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Loading Time</Label>
+                  <Input
+                    type="time"
+                    className="h-11 bg-slate-50 border-slate-200 rounded-xl font-bold"
+                    value={bookingInfo.loadingTime}
+                    onChange={(e) => setBookingInfo({...bookingInfo, loadingTime: e.target.value})}
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Port Terminal</Label>
+                <Select value={bookingInfo.terminalValue} onValueChange={(v) => setBookingInfo({...bookingInfo, terminalValue: v})}>
+                  <SelectTrigger className="h-11 bg-slate-50 border-slate-200 rounded-xl font-bold">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl min-w-[300px]">
+                    <div className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Rotterdam</div>
+                    {TERMINAL_OPTIONS.filter(t => t.port === 'RTM').map(t => (
+                      <SelectItem key={t.value} value={t.value}>{t.label} <span className="text-slate-400 ml-1">· YOT {t.value.split('|')[1]}d</span></SelectItem>
+                    ))}
+                    <div className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest border-t border-slate-100 mt-1 pt-2">Antwerp</div>
+                    {TERMINAL_OPTIONS.filter(t => t.port === 'ANR').map(t => (
+                      <SelectItem key={t.value} value={t.value}>{t.label} <span className="text-slate-400 ml-1">· YOT {t.value.split('|')[1]}d</span></SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="mt-5 flex gap-3">
+              <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="rounded-xl font-bold text-slate-500 hover:bg-slate-100 flex-none">Cancel</Button>
+              <Button
+                onClick={handleFindSchedules}
+                disabled={!bookingInfo.zipcode || bookingInfo.zipcode.length < 4}
+                className="flex-1 bg-maersk-dark text-white hover:bg-maersk-blue shadow-lg rounded-xl font-black h-11"
+              >
+                Find Export Schedules <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
