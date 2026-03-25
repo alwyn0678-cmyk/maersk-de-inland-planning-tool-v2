@@ -200,9 +200,16 @@ export function DashboardOverview() {
         loadTime: bookingInfo.loadingTime,
         terminalValue: bookingInfo.terminalValue,
       });
-      setExpResult(result);
-      setBookingStep('results');
+      setExportRequest({
+        postcode: bookingInfo.zipcode,
+        containerType: bookingInfo.containerType as any,
+        loadingDate: loadDate,
+        loadingTime: bookingInfo.loadingTime,
+      });
+      setExpRunResult(result);
+      setIsDialogOpen(false);
       setBookingLoading(false);
+      setActiveTab('export');
     }, 600);
   };
 
@@ -271,7 +278,6 @@ export function DashboardOverview() {
                 </div>
                 <div>
                   <CardTitle className="text-2xl font-black tracking-tight text-maersk-dark">Export Truck Capacity Forecast</CardTitle>
-                  <CardDescription className="text-slate-700 font-bold">Predictive 14-day availability across main Rhine hubs.</CardDescription>
                 </div>
               </div>
               <div className="flex items-center space-x-6">
@@ -433,7 +439,13 @@ export function DashboardOverview() {
                   <Activity className={cn("h-3 w-3 mr-1.5", waterLoading ? "animate-spin" : "animate-pulse")} />
                   {waterLoading ? 'Loading...' : 'Live Sync'}
                 </Badge>
-                <Button variant="ghost" size="icon" className="text-white/70 hover:text-white hover:bg-white/10">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-white/70 hover:text-white hover:bg-white/10"
+                  onClick={() => window.open('https://www.pegelonline.wsv.de/gast/karte/standard', '_blank', 'noopener,noreferrer')}
+                  title="Open live data on pegelonline.wsv.de"
+                >
                   <ExternalLink className="h-4 w-4" />
                 </Button>
               </div>
@@ -762,7 +774,7 @@ export function DashboardOverview() {
                     <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="rounded-xl font-bold text-slate-500 hover:bg-slate-100 flex-none">Close</Button>
                     {expResult && expResult.cards.length > 0 && (
                       <Button onClick={handleOpenInPlanner} className="flex-1 bg-maersk-dark text-white hover:bg-maersk-blue shadow-lg rounded-xl font-black h-11">
-                        Open in Export Planner <ExternalLink className="h-4 w-4 ml-2" />
+                        Open in Export Booking <ExternalLink className="h-4 w-4 ml-2" />
                       </Button>
                     )}
                   </div>

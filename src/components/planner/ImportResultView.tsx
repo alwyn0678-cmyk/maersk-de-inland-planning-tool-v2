@@ -1,13 +1,12 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { ImpRunResult, impTName, impTruck, impHasSc } from '../../logic/import/impRun';
 import { ImpInstance } from '../../logic/import/computeInstances';
 import { impScCode } from '../../logic/import/zipLookup';
 import { fmt, fmtS, fmtDateISO } from '../../logic/dateUtils';
 import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
-import { AlertTriangle, CheckCircle2, Copy, Check, Info, Train, Anchor, Package, MapPin, Ship } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Copy, Check, Info, Train, Anchor, Package, ArrowRight, Mail } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 function dFromNow(d: Date): number {
@@ -74,132 +73,119 @@ function ImportCard({ inst, result, idx }: { inst: ImpInstance; result: ImpRunRe
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: idx * 0.08, duration: 0.4 }}
     >
       <Card className={cn(
-        "overflow-hidden border hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-2xl group",
-        inst.rec ? "border-maersk-blue/40 shadow-lg shadow-maersk-blue/10" : "border-slate-200 shadow-sm"
+        "overflow-hidden border rounded-2xl transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5",
+        inst.rec
+          ? "border-amber-300 shadow-lg shadow-amber-400/15 ring-1 ring-amber-200/50"
+          : "border-slate-200 shadow-sm"
       )}>
-        {/* Gradient mode header */}
-        <div className={cn(
-          "px-4 py-3 relative overflow-hidden",
-          isBarge
-            ? "bg-gradient-to-r from-[#00243d] via-[#00315a] to-maersk-blue/80"
-            : "bg-gradient-to-r from-purple-950 via-purple-900 to-purple-700"
-        )}>
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.07),transparent)] pointer-events-none" />
-          <div className="flex items-center justify-between relative z-10">
-            <div className="flex items-center gap-2">
-              <div className={cn("p-1.5 rounded-md flex-none", isBarge ? "bg-maersk-blue/40" : "bg-purple-500/40")}>
-                {isBarge ? <Anchor className="h-3.5 w-3.5 text-white" /> : <Train className="h-3.5 w-3.5 text-white" />}
+        {inst.rec && (
+          <div className="bg-amber-400 px-5 py-2 flex items-center gap-2">
+            <CheckCircle2 className="h-3.5 w-3.5 text-amber-900" />
+            <span className="text-[11px] font-black text-amber-900 uppercase tracking-[0.2em]">★ Recommended — Best Available Option</span>
+          </div>
+        )}
+
+        <div className="flex flex-col sm:flex-row">
+          {/* Left: dark modality panel */}
+          <div className={cn(
+            "sm:w-44 flex-none flex flex-col justify-between p-3",
+            isBarge
+              ? "bg-gradient-to-br from-[#00243d] to-[#00375c]"
+              : "bg-gradient-to-br from-purple-950 to-purple-800"
+          )}>
+            <div>
+              <div className={cn(
+                "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg mb-2 border",
+                isBarge ? "bg-[#42b0d5]/20 border-[#42b0d5]/30" : "bg-purple-400/20 border-purple-400/30"
+              )}>
+                {isBarge
+                  ? <Anchor className="h-4 w-4 text-[#42b0d5]" />
+                  : <Train className="h-4 w-4 text-purple-300" />
+                }
+                <span className={cn(
+                  "text-sm font-black uppercase tracking-wider",
+                  isBarge ? "text-[#42b0d5]" : "text-purple-300"
+                )}>{inst.mod}</span>
               </div>
-              <div className="min-w-0">
-                <p className="text-[9px] font-black text-white/50 uppercase tracking-widest leading-none">{inst.mod}</p>
-                <p className="text-sm font-black text-white leading-tight truncate">{impTName(inst.loc)}</p>
-              </div>
-              <span className="font-mono text-[9px] text-white/40 ml-0.5 self-end pb-0.5 flex-none">{inst.loc}</span>
+              <p className="text-xs font-black text-white leading-tight">{impTName(inst.loc)}</p>
+              <p className="font-mono text-[9px] text-white/30 mt-0.5">{inst.loc}</p>
             </div>
-            <div className="flex items-center gap-1.5 flex-none ml-2">
-              {inst.rec && (
-                <span className="bg-white/15 text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border border-white/20">
-                  ★ Best
-                </span>
-              )}
+            <div className="mt-3">
               <CopyButton text={buildCopyText(inst, result)} />
             </div>
           </div>
+
+          {/* Right: info panel */}
+          <CardContent className="flex-1 p-0">
+            {/* Journey row */}
+            <div className="px-4 py-4">
+              <div className="flex items-center gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Terminal ETD</p>
+                  <p className="text-sm font-black text-maersk-dark leading-tight">{fmtS(inst.etd)}</p>
+                </div>
+                <ArrowRight className="h-3.5 w-3.5 text-slate-300 flex-none" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Depot Arrival</p>
+                  <p className="text-sm font-black text-emerald-600 leading-tight">{fmtS(inst.eta)}</p>
+                </div>
+                <ArrowRight className="h-3.5 w-3.5 text-slate-300 flex-none" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Customer Delivery</p>
+                  <p className="text-sm font-black text-maersk-dark leading-tight">{fmtS(inst.custDel)}</p>
+                  {isDui && <p className="text-[9px] text-amber-500 font-black">after 12:00</p>}
+                </div>
+              </div>
+            </div>
+
+            <div className="h-px bg-slate-100 mx-4" />
+
+            {/* Deadlines & transport */}
+            <div className="px-4 py-4 flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2">
+                <div>
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Order Deadline</p>
+                  <p className="text-sm font-black text-maersk-dark">{fmtS(inst.orderDL)}</p>
+                </div>
+                <UrgencyBadge date={inst.orderDL} />
+              </div>
+
+              {inst.custDL && (
+                <div className="flex items-center gap-2 px-2.5 py-1 bg-amber-50 border border-amber-200 rounded-lg">
+                  <AlertTriangle className="h-3 w-3 text-amber-600 flex-none" />
+                  <div>
+                    <p className="text-[8px] font-black text-amber-600 uppercase tracking-widest mb-0">Customs DL</p>
+                    <p className="text-xs font-black text-amber-800">
+                      {fmtS(inst.custDL)} {inst.custDL.getHours().toString().padStart(2,'0')}:{inst.custDL.getMinutes().toString().padStart(2,'0')}
+                    </p>
+                  </div>
+                  <UrgencyBadge date={inst.custDL} />
+                </div>
+              )}
+
+              <div className="ml-auto text-right hidden sm:block">
+                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0">Transport</p>
+                <p className="text-xs font-black text-maersk-dark">
+                  {inst.mod.toLowerCase()} ETD {inst.etdDay} {inst.etd.getDate().toString().padStart(2,'0')}/{(inst.etd.getMonth()+1).toString().padStart(2,'0')}
+                </p>
+              </div>
+            </div>
+
+            {/* Customs doc reminder — prominent banner */}
+            <div className="mx-4 mb-3 px-2.5 py-2 bg-maersk-blue/8 border border-maersk-blue/25 rounded-lg flex items-center gap-2">
+              <Mail className="h-3 w-3 text-maersk-blue shrink-0" />
+              <p className="text-[9px] font-black text-maersk-blue leading-tight">
+                Customs doc → <span className="underline underline-offset-1">nlaopsinlrbc@maersk.com</span>
+                <span className="font-bold text-slate-500 ml-1.5">· ATA 2d before delivery for multistop</span>
+              </p>
+            </div>
+          </CardContent>
         </div>
-
-        <CardContent className="p-0">
-          {/* Journey Timeline */}
-          <div className="px-4 pt-4 pb-3">
-            <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 flex items-center gap-1">
-              <span className="w-3 h-px bg-slate-200 inline-block" />Journey
-            </p>
-            <div className="flex items-start">
-              {/* Terminal ETD */}
-              <div className="flex flex-col items-center flex-1 min-w-0">
-                <div className={cn(
-                  "w-7 h-7 rounded-full flex items-center justify-center shadow-md mb-1.5 flex-none",
-                  isBarge ? "bg-maersk-blue" : "bg-purple-600"
-                )}>
-                  {isBarge ? <Anchor className="h-3.5 w-3.5 text-white" /> : <Train className="h-3.5 w-3.5 text-white" />}
-                </div>
-                <p className="text-[8px] font-black text-slate-400 uppercase leading-tight text-center">ETD</p>
-                <p className="text-xs font-black text-maersk-dark text-center leading-tight">{fmtS(inst.etd)}</p>
-                <p className="text-[9px] text-slate-400 text-center">{inst.etdDay}</p>
-              </div>
-
-              {/* Connector */}
-              <div className="flex-1 flex items-start pt-3 mx-1">
-                <div className="w-full h-px bg-gradient-to-r from-slate-300 via-slate-200 to-slate-300" />
-              </div>
-
-              {/* Depot Arrival */}
-              <div className="flex flex-col items-center flex-1 min-w-0">
-                <div className="w-7 h-7 rounded-full bg-slate-500 flex items-center justify-center shadow-md mb-1.5 flex-none">
-                  <Package className="h-3.5 w-3.5 text-white" />
-                </div>
-                <p className="text-[8px] font-black text-slate-400 uppercase leading-tight text-center">Depot</p>
-                <p className="text-xs font-black text-maersk-dark text-center leading-tight">{fmtS(inst.eta)}</p>
-                <p className="text-[9px] text-slate-400 text-center">{inst.etaDay}</p>
-              </div>
-
-              {/* Connector */}
-              <div className="flex-1 flex items-start pt-3 mx-1">
-                <div className="w-full h-px bg-gradient-to-r from-slate-300 via-slate-200 to-slate-300" />
-              </div>
-
-              {/* Customer Delivery */}
-              <div className="flex flex-col items-center flex-1 min-w-0">
-                <div className="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center shadow-md mb-1.5 flex-none">
-                  <MapPin className="h-3.5 w-3.5 text-white" />
-                </div>
-                <p className="text-[8px] font-black text-slate-400 uppercase leading-tight text-center">Delivery</p>
-                <p className="text-xs font-black text-maersk-dark text-center leading-tight">{fmtS(inst.custDel)}</p>
-                {isDui && <p className="text-[9px] text-amber-600 font-bold text-center">after 12:00</p>}
-              </div>
-            </div>
-          </div>
-
-          {/* Divider */}
-          <div className="mx-4 h-px bg-slate-100" />
-
-          {/* Order deadline row */}
-          <div className="mx-4 my-3 flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl">
-            <div>
-              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">Order Deadline</p>
-              <p className="text-xs font-black text-maersk-dark">{fmtS(inst.orderDL)}</p>
-            </div>
-            <UrgencyBadge date={inst.orderDL} />
-          </div>
-
-          {/* Customs deadline */}
-          {inst.custDL && (
-            <div className="mx-4 mb-3 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2">
-              <AlertTriangle className="h-3 w-3 text-amber-600 shrink-0" />
-              <span className="text-[9px] font-black text-amber-700">
-                Customs: {fmt(inst.custDL)} {inst.custDL.getHours().toString().padStart(2,'0')}:{inst.custDL.getMinutes().toString().padStart(2,'0')}
-              </span>
-            </div>
-          )}
-
-          {/* Reminders + transport order */}
-          <div className="mx-4 mb-4 px-3 py-2.5 bg-slate-50 border border-slate-100 rounded-xl space-y-1">
-            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-              <Info className="h-2.5 w-2.5" />Transport Order
-            </p>
-            <p className="text-[9px] font-black text-maersk-dark">
-              Plan {inst.mod.toLowerCase()} ETD {inst.etdDay} {inst.etd.getDate().toString().padStart(2,'0')}/{(inst.etd.getMonth()+1).toString().padStart(2,'0')}
-            </p>
-            <p className="text-[9px] text-slate-400 leading-snug">
-              Customs doc → <span className="font-black text-maersk-dark">nlaopsinlrbc@maersk.com</span>
-            </p>
-            <p className="text-[9px] text-slate-400 leading-snug">ATA 2d before delivery for multistop</p>
-          </div>
-        </CardContent>
       </Card>
     </motion.div>
   );
@@ -222,33 +208,31 @@ export function ImportResultView({ result }: { result: ImpRunResult }) {
     : result.all;
   const show = filtered.slice(0, result.maxCards);
 
-  const termSet = new Set<string>();
-  if (result.terms?.b) termSet.add(result.terms.b);
-  if (result.terms?.b2) termSet.add(result.terms.b2);
-  if (result.terms?.r && !termSet.has(result.terms.r)) termSet.add(result.terms.r);
-
   return (
     <div className="space-y-4">
-      {/* Summary strip — grid layout to avoid wrapping */}
-      <div className="grid grid-cols-3 gap-px bg-slate-100 rounded-2xl overflow-hidden shadow-sm">
+      {/* Summary strip — horizontal flex */}
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 px-5 py-4 bg-white border border-slate-100 rounded-2xl shadow-sm max-w-4xl mx-auto">
         {[
           { label: 'PLZ / Region', value: `${result.zip} · ${result.region}` },
           { label: 'Container', value: `${result.size}' ${result.type.toUpperCase()}` },
           { label: 'Port', value: result.portName },
           { label: 'Vessel ETD', value: fmtS(result.vesselETD) + ' ' + result.etdTime },
-          { label: 'Booking Status', value: result.isFuture ? 'Future Booking' : 'Discharged' },
-          { label: 'Options Found', value: `${show.length}` },
-        ].map(({ label, value }) => (
-          <div key={label} className="bg-white px-4 py-3">
-            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">{label}</p>
-            <p className="text-xs font-black text-maersk-dark leading-tight">{value}</p>
+          { label: 'Status', value: result.isFuture ? 'Future Booking' : 'Discharged' },
+          { label: 'Options', value: `${show.length} found` },
+        ].map(({ label, value }, i, arr) => (
+          <div key={label} className="flex items-center gap-4">
+            <div>
+              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">{label}</p>
+              <p className="text-sm font-black text-maersk-dark">{value}</p>
+            </div>
+            {i < arr.length - 1 && <div className="h-8 w-px bg-slate-100" />}
           </div>
         ))}
       </div>
 
       {/* Terminal info bar */}
       {result.terms && (
-        <div className="flex flex-wrap items-center gap-2 px-4 py-3 bg-white border border-slate-100 rounded-xl">
+        <div className="flex flex-wrap items-center gap-2 px-4 py-3 bg-white border border-slate-100 rounded-xl max-w-4xl mx-auto">
           {result.terms.b && (
             <div className="flex items-center gap-1.5">
               <span className="text-[8px] font-black uppercase bg-maersk-blue/10 text-maersk-blue px-2 py-0.5 rounded-md">Barge</span>
@@ -291,7 +275,7 @@ export function ImportResultView({ result }: { result: ImpRunResult }) {
 
       {/* Depot selector (prefix 56) */}
       {result.hasB2 && result.terms && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 max-w-4xl mx-auto">
           <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Select Depot:</span>
           {[result.terms.b!, result.terms.b2!].map((code, rank) => (
             <button
@@ -311,23 +295,9 @@ export function ImportResultView({ result }: { result: ImpRunResult }) {
         </div>
       )}
 
-      {/* Result cards */}
-      {show.length === 0 ? (
-        <div className="p-8 text-center bg-slate-50 border border-slate-200 rounded-2xl">
-          <p className="text-sm font-black text-slate-500">No plannable departures found.</p>
-          <p className="text-xs text-slate-400 mt-1">Contact inland operations.</p>
-        </div>
-      ) : (
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {show.map((inst, idx) => (
-            <ImportCard key={`${fmtDateISO(inst.etd)}-${inst.mod}-${inst.loc}`} inst={inst} result={result} idx={idx} />
-          ))}
-        </div>
-      )}
-
-      {/* Empty return depot */}
+      {/* Empty return depot — shown ABOVE schedules (same as Export) */}
       {result.emptyDepot && (
-        <div className="px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm">
+        <div className="px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm max-w-4xl mx-auto">
           <div className="flex items-center gap-2 mb-2">
             <Package className="h-3.5 w-3.5 text-maersk-blue" />
             <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Empty Return Depot ({result.emptyLabel})</span>
@@ -337,6 +307,20 @@ export function ImportResultView({ result }: { result: ImpRunResult }) {
             <span className="font-mono text-xs font-black text-maersk-dark">{result.emptyDepot.p1}</span>
             <span className="text-xs text-slate-600 font-bold">— {result.emptyDepot.p1n}</span>
           </div>
+        </div>
+      )}
+
+      {/* Result cards — vertical stack, full width */}
+      {show.length === 0 ? (
+        <div className="p-8 text-center bg-slate-50 border border-slate-200 rounded-2xl">
+          <p className="text-sm font-black text-slate-500">No plannable departures found.</p>
+          <p className="text-xs text-slate-400 mt-1">Contact inland operations.</p>
+        </div>
+      ) : (
+        <div className="space-y-3 max-w-4xl mx-auto">
+          {show.map((inst, idx) => (
+            <ImportCard key={`${fmtDateISO(inst.etd)}-${inst.mod}-${inst.loc}`} inst={inst} result={result} idx={idx} />
+          ))}
         </div>
       )}
     </div>

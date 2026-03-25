@@ -43,7 +43,7 @@ const TERMINAL_OPTIONS = [
   { value: 'BEANT913|7|ANR', label: 'PSA Noordzee Terminal (ANR)', port: 'ANR' },
 ];
 
-export function ExportForm() {
+export function ExportForm({ onSuccess }: { onSuccess?: () => void }) {
   const { exportRequest, setExportRequest, setExpRunResult, resetExport } = usePlannerStore();
   const [loading, setLoading] = useState(false);
   const [terminalValue, setTerminalValue] = useState('NLROTTM|5|RTM');
@@ -63,6 +63,7 @@ export function ExportForm() {
         terminalValue,
       });
       setExpRunResult(result);
+      onSuccess?.();
       setLoading(false);
     }, 400);
   };
@@ -80,8 +81,8 @@ export function ExportForm() {
               <Settings2 className="h-4 w-4 text-emerald-500" />
             </div>
             <div>
-              <h3 className="text-lg font-black text-maersk-dark tracking-tighter uppercase italic">Export <span className="text-emerald-500 not-italic">Config</span></h3>
-              <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.25em]">Optimization Parameters</p>
+              <h3 className="text-lg font-black text-maersk-dark tracking-tighter uppercase italic">Export <span className="text-emerald-500 not-italic">Booking</span></h3>
+              <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.25em]">Search Configuration</p>
             </div>
           </div>
           <div className="flex items-center space-x-2 px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">

@@ -1,20 +1,26 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { CYCYForm } from '../components/planner/CYCYForm';
 import { CYCYResultCard } from '../components/planner/CYCYResultCard';
 import { usePlannerStore } from '../store/usePlannerStore';
-import { ArrowRightLeft, Anchor, TrendingUp, Settings2, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowRightLeft, Anchor, TrendingUp, SlidersHorizontal, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
-import { IMP_TERM_NAMES } from '../data/import/terminalNames';
-import { EXP_DEPOTS, EXP_TERM_NAMES } from '../data/export/depotNames';
 
 export function CYCYPlanner() {
-  const { cycyResult, cycyRunResult, cycyRequest, setCYCYRequest } = usePlannerStore();
-  const [showForm, setShowForm] = useState(true);
+  const { cycyRequest, cycyRunResult, setCYCYRequest, resetCYCY } = usePlannerStore();
+  const [filterOpen, setFilterOpen] = useState(false);
 
-  const hasResult = !!(cycyResult || cycyRunResult);
-  useEffect(() => { if (hasResult) setShowForm(false); }, [hasResult]);
-  useEffect(() => { if (!hasResult) setShowForm(true); }, [hasResult]);
+  const isImport = cycyRequest.direction === 'Import';
+
+  function switchDirection(dir: 'Import' | 'Export') {
+    if (dir === 'Import') {
+      setCYCYRequest({ direction: 'Import', originTerminal: 'RTM', destinationTerminal: 'DEDUI01' });
+    } else {
+      setCYCYRequest({ direction: 'Export', originTerminal: 'DEDUI01', destinationTerminal: 'NLROTTM|5|RTM' });
+    }
+    resetCYCY();
+    setFilterOpen(true);
+  }
 
   // Direction selection splash
   if (!cycyRequest.direction) {
@@ -25,7 +31,7 @@ export function CYCYPlanner() {
             <ArrowRightLeft className="h-6 w-6 text-maersk-blue" />
           </div>
           <h2 className="text-3xl font-black tracking-tighter text-maersk-dark uppercase italic">
-            CY/CY <span className="text-maersk-blue not-italic">Planner</span>
+            CY/CY <span className="text-maersk-blue not-italic">Booking</span>
           </h2>
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
             Select network flow direction to begin
@@ -36,7 +42,7 @@ export function CYCYPlanner() {
           <motion.button
             whileHover={{ scale: 1.02, y: -3 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => setCYCYRequest({ direction: 'Import', originTerminal: 'RTM', destinationTerminal: 'DEDUI01' })}
+            onClick={() => { setCYCYRequest({ direction: 'Import', originTerminal: 'RTM', destinationTerminal: 'DEDUI01' }); setFilterOpen(true); }}
             className="group relative p-6 rounded-2xl bg-white border border-slate-100 hover:border-maersk-blue/40 transition-all duration-300 hover:shadow-[0_16px_32px_-8px_rgba(66,176,213,0.2)] flex flex-col items-center text-center space-y-3 overflow-hidden"
           >
             <div className="absolute -top-4 -right-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
@@ -57,7 +63,7 @@ export function CYCYPlanner() {
           <motion.button
             whileHover={{ scale: 1.02, y: -3 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => setCYCYRequest({ direction: 'Export', originTerminal: 'DEDUI01', destinationTerminal: 'NLROTTM|5|RTM' })}
+            onClick={() => { setCYCYRequest({ direction: 'Export', originTerminal: 'DEDUI01', destinationTerminal: 'NLROTTM|5|RTM' }); setFilterOpen(true); }}
             className="group relative p-6 rounded-2xl bg-white border border-slate-100 hover:border-emerald-500/40 transition-all duration-300 hover:shadow-[0_16px_32px_-8px_rgba(16,185,129,0.2)] flex flex-col items-center text-center space-y-3 overflow-hidden"
           >
             <div className="absolute -top-4 -right-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
@@ -75,119 +81,188 @@ export function CYCYPlanner() {
             </div>
           </motion.button>
         </div>
-      </div>
-    );
-  }
 
-  const isImport = cycyRequest.direction === 'Import';
-
-  return (
-    <div className="space-y-5 pb-10">
-
-      {/* ── Page header ─────────────────────────────────────────── */}
-      <div className="flex items-center justify-between">
-        <div className="relative pl-4">
-          <div className={cn(
-            "absolute left-0 top-1/2 -translate-y-1/2 w-1 h-10 rounded-full",
-            isImport
-              ? "bg-maersk-blue shadow-[0_0_10px_rgba(66,176,213,0.6)]"
-              : "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
-          )} />
-          <h2 className="text-3xl font-black tracking-tighter text-maersk-dark uppercase italic leading-tight">
-            CY/CY <span className={cn('not-italic', isImport ? 'text-maersk-blue' : 'text-emerald-500')}>Planner</span>
-          </h2>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
-            Terminal-to-Terminal Network Optimizer
-          </p>
-        </div>
-
-        {/* Direction switcher */}
-        <div className="bg-slate-100/70 p-1 rounded-xl flex items-center gap-1 border border-slate-200/50">
-          <button
-            onClick={() => setCYCYRequest({ direction: 'Import', originTerminal: 'RTM', destinationTerminal: 'DEDUI01' })}
-            className={cn(
-              'px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all duration-300 flex items-center gap-1.5',
-              cycyRequest.direction === 'Import'
-                ? 'bg-white text-maersk-blue shadow-md'
-                : 'text-slate-400 hover:text-slate-600'
-            )}
-          >
-            <Anchor className="h-3.5 w-3.5" />
-            Import
-          </button>
-          <button
-            onClick={() => setCYCYRequest({ direction: 'Export', originTerminal: 'DEDUI01', destinationTerminal: 'NLROTTM|5|RTM' })}
-            className={cn(
-              'px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all duration-300 flex items-center gap-1.5',
-              cycyRequest.direction === 'Export'
-                ? 'bg-white text-emerald-500 shadow-md'
-                : 'text-slate-400 hover:text-slate-600'
-            )}
-          >
-            <TrendingUp className="h-3.5 w-3.5" />
-            Export
-          </button>
-        </div>
-      </div>
-
-      {/* ── Collapsible parameters panel ────────────────────────── */}
-      <div className="bg-white border border-slate-100 rounded-2xl shadow-md overflow-hidden">
-        <button
-          onClick={() => setShowForm(v => !v)}
-          className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-slate-50/60 transition-colors duration-200"
-        >
-          <div className="flex items-center gap-3">
-            <div className={cn('p-1.5 rounded-lg', isImport ? 'bg-maersk-blue/10' : 'bg-emerald-500/10')}>
-              <Settings2 className={cn('h-4 w-4', isImport ? 'text-maersk-blue' : 'text-emerald-600')} />
-            </div>
-            <span className="text-sm font-black text-maersk-dark uppercase tracking-wide">Optimization Parameters</span>
-            {hasResult && !showForm && cycyRequest.originTerminal && (
-              <div className="flex items-center gap-1.5 ml-2 flex-wrap">
-                {[
-                  cycyRequest.direction,
-                  cycyRequest.direction === 'Import'
-                    ? `${cycyRequest.originTerminal === 'RTM' ? 'Rotterdam' : 'Antwerp'} → ${IMP_TERM_NAMES[cycyRequest.destinationTerminal || ''] || cycyRequest.destinationTerminal}`
-                    : `${EXP_DEPOTS[cycyRequest.originTerminal || ''] || cycyRequest.originTerminal} → ${EXP_TERM_NAMES[(cycyRequest.destinationTerminal || '').split('|')[0]] || cycyRequest.destinationTerminal}`,
-                  cycyRequest.containerType,
-                  cycyRequest.date,
-                ].filter(Boolean).map((tag, i) => (
-                  <span key={i} className={cn(
-                    'text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wide',
-                    isImport ? 'bg-maersk-blue/10 text-maersk-blue' : 'bg-emerald-500/10 text-emerald-600'
-                  )}>
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="flex items-center gap-2 text-slate-400">
-            <span className="text-[10px] font-black uppercase tracking-widest">{showForm ? 'Hide' : 'Edit'}</span>
-            {showForm ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </div>
-        </button>
-
-        <AnimatePresence initial={false}>
-          {showForm && (
+        {/* Modal for initial direction (opened immediately on card click via setFilterOpen) */}
+        <AnimatePresence>
+          {filterOpen && cycyRequest.direction && (
             <motion.div
-              key="form"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="overflow-hidden border-t border-slate-100"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
             >
-              <div className="p-4">
-                <CYCYForm />
-              </div>
+              <div className="absolute inset-0 bg-maersk-dark/70 backdrop-blur-sm" onClick={() => setFilterOpen(false)} />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ type: 'spring', damping: 28, stiffness: 350 }}
+                className="relative z-10 w-full max-w-lg"
+              >
+                <div className="flex items-center justify-between px-5 py-4 bg-maersk-dark rounded-t-2xl border-b border-white/10">
+                  <div className="flex items-center gap-3">
+                    <div className={cn('p-1.5 rounded-lg', cycyRequest.direction === 'Import' ? 'bg-maersk-blue/20' : 'bg-emerald-500/20')}>
+                      <ArrowRightLeft className={cn('h-4 w-4', cycyRequest.direction === 'Import' ? 'text-maersk-blue' : 'text-emerald-500')} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-white uppercase tracking-widest leading-none">CY/CY {cycyRequest.direction} Booking</p>
+                      <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.2em] mt-0.5">Terminal-to-Terminal Network</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setFilterOpen(false)} className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/10 transition-all">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="rounded-b-2xl overflow-hidden shadow-2xl shadow-black/40 max-h-[80vh] overflow-y-auto">
+                  <CYCYForm onSuccess={() => setFilterOpen(false)} />
+                </div>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+    );
+  }
 
-      {/* ── Results ─────────────────────────────────────────────── */}
-      <CYCYResultCard />
+  return (
+    <div className="space-y-5 pb-10">
+      {/* Page header */}
+      <div className="flex items-center justify-between">
+        <div className="relative pl-4">
+          <div className={cn(
+            "absolute left-0 top-1/2 -translate-y-1/2 w-1 h-10 rounded-full",
+            isImport ? "bg-maersk-blue shadow-[0_0_10px_rgba(66,176,213,0.6)]" : "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
+          )} />
+          <h2 className="text-3xl font-black tracking-tighter text-maersk-dark uppercase italic leading-tight">
+            CY/CY <span className={cn('not-italic', isImport ? 'text-maersk-blue' : 'text-emerald-500')}>Booking</span>
+          </h2>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Terminal-to-Terminal Network</p>
+        </div>
 
+        <div className="flex items-center gap-2">
+          {/* Direction switcher */}
+          <div className="bg-slate-100/70 p-1 rounded-xl flex items-center gap-1 border border-slate-200/50">
+            <button
+              onClick={() => cycyRequest.direction !== 'Import' && switchDirection('Import')}
+              className={cn(
+                'px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all duration-300 flex items-center gap-1.5',
+                cycyRequest.direction === 'Import' ? 'bg-white text-maersk-blue shadow-md' : 'text-slate-400 hover:text-slate-600'
+              )}
+            >
+              <Anchor className="h-3 w-3" />Import
+            </button>
+            <button
+              onClick={() => cycyRequest.direction !== 'Export' && switchDirection('Export')}
+              className={cn(
+                'px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all duration-300 flex items-center gap-1.5',
+                cycyRequest.direction === 'Export' ? 'bg-white text-emerald-500 shadow-md' : 'text-slate-400 hover:text-slate-600'
+              )}
+            >
+              <TrendingUp className="h-3 w-3" />Export
+            </button>
+          </div>
+
+          <button
+            onClick={() => setFilterOpen(true)}
+            className={cn(
+              'flex items-center gap-2 px-4 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest transition-all duration-200',
+              cycyRunResult
+                ? 'bg-white border border-slate-200 text-slate-600 hover:border-maersk-blue/40 shadow-sm'
+                : isImport
+                  ? 'bg-maersk-blue text-white shadow-lg shadow-maersk-blue/30 hover:bg-maersk-blue/90'
+                  : 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-600'
+            )}
+          >
+            <SlidersHorizontal className="h-3.5 w-3.5" />
+            {cycyRunResult ? 'Change Filters' : 'Configure Search'}
+          </button>
+        </div>
+      </div>
+
+      {/* Results */}
+      {cycyRunResult ? (
+        <CYCYResultCard />
+      ) : (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="py-24 text-center bg-white border border-slate-100 rounded-2xl shadow-sm"
+        >
+          <div className={cn("inline-flex p-5 rounded-2xl mb-5", isImport ? "bg-maersk-blue/5" : "bg-emerald-500/5")}>
+            {isImport
+              ? <Anchor className="h-12 w-12 text-maersk-blue/25" />
+              : <TrendingUp className="h-12 w-12 text-emerald-500/25" />
+            }
+          </div>
+          <p className="text-base font-black text-slate-400 uppercase tracking-widest mb-2">
+            {isImport ? 'Import Flow' : 'Export Flow'} Ready
+          </p>
+          <p className="text-sm text-slate-300 font-bold mb-7">
+            {isImport ? 'Enter ZIP, port & vessel ETD to plan inland delivery' : 'Enter ZIP, terminal & loading date to plan export route'}
+          </p>
+          <button
+            onClick={() => setFilterOpen(true)}
+            className={cn(
+              "inline-flex items-center gap-2 px-8 py-3 text-white rounded-xl font-black text-sm uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-[0.98]",
+              isImport
+                ? "bg-maersk-blue shadow-lg shadow-maersk-blue/30 hover:bg-maersk-blue/90"
+                : "bg-emerald-500 shadow-lg shadow-emerald-500/30 hover:bg-emerald-600"
+            )}
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+            Configure Search
+          </button>
+        </motion.div>
+      )}
+
+      {/* Filter Modal */}
+      <AnimatePresence>
+        {filterOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          >
+            <div
+              className="absolute inset-0 bg-maersk-dark/70 backdrop-blur-sm"
+              onClick={() => cycyRunResult && setFilterOpen(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 350 }}
+              className="relative z-10 w-full max-w-lg"
+            >
+              <div className="flex items-center justify-between px-5 py-4 bg-maersk-dark rounded-t-2xl border-b border-white/10">
+                <div className="flex items-center gap-3">
+                  <div className={cn('p-1.5 rounded-lg', isImport ? 'bg-maersk-blue/20' : 'bg-emerald-500/20')}>
+                    <ArrowRightLeft className={cn("h-4 w-4", isImport ? "text-maersk-blue" : "text-emerald-500")} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-black text-white uppercase tracking-widest leading-none">CY/CY {isImport ? 'Import' : 'Export'} Booking</p>
+                    <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.2em] mt-0.5">Terminal-to-Terminal Network</p>
+                  </div>
+                </div>
+                {cycyRunResult && (
+                  <button
+                    onClick={() => setFilterOpen(false)}
+                    className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/10 transition-all"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              <div className="rounded-b-2xl overflow-hidden shadow-2xl shadow-black/40 max-h-[80vh] overflow-y-auto">
+                <CYCYForm onSuccess={() => setFilterOpen(false)} />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

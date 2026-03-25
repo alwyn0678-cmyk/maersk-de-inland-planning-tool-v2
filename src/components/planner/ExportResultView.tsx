@@ -3,9 +3,8 @@ import { motion } from 'motion/react';
 import { ExpRunResult, ExpCard } from '../../logic/export/expRun';
 import { fmt, fmtS, fmtDateISO } from '../../logic/dateUtils';
 import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
-import { AlertTriangle, Copy, Check, Info, Train, Anchor, Package, ShieldAlert, Calendar, MapPin, Ship } from 'lucide-react';
+import { AlertTriangle, Copy, Check, Info, Train, Anchor, Package, ShieldAlert, Calendar, ArrowRight } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 function dFromNow(d: Date): number {
@@ -78,145 +77,136 @@ function ExportCard({ card, result, idx }: { card: ExpCard; result: ExpRunResult
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: idx * 0.08, duration: 0.4 }}
     >
       <Card className={cn(
-        "overflow-hidden border hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-2xl group",
-        card.isRecommended ? "border-emerald-300 shadow-lg shadow-emerald-500/10" : "border-slate-200 shadow-sm"
+        "overflow-hidden border rounded-2xl transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5",
+        card.isRecommended
+          ? "border-amber-300 shadow-lg shadow-amber-400/15 ring-1 ring-amber-200/50"
+          : "border-slate-200 shadow-sm"
       )}>
-        {/* Gradient mode header */}
-        <div className={cn(
-          "px-4 py-3 relative overflow-hidden",
-          isBarge
-            ? "bg-gradient-to-r from-[#00243d] via-[#00315a] to-maersk-blue/80"
-            : "bg-gradient-to-r from-purple-950 via-purple-900 to-purple-700"
-        )}>
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.07),transparent)] pointer-events-none" />
-          <div className="flex items-center justify-between relative z-10">
-            <div className="flex items-center gap-2">
-              <div className={cn("p-1.5 rounded-md flex-none", isBarge ? "bg-maersk-blue/40" : "bg-purple-500/40")}>
-                {isBarge ? <Anchor className="h-3.5 w-3.5 text-white" /> : <Train className="h-3.5 w-3.5 text-white" />}
+        {card.isRecommended && (
+          <div className="bg-amber-400 px-5 py-2 flex items-center gap-2">
+            <Calendar className="h-3.5 w-3.5 text-amber-900" />
+            <span className="text-[11px] font-black text-amber-900 uppercase tracking-[0.2em]">★ Recommended — Best Available Option</span>
+          </div>
+        )}
+
+        <div className="flex flex-col sm:flex-row">
+          {/* Left: dark modality panel */}
+          <div className={cn(
+            "sm:w-48 flex-none flex flex-col justify-between p-3",
+            isBarge
+              ? "bg-gradient-to-br from-[#00243d] to-[#00375c]"
+              : "bg-gradient-to-br from-purple-950 to-purple-800"
+          )}>
+            <div>
+              <div className={cn(
+                "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg mb-2 border",
+                isBarge ? "bg-[#42b0d5]/20 border-[#42b0d5]/30" : "bg-purple-400/20 border-purple-400/30"
+              )}>
+                {isBarge
+                  ? <Anchor className="h-4 w-4 text-[#42b0d5]" />
+                  : <Train className="h-4 w-4 text-purple-300" />
+                }
+                <span className={cn(
+                  "text-sm font-black uppercase tracking-wider",
+                  isBarge ? "text-[#42b0d5]" : "text-purple-300"
+                )}>{card.mod}</span>
               </div>
-              <div className="min-w-0">
-                <p className="text-[9px] font-black text-white/50 uppercase tracking-widest leading-none">{card.mod}</p>
-                <p className="text-sm font-black text-white leading-tight truncate">{card.depotName}</p>
+              {/* Route display */}
+              <div className="space-y-0">
+                <p className="text-[8px] font-black text-white/40 uppercase tracking-widest">From</p>
+                <p className="text-xs font-black text-white leading-tight">{card.depotName}</p>
+                <p className="font-mono text-[9px] text-white/30">{card.depotCode}</p>
+                <ArrowRight className="h-2.5 w-2.5 text-white/30 my-1" />
+                <p className="text-[8px] font-black text-white/40 uppercase tracking-widest">To</p>
+                <p className="text-xs font-black text-white leading-tight">{card.termName}</p>
+                <p className="font-mono text-[9px] text-white/30">{card.termCode}</p>
               </div>
             </div>
-            <div className="flex items-center gap-1.5 flex-none ml-2">
-              {card.isRecommended && (
-                <span className="bg-emerald-500/30 text-emerald-200 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border border-emerald-400/30">
-                  ★ Best
-                </span>
-              )}
+            <div className="flex items-center gap-2 mt-2">
               {card.nextDayCutoff && (
-                <span className="bg-amber-400/30 text-amber-200 text-[9px] font-black px-1.5 py-0.5 rounded-md">Cutoff</span>
+                <span className="text-[9px] font-black bg-amber-400/30 text-amber-200 px-1.5 py-0.5 rounded border border-amber-400/30">Cutoff</span>
               )}
               <CopyButton text={buildExportCopyText(card, result)} />
             </div>
           </div>
+
+          {/* Right: info panel */}
+          <CardContent className="flex-1 p-0">
+            {/* Timeline: Loading → Depot ETD → Terminal EAT */}
+            <div className="px-4 py-4">
+              <div className="flex items-center gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Loading</p>
+                  <p className="text-sm font-black text-maersk-dark leading-tight">{fmtS(result.loadingDate)}</p>
+                  <p className="text-[10px] text-slate-400 font-bold">{result.loadTime}</p>
+                </div>
+                <ArrowRight className="h-3.5 w-3.5 text-slate-300 flex-none" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Depot ETD</p>
+                  <p className="text-sm font-black text-maersk-dark leading-tight">{fmtS(card.etd)}</p>
+                </div>
+                <ArrowRight className="h-3.5 w-3.5 text-slate-300 flex-none" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Terminal EAT</p>
+                  <p className="text-sm font-black text-maersk-dark leading-tight">{fmtS(card.eat)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="h-px bg-slate-100 mx-4" />
+
+            {/* Vessel window + deadlines */}
+            <div className="px-4 py-4">
+              <div className="flex flex-wrap gap-3 items-center">
+                {/* Vessel window box */}
+                <div className="px-2.5 py-1.5 bg-maersk-dark/5 border border-maersk-dark/10 rounded-lg">
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Vessel Window · {card.termCode}</p>
+                  <div className="flex gap-4">
+                    <div>
+                      <p className="text-[8px] text-slate-400 font-black uppercase mb-0">Earliest CCO</p>
+                      <p className="text-sm font-black text-maersk-dark">{fmtS(card.earliestCCO)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[8px] text-slate-400 font-black uppercase mb-0">Latest ETA</p>
+                      <p className="text-sm font-black text-maersk-dark">{fmtS(card.latestETA)}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Order deadline */}
+                <div className="flex items-center gap-2">
+                  <div>
+                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0">Order Deadline</p>
+                    <p className="text-sm font-black text-maersk-dark">{fmtS(card.orderDL)}</p>
+                  </div>
+                  <UrgencyBadge date={card.orderDL} />
+                </div>
+
+                <div className="ml-auto text-right hidden sm:block">
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0">Transport</p>
+                  <p className="text-xs font-black text-maersk-dark">
+                    {card.mod.toLowerCase()} ETD {card.etd.toLocaleDateString('en-GB',{weekday:'short'})} {card.etd.getDate().toString().padStart(2,'0')}/{(card.etd.getMonth()+1).toString().padStart(2,'0')}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Holidays warning */}
+            {card.holidaysInTransit.length > 0 && (
+              <div className="mx-4 mb-2 px-2.5 py-1.5 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2">
+                <AlertTriangle className="h-3 w-3 text-amber-600 shrink-0" />
+                <span className="text-[9px] font-black text-amber-700">
+                  Holiday in transit: {card.holidaysInTransit.map(d => fmtS(d)).join(', ')} — verify with depot
+                </span>
+              </div>
+            )}
+          </CardContent>
         </div>
-
-        <CardContent className="p-0">
-          {/* Journey Timeline: Loading → Depot ETD → Terminal EAT */}
-          <div className="px-4 pt-4 pb-3">
-            <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 flex items-center gap-1">
-              <span className="w-3 h-px bg-slate-200 inline-block" />Route
-            </p>
-            <div className="flex items-start">
-              {/* Loading */}
-              <div className="flex flex-col items-center flex-1 min-w-0">
-                <div className="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center shadow-md mb-1.5 flex-none">
-                  <MapPin className="h-3.5 w-3.5 text-white" />
-                </div>
-                <p className="text-[8px] font-black text-slate-400 uppercase leading-tight text-center">Loading</p>
-                <p className="text-xs font-black text-maersk-dark text-center leading-tight">{fmtS(result.loadingDate)}</p>
-                <p className="text-[9px] text-slate-400 text-center">{result.loadTime}</p>
-              </div>
-
-              {/* Connector */}
-              <div className="flex-1 flex items-start pt-3 mx-1">
-                <div className="w-full h-px bg-gradient-to-r from-slate-300 via-slate-200 to-slate-300" />
-              </div>
-
-              {/* Depot ETD */}
-              <div className="flex flex-col items-center flex-1 min-w-0">
-                <div className={cn(
-                  "w-7 h-7 rounded-full flex items-center justify-center shadow-md mb-1.5 flex-none",
-                  isBarge ? "bg-maersk-blue" : "bg-purple-600"
-                )}>
-                  {isBarge ? <Anchor className="h-3.5 w-3.5 text-white" /> : <Train className="h-3.5 w-3.5 text-white" />}
-                </div>
-                <p className="text-[8px] font-black text-slate-400 uppercase leading-tight text-center">ETD</p>
-                <p className="text-xs font-black text-maersk-dark text-center leading-tight">{fmtS(card.etd)}</p>
-                <p className="text-[9px] text-slate-400 text-center">{card.depotCode}</p>
-              </div>
-
-              {/* Connector */}
-              <div className="flex-1 flex items-start pt-3 mx-1">
-                <div className="w-full h-px bg-gradient-to-r from-slate-300 via-slate-200 to-slate-300" />
-              </div>
-
-              {/* Terminal EAT */}
-              <div className="flex flex-col items-center flex-1 min-w-0">
-                <div className="w-7 h-7 rounded-full bg-slate-500 flex items-center justify-center shadow-md mb-1.5 flex-none">
-                  <Ship className="h-3.5 w-3.5 text-white" />
-                </div>
-                <p className="text-[8px] font-black text-slate-400 uppercase leading-tight text-center">Terminal</p>
-                <p className="text-xs font-black text-maersk-dark text-center leading-tight">{fmtS(card.eat)}</p>
-                <p className="text-[9px] text-slate-400 text-center">{card.termCode}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Divider */}
-          <div className="mx-4 h-px bg-slate-100" />
-
-          {/* Vessel Planning Window */}
-          <div className="mx-4 my-3 px-3 py-2.5 bg-maersk-dark/5 border border-maersk-dark/10 rounded-xl">
-            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-2">Vessel Window · {card.termCode}</p>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <p className="text-[8px] text-slate-400 uppercase font-black leading-none mb-0.5">Earliest CCO</p>
-                <p className="text-xs font-black text-maersk-dark">{fmtS(card.earliestCCO)}</p>
-              </div>
-              <div>
-                <p className="text-[8px] text-slate-400 uppercase font-black leading-none mb-0.5">Latest ETA</p>
-                <p className="text-xs font-black text-maersk-dark">{fmtS(card.latestETA)}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Order deadline */}
-          <div className="mx-4 mb-3 flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl">
-            <div>
-              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">Order Deadline</p>
-              <p className="text-xs font-black text-maersk-dark">{fmtS(card.orderDL)}</p>
-            </div>
-            <UrgencyBadge date={card.orderDL} />
-          </div>
-
-          {/* Holidays in transit */}
-          {card.holidaysInTransit.length > 0 && (
-            <div className="mx-4 mb-3 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2">
-              <AlertTriangle className="h-3 w-3 text-amber-600 shrink-0" />
-              <span className="text-[9px] font-black text-amber-700">
-                Holiday in transit: {card.holidaysInTransit.map(d => fmtS(d)).join(', ')}
-              </span>
-            </div>
-          )}
-
-          {/* Transport order */}
-          <div className="mx-4 mb-4 px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl">
-            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5 flex items-center gap-1">
-              <Info className="h-2.5 w-2.5" />Transport Order
-            </p>
-            <p className="text-[9px] font-black text-maersk-dark">
-              Plan {card.mod.toLowerCase()} ETD {card.etd.toLocaleDateString('en-GB',{weekday:'short'})} {card.etd.getDate().toString().padStart(2,'0')}/{(card.etd.getMonth()+1).toString().padStart(2,'0')}
-            </p>
-          </div>
-        </CardContent>
       </Card>
     </motion.div>
   );
@@ -281,8 +271,8 @@ export function ExportResultView({ result }: { result: ExpRunResult }) {
 
   return (
     <div className="space-y-4">
-      {/* Context bar — grid to prevent wrapping */}
-      <div className="grid grid-cols-3 gap-px bg-slate-100 rounded-2xl overflow-hidden shadow-sm">
+      {/* Context bar — horizontal flex */}
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 px-5 py-4 bg-white border border-slate-100 rounded-2xl shadow-sm max-w-4xl mx-auto">
         {[
           { label: 'PLZ / Region', value: `${result.zip} · ${result.region}` },
           { label: 'Container', value: `${result.size}' ${result.type.toUpperCase()}` },
@@ -290,17 +280,20 @@ export function ExportResultView({ result }: { result: ExpRunResult }) {
           { label: 'Terminal', value: result.termCode },
           { label: 'YOT', value: `${result.yot} days` },
           { label: 'Depot', value: result.depotName },
-        ].map(({ label, value }) => (
-          <div key={label} className="bg-white px-4 py-3">
-            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">{label}</p>
-            <p className="text-xs font-black text-maersk-dark leading-tight">{value}</p>
+        ].map(({ label, value }, i, arr) => (
+          <div key={label} className="flex items-center gap-4">
+            <div>
+              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">{label}</p>
+              <p className="text-sm font-black text-maersk-dark">{value}</p>
+            </div>
+            {i < arr.length - 1 && <div className="h-8 w-px bg-slate-100" />}
           </div>
         ))}
       </div>
 
       {/* RTM customs deadline banner */}
       {result.customsDeadline && (
-        <div className="px-4 py-3 bg-amber-50 border border-amber-300 rounded-xl flex items-center gap-3">
+        <div className="px-4 py-3 bg-amber-50 border border-amber-300 rounded-xl flex items-center gap-3 max-w-4xl mx-auto">
           <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
           <div>
             <span className="text-[9px] font-black text-amber-700 uppercase tracking-widest">Rotterdam Customs Deadline: </span>
@@ -311,7 +304,7 @@ export function ExportResultView({ result }: { result: ExpRunResult }) {
 
       {/* Next-day warning */}
       {result.skipped.length > 0 && (
-        <div className="px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2">
+        <div className="px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2 max-w-4xl mx-auto">
           <Info className="h-4 w-4 text-amber-600 shrink-0" />
           <p className="text-[10px] font-black text-amber-700">
             Next-day departure excluded — loading time after 12:00 (cutoff missed)
@@ -319,26 +312,9 @@ export function ExportResultView({ result }: { result: ExpRunResult }) {
         </div>
       )}
 
-      {/* Departure cards */}
-      {result.cards.length === 0 ? (
-        <div className="p-8 text-center bg-slate-50 border border-slate-200 rounded-2xl">
-          <p className="text-sm font-black text-slate-500">No departures found.</p>
-          <p className="text-xs text-slate-400 mt-1">Contact inland team.</p>
-        </div>
-      ) : (
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {result.cards.map((card, idx) => (
-            <ExportCard
-              key={`${fmtDateISO(card.etd)}-${card.mod}-${card.depotCode}`}
-              card={card} result={result} idx={idx}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Empty depot */}
+      {/* Empty depot — shown ABOVE schedules */}
       {result.emptyDepot && (
-        <div className="px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm">
+        <div className="px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm max-w-4xl mx-auto">
           <div className="flex items-center gap-2 mb-2">
             <Package className="h-3.5 w-3.5 text-emerald-600" />
             <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Empty Container Release ({result.emptyLabel})</span>
@@ -360,6 +336,23 @@ export function ExportResultView({ result }: { result: ExpRunResult }) {
               Always recommend preferred depot. If unavailable, delay transport or contact <strong>INLAND OPS</strong>.
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Departure cards — vertical stack, full width */}
+      {result.cards.length === 0 ? (
+        <div className="p-8 text-center bg-slate-50 border border-slate-200 rounded-2xl">
+          <p className="text-sm font-black text-slate-500">No departures found.</p>
+          <p className="text-xs text-slate-400 mt-1">Contact inland team.</p>
+        </div>
+      ) : (
+        <div className="space-y-3 max-w-4xl mx-auto">
+          {result.cards.map((card, idx) => (
+            <ExportCard
+              key={`${fmtDateISO(card.etd)}-${card.mod}-${card.depotCode}`}
+              card={card} result={result} idx={idx}
+            />
+          ))}
         </div>
       )}
     </div>

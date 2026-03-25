@@ -31,7 +31,7 @@ function containerToSizeType(ct: string): { size: string; type: string } {
   return { size: '40', type: 'hc' };
 }
 
-export function ImportForm() {
+export function ImportForm({ onSuccess }: { onSuccess?: () => void }) {
   const { importRequest, setImportRequest, setImpRunResult, resetImport } = usePlannerStore();
   const [loading, setLoading] = useState(false);
   const [etdTime, setEtdTime] = useState('08:00');
@@ -52,6 +52,7 @@ export function ImportForm() {
         etdTime,
       });
       setImpRunResult(result);
+      onSuccess?.();
       setLoading(false);
     }, 400);
   };
@@ -69,8 +70,8 @@ export function ImportForm() {
               <Settings2 className="h-4 w-4 text-maersk-blue" />
             </div>
             <div>
-              <h2 className="text-lg font-black text-maersk-dark tracking-tighter uppercase italic">Import <span className="text-maersk-blue not-italic">Config</span></h2>
-              <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.25em]">Optimization Parameters</p>
+              <h2 className="text-lg font-black text-maersk-dark tracking-tighter uppercase italic">Import <span className="text-maersk-blue not-italic">Booking</span></h2>
+              <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.25em]">Search Configuration</p>
             </div>
           </div>
           <div className="flex items-center space-x-2 px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
