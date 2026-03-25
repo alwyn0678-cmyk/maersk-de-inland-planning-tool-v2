@@ -167,6 +167,7 @@ export const usePlannerStore = create<PlannerState>()(
           preferredTerminal: 'Auto',
         },
         importResult: null,
+        impRunResult: null,
       }),
       resetExport: () => set({
         exportRequest: {
@@ -178,6 +179,7 @@ export const usePlannerStore = create<PlannerState>()(
           preferredTerminal: 'Auto',
         },
         exportResult: null,
+        expRunResult: null,
       }),
       resetCYCY: () => set({
         cycyRequest: {
