@@ -73,19 +73,40 @@ async function fetchDailyReadings(station: string, days: number): Promise<DailyR
   if (!Array.isArray(raw) || raw.length === 0) throw new Error(`No data returned for ${station}`);
 
   // Group by LOCAL calendar date.
-  // We extract the date directly from the timestamp string (first 10 chars: "YYYY-MM-DD")
-  // because the API returns CET/CEST timestamps like "2026-03-25T10:00:00+01:00".
-  // This avoids any UTC↔local conversion error around midnight.
-  const byDate = new Map<string, number>();
+  // Timestamps from the API are CET/CEST (e.g. "2026-03-25T07:15:00+01:00").
+  // We extract the date and hour directly from the string to avoid UTC↔local mismatch.
+  //
+  // Reading selection:
+  //   Past completed days → reading closest to 07:00 CET.
+  //     This matches the official WSV daily gauge value used in Pegel bulletins,
+  //     so numbers align when the manager cross-checks against official sources.
+  //   Today → most recent reading available (no 07:00 reading yet for the full day).
+  const today = todayKey();
+  const byDate = new Map<string, { level: number; diff: number }>();
+
   for (const m of raw) {
-    const localDate = m.timestamp.substring(0, 10); // CET local date
-    byDate.set(localDate, Math.round(m.value) / 100); // last reading of each day wins
+    const localDate = m.timestamp.substring(0, 10); // "YYYY-MM-DD" in CET
+    const level = Math.round(m.value) / 100;
+
+    if (localDate === today) {
+      // Always overwrite with the latest reading for today
+      byDate.set(localDate, { level, diff: -1 });
+    } else {
+      // Pick reading closest to 07:00 CET
+      const hour = parseInt(m.timestamp.substring(11, 13), 10);
+      const min  = parseInt(m.timestamp.substring(14, 16), 10);
+      const diff = Math.abs(hour * 60 + min - 7 * 60); // distance from 07:00 in minutes
+      const existing = byDate.get(localDate);
+      if (!existing || diff < existing.diff) {
+        byDate.set(localDate, { level, diff });
+      }
+    }
   }
 
   // Sort ascending and return
   return [...byDate.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([key, level]) => ({ key, level }));
+    .map(([key, { level }]) => ({ key, level }));
 }
 
 function buildForecast(historicalDays: DailyReading[], forecastDays: number): DailyReading[] {
@@ -111,85 +132,119 @@ function buildForecast(historicalDays: DailyReading[], forecastDays: number): Da
 export async function generateWaterLevelReport(): Promise<string> {
   const now = new Date();
   const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const SEP  = `═══════════════════════════════════════════════════════════`;
+  const SEP2 = `───────────────────────────────────────────────────────────`;
 
-  const lines: string[] = [
-    `MAERSK DE — RHINE WATER LEVEL REPORT`,
-    `Generated : ${todayFmt()} · ${timeStr} CET`,
-    ``,
-    `─────────────────────────────────────────────────────────`,
-    `[OPERATIONAL NOTES — add situation summary before sending]`,
-    `─────────────────────────────────────────────────────────`,
-    ``,
-    `LOW WATER THRESHOLDS`,
-    `─────────────────────────────────────────────────────────`,
-  ];
+  // Fetch all stations up front so we can build the summary table
+  type StationData = {
+    site: string;
+    thresholdM: number;
+    readings: DailyReading[];
+    forecast: DailyReading[];
+    error: boolean;
+  };
 
-  for (const { site, thresholdM, desc } of REPORT_STATIONS) {
-    lines.push(
-      `Low water situation at measure point ${site} - ${desc} starts as from ${thresholdM.toFixed(2)} meter and lower.`,
-    );
-  }
+  const stationData: StationData[] = await Promise.all(
+    REPORT_STATIONS.map(async ({ site, station, thresholdM }) => {
+      try {
+        let readings = await fetchDailyReadings(station, 5);
+        if (readings.length > 5) readings = readings.slice(-5);
+        const forecast = buildForecast(readings, 2);
+        return { site, thresholdM, readings, forecast, error: false };
+      } catch {
+        return { site, thresholdM, readings: [], forecast: [], error: true };
+      }
+    })
+  );
 
+  const lines: string[] = [];
+
+  // ── Header ────────────────────────────────────────────────────────────────
+  lines.push(SEP);
+  lines.push(`  MAERSK DE — RHINE WATER LEVEL REPORT`);
+  lines.push(`  Generated : ${todayFmt()}  ·  ${timeStr} CET`);
+  lines.push(SEP);
   lines.push(``);
 
-  for (const { site, station, thresholdM } of REPORT_STATIONS) {
-    let readings: DailyReading[];
-    let forecast: DailyReading[] = [];
+  // ── Operational notes placeholder ─────────────────────────────────────────
+  lines.push(`  OPERATIONAL NOTES`);
+  lines.push(SEP2);
+  lines.push(`  [Add situation summary / action items here before sending]`);
+  lines.push(``);
 
-    try {
-      readings = await fetchDailyReadings(station, 5);
-      // Keep last 5 entries (oldest first)
-      if (readings.length > 5) readings = readings.slice(-5);
-      forecast = buildForecast(readings, 2);
-    } catch {
-      lines.push(`Measure point ${site} :`);
-      lines.push(`  (Live data unavailable — check pegelonline.wsv.de directly)`);
+  // ── Status overview table ─────────────────────────────────────────────────
+  lines.push(`  CURRENT STATUS OVERVIEW  (as of ${todayFmt()})`);
+  lines.push(SEP2);
+  lines.push(`  ${'Station'.padEnd(22)} ${'Level today'.padEnd(14)} ${'Threshold'.padEnd(12)} Status`);
+  lines.push(`  ${'─'.repeat(21)} ${'─'.repeat(13)} ${'─'.repeat(11)} ${'─'.repeat(14)}`);
+
+  for (const { site, thresholdM, readings, error } of stationData) {
+    if (error || readings.length === 0) {
+      lines.push(`  ${site.padEnd(22)} ${'N/A'.padEnd(14)} ${(thresholdM.toFixed(2) + ' m').padEnd(12)} DATA UNAVAILABLE`);
+    } else {
+      const latest = readings[readings.length - 1];
+      const isLow = latest.level <= thresholdM;
+      const levelStr = (latest.level.toFixed(2) + ' m').padEnd(14);
+      const threshStr = (thresholdM.toFixed(2) + ' m').padEnd(12);
+      const status = isLow ? `⚠  LOW WATER` : `✓  Normal`;
+      lines.push(`  ${site.padEnd(22)} ${levelStr} ${threshStr} ${status}`);
+    }
+  }
+  lines.push(``);
+
+  // ── Detailed readings per station ─────────────────────────────────────────
+  lines.push(`  DETAILED READINGS`);
+  lines.push(SEP);
+
+  for (const { site, thresholdM, readings, forecast, error } of stationData) {
+    lines.push(``);
+    lines.push(`  ▌ ${site.toUpperCase()}  —  Low-water threshold : ${thresholdM.toFixed(2)} m`);
+    lines.push(`  ${SEP2}`);
+
+    if (error || readings.length === 0) {
+      lines.push(`    Live data unavailable — check pegelonline.wsv.de directly`);
       lines.push(``);
       continue;
     }
 
-    const latest = readings[readings.length - 1];
-    const isCurrentlyLow = latest.level <= thresholdM;
-
-    lines.push(`Measure point ${site} :`);
-    lines.push(
-      `Level at measure point ${site} today ${todayFmt()} is ${latest.level.toFixed(2)} meter.` +
-      (isCurrentlyLow ? `  ⚠ LOW WATER` : ''),
-    );
-    lines.push(``);
-
-    // Historical rows with low-water transition markers
+    // 5-day history
+    lines.push(`    5-Day History :`);
     let prevLow: boolean | null = null;
     for (const r of readings) {
       const isLow = r.level <= thresholdM;
-      let tag = '';
+      let marker = '';
       if (prevLow !== null) {
-        if (isLow && !prevLow)  tag = '  * Start of low water *';
-        if (!isLow && prevLow) tag = '  * End of low water *';
+        if (isLow && !prevLow)  marker = `   ◄ START OF LOW WATER`;
+        if (!isLow && prevLow)  marker = `   ◄ End of low water`;
       }
       prevLow = isLow;
-      lines.push(`${fmtKey(r.key)} : ${r.level.toFixed(2)} meter${tag}`);
+      const lowFlag = isLow ? `  ⚠` : `   `;
+      lines.push(`    ${fmtKey(r.key)}  :  ${r.level.toFixed(2)} m${lowFlag}${marker}`);
     }
 
-    // Forecast rows
+    // 2-day forecast
     if (forecast.length > 0) {
       lines.push(``);
-      lines.push(`2-day outlook (trend-based estimate — not an official forecast):`);
+      lines.push(`    2-Day Outlook  (trend estimate — not an official forecast) :`);
       for (const f of forecast) {
         const isLow = f.level <= thresholdM;
-        const lowTag = isLow ? `  ⚠ LOW WATER (est.)` : '';
-        lines.push(`${fmtKey(f.key)} : ${f.level.toFixed(2)} meter  (est.)${lowTag}`);
+        const lowFlag = isLow ? `  ⚠  LOW WATER` : ``;
+        lines.push(`    ${fmtKey(f.key)}  :  ${f.level.toFixed(2)} m  (est.)${lowFlag}`);
       }
     }
 
     lines.push(``);
   }
 
-  lines.push(`─────────────────────────────────────────────────────────`);
-  lines.push(`Forecast values are trend-based estimates derived from the last 3 completed daily readings.`);
-  lines.push(`Always verify with live data at pegelonline.wsv.de before making operational decisions.`);
-  lines.push(``);
-  lines.push(`Generated by Maersk DE Inland Ops Tool`);
+  // ── Footer ────────────────────────────────────────────────────────────────
+  lines.push(SEP);
+  lines.push(`  DATA SOURCE  : pegelonline.wsv.de (WSV — Wasserstraßen- und Schifffahrtsverwaltung)`);
+  lines.push(`  DAILY VALUES : 07:00 CET reading (matches official WSV Pegel bulletins)`);
+  lines.push(`                 Today's value = most recent reading at time of generation`);
+  lines.push(`  FORECAST     : Trend-based estimate from last 3 completed daily readings — not official`);
+  lines.push(`                 Always verify at pegelonline.wsv.de before making operational decisions.`);
+  lines.push(`  Generated by Maersk DE Inland Ops Tool  ·  ${todayFmt()}  ·  ${timeStr} CET`);
+  lines.push(SEP);
 
   return lines.join('\n');
 }
