@@ -26,7 +26,7 @@ export const EMPTY_DEPOTS: Record<'40dchc' | '20' | '40reefer', EmptyDepotRow[]>
     { lo: 66000, hi: 79999, rtm: { p1: 'DEGRH01', p1n: 'Germersheim DPW',           p2: null, p2n: null },                     anr: { p1: 'DEGRH01', p1n: 'Germersheim DPW', p2: null, p2n: null } },
     { lo: 80000, hi: 87999, rtm: { p1: 'DEMUN01', p1n: 'Muenchen',                  p2: null, p2n: null },                     anr: { p1: 'DEMUN01', p1n: 'Muenchen', p2: null, p2n: null } },
     { lo: 88000, hi: 89999, rtm: { p1: 'DEGRH01', p1n: 'Germersheim DPW',           p2: null, p2n: null },                     anr: { p1: 'DEGRH01', p1n: 'Germersheim DPW', p2: null, p2n: null } },
-    { lo: 90000, hi: 99000, rtm: { p1: 'DENUE02', p1n: 'Nuernberg CDN',             p2: null, p2n: null },                     anr: { p1: 'DENUE02', p1n: 'Nuernberg CDN', p2: null, p2n: null } },
+    { lo: 90000, hi: 99999, rtm: { p1: 'DENUE02', p1n: 'Nuernberg CDN',             p2: null, p2n: null },                     anr: { p1: 'DENUE02', p1n: 'Nuernberg CDN', p2: null, p2n: null } },
   ],
   '20': [
     { lo: 0,     hi: 34999, rtm: { p1: 'DEDUI01', p1n: 'Hutchison Ports Duisburg', p2: 'DEDUI03', p2n: 'DIT Depot' },         anr: { p1: 'DEDUI01', p1n: 'Hutchison Ports Duisburg', p2: null, p2n: null } },
@@ -41,7 +41,7 @@ export const EMPTY_DEPOTS: Record<'40dchc' | '20' | '40reefer', EmptyDepotRow[]>
     { lo: 66000, hi: 79999, rtm: { p1: 'DEGRH01', p1n: 'Germersheim DPW',           p2: null, p2n: null },                     anr: { p1: 'DEGRH01', p1n: 'Germersheim DPW', p2: null, p2n: null } },
     { lo: 80000, hi: 87999, rtm: { p1: 'DEMUN01', p1n: 'Muenchen',                  p2: null, p2n: null },                     anr: { p1: 'DEMUN01', p1n: 'Muenchen', p2: null, p2n: null } },
     { lo: 88000, hi: 89999, rtm: { p1: 'DEGRH01', p1n: 'Germersheim DPW',           p2: null, p2n: null },                     anr: { p1: 'DEGRH01', p1n: 'Germersheim DPW', p2: null, p2n: null } },
-    { lo: 90000, hi: 99000, rtm: { p1: 'DENUE02', p1n: 'Nuernberg CDN',             p2: null, p2n: null },                     anr: { p1: 'DENUE02', p1n: 'Nuernberg CDN', p2: null, p2n: null } },
+    { lo: 90000, hi: 99999, rtm: { p1: 'DENUE02', p1n: 'Nuernberg CDN',             p2: null, p2n: null },                     anr: { p1: 'DENUE02', p1n: 'Nuernberg CDN', p2: null, p2n: null } },
   ],
   '40reefer': [
     { lo: 0,     hi: 34999, rtm: { p1: 'REQUEST', p1n: 'Request Inland Ops', p2: null, p2n: null }, anr: { p1: 'REQUEST', p1n: 'Request Inland Ops', p2: null, p2n: null } },
@@ -56,6 +56,6 @@ export const EMPTY_DEPOTS: Record<'40dchc' | '20' | '40reefer', EmptyDepotRow[]>
     { lo: 66000, hi: 79999, rtm: { p1: 'DEGRH01', p1n: 'Germersheim DPW',    p2: null, p2n: null }, anr: { p1: 'DEGRH01', p1n: 'Germersheim DPW', p2: null, p2n: null } },
     { lo: 80000, hi: 87999, rtm: { p1: 'REQUEST', p1n: 'Request Inland Ops', p2: null, p2n: null }, anr: { p1: 'REQUEST', p1n: 'Request Inland Ops', p2: null, p2n: null } },
     { lo: 88000, hi: 89999, rtm: { p1: 'DEGRH01', p1n: 'Germersheim DPW',    p2: null, p2n: null }, anr: { p1: 'DEGRH01', p1n: 'Germersheim DPW', p2: null, p2n: null } },
-    { lo: 90000, hi: 99000, rtm: { p1: 'REQUEST', p1n: 'Request Inland Ops', p2: null, p2n: null }, anr: { p1: 'REQUEST', p1n: 'Request Inland Ops', p2: null, p2n: null } },
+    { lo: 90000, hi: 99999, rtm: { p1: 'REQUEST', p1n: 'Request Inland Ops', p2: null, p2n: null }, anr: { p1: 'REQUEST', p1n: 'Request Inland Ops', p2: null, p2n: null } },
   ],
 };

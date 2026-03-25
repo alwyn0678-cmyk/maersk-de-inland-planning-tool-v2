@@ -1,7 +1,6 @@
 import { ZipEntry } from '../../data/import/zipMap';
-import { IMP_NO_RAIL } from '../../data/import/constants';
+import { IMP_NO_RAIL, IMP_HAS_SCHED } from '../../data/import/constants';
 import { IMP_TERM_NAMES, IMP_TRUCK_BY_TERM } from '../../data/import/terminalNames';
-import { IMP_HAS_SCHED } from '../../data/import/constants';
 import { impLookupTerms, impScCode } from './zipLookup';
 import { impFindScheds } from './scheduleFinder';
 import { impComputeInst, ImpInstance } from './computeInstances';
