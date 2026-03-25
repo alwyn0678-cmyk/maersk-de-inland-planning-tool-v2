@@ -84,10 +84,17 @@ export function useRhineWaterLevels(refreshIntervalMs = 60 * 60 * 1000) {
         try {
           const measurements = await fetchStation(station);
 
-          // Sample 6 evenly-spaced points across the last 24h (oldest → newest)
-          const step = Math.max(1, Math.floor(measurements.length / 6));
+          // Sample 6 points across the last 24h (oldest → newest).
+          // The last slot is always the most recent reading so trend arrows
+          // and the sparkline always reflect the current state, not data from
+          // ~4 hours ago (which happened when the last evenly-spaced index
+          // fell short of measurements.length - 1).
+          const step = Math.max(1, Math.floor(measurements.length / 5));
           const history = Array.from({ length: 6 }, (_, i) => {
-            const m = measurements[Math.min(i * step, measurements.length - 1)];
+            const idx = i === 5
+              ? measurements.length - 1                        // always latest
+              : Math.min(i * step, measurements.length - 1);  // evenly spaced
+            const m = measurements[idx];
             const d = new Date(m.timestamp);
             const hh = d.getHours().toString().padStart(2, '0');
             const mm = d.getMinutes().toString().padStart(2, '0');
