@@ -296,23 +296,52 @@ export function DashboardOverview() {
               </p>
             </div>
 
-            {/* Centre — Maersk star watermark filling the gap */}
+            {/* Centre — Maersk logo badge blended into banner */}
             <div className="hidden md:flex flex-1 items-center justify-center pointer-events-none select-none">
               {/*
-                Accurate 7-pointed star (heptagram):
-                outer R=47, inner r=17, center (50,50), first point at -90° (straight up).
-                Outer points at -90° + k×(360°/7), inner points at -90° + (180°/7) + k×(360°/7).
+                Maersk logo: rounded-square badge + accurate 7-pointed heptagram.
+                Star: outer R=38, inner r=14, center (50,50), first point at -90°.
+                Outer at -90°+k×(360°/7), inner at -90°+(180°/7)+k×(360°/7).
               */}
               <svg
-                width="220" height="220"
+                width="210" height="210"
                 viewBox="0 0 100 100"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                style={{ opacity: 0.18 }}
               >
+                <defs>
+                  <linearGradient id="maerskBadgeBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#5ecae9" stopOpacity="0.38" />
+                    <stop offset="100%" stopColor="#0076a8" stopOpacity="0.26" />
+                  </linearGradient>
+                  <filter id="maerskBadgeShadow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feDropShadow dx="0" dy="3" stdDeviation="6" floodColor="#000" floodOpacity="0.30" />
+                  </filter>
+                  <filter id="maerskStarGlow" x="-25%" y="-25%" width="150%" height="150%">
+                    <feGaussianBlur stdDeviation="1.2" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+
+                {/* Rounded square badge — Maersk blue tinted */}
+                <rect
+                  x="3" y="3" width="94" height="94" rx="20"
+                  fill="url(#maerskBadgeBg)"
+                  stroke="#42b0d5"
+                  strokeOpacity="0.55"
+                  strokeWidth="1.4"
+                  filter="url(#maerskBadgeShadow)"
+                />
+
+                {/* 7-pointed star — white with soft glow */}
                 <path
-                  d="M50,3 L57.4,34.7 L86.7,20.7 L66.6,46.2 L95.8,60.5 L63.3,60.6 L70.4,92.3 L50,67 L29.6,92.3 L36.7,60.6 L4.2,60.5 L33.4,46.2 L13.3,20.7 L42.6,34.7 Z"
+                  d="M50,12 L56.1,37.4 L79.7,26.3 L63.6,46.9 L87.0,58.5 L61.0,58.7 L66.5,84.2 L50,64 L33.5,84.2 L39.0,58.7 L13.0,58.5 L36.4,46.9 L20.3,26.3 L43.9,37.4 Z"
                   fill="white"
+                  fillOpacity="0.88"
+                  filter="url(#maerskStarGlow)"
                 />
               </svg>
             </div>
