@@ -77,7 +77,6 @@ const TERMINALS: Terminal[] = [
     hasSchedule: true,
     links: [
       { label: 'Terminal', url: 'https://www.contargo.net/en/locations/terminals-a-k/gustavsburg/', icon: 'terminal', primary: true },
-      { label: 'News', url: 'https://www.contargo.net/en/news', icon: 'news' },
     ],
     mapsQuery: 'Contargo+Gustavsburg+Terminal',
   },
@@ -92,8 +91,7 @@ const TERMINALS: Terminal[] = [
     ports: ['RTM', 'ANR'],
     hasSchedule: true,
     links: [
-      { label: 'Terminal', url: 'https://www.dpworld.com/en/ports-terminals/eu-intermodal/germersheim', icon: 'terminal', primary: true },
-      { label: 'News', url: 'https://www.dpworld.com/en/news', icon: 'news' },
+      { label: 'DP World', url: 'https://www.dpworld.com', icon: 'globe', primary: true },
     ],
     mapsQuery: 'DP+World+Germersheim+Inland+Terminal',
   },
@@ -108,8 +106,7 @@ const TERMINALS: Terminal[] = [
     ports: ['RTM', 'ANR'],
     hasSchedule: true,
     links: [
-      { label: 'Terminal', url: 'https://www.dpworld.com/en/ports-terminals/eu-intermodal/mannheim', icon: 'terminal', primary: true },
-      { label: 'News', url: 'https://www.dpworld.com/en/news', icon: 'news' },
+      { label: 'DP World', url: 'https://www.dpworld.com', icon: 'globe', primary: true },
     ],
     mapsQuery: 'DP+World+Mannheim+Inland+Terminal',
   },
@@ -125,7 +122,6 @@ const TERMINALS: Terminal[] = [
     hasSchedule: true,
     links: [
       { label: 'Website', url: 'https://www.hafen-andernach.de', icon: 'globe', primary: true },
-      { label: 'Aktuelles', url: 'https://www.hafen-andernach.de/aktuelles', icon: 'news' },
     ],
     mapsQuery: 'Rheinhafen+Andernach',
   },
@@ -141,7 +137,6 @@ const TERMINALS: Terminal[] = [
     hasSchedule: true,
     links: [
       { label: 'Website', url: 'https://azs-group.com', icon: 'globe', primary: true },
-      { label: 'News', url: 'https://azs-group.com/en/news', icon: 'news' },
     ],
     mapsQuery: 'AZS+Terminal+Bonn+Hafen',
   },
@@ -157,7 +152,6 @@ const TERMINALS: Terminal[] = [
     hasSchedule: false,
     links: [
       { label: 'Terminal', url: 'https://www.contargo.net/en/locations/terminals-n-z/neuss/', icon: 'terminal', primary: true },
-      { label: 'News', url: 'https://www.contargo.net/en/news', icon: 'news' },
     ],
     mapsQuery: 'Contargo+Neuss+Terminal',
   },
@@ -173,7 +167,6 @@ const TERMINALS: Terminal[] = [
     hasSchedule: false,
     links: [
       { label: 'Website', url: 'https://azs-group.com', icon: 'globe', primary: true },
-      { label: 'News', url: 'https://azs-group.com/en/news', icon: 'news' },
     ],
     mapsQuery: 'AZS+Terminal+Trier+Hafen',
   },
@@ -189,7 +182,6 @@ const TERMINALS: Terminal[] = [
     hasSchedule: true,
     links: [
       { label: 'Terminal', url: 'https://www.contargo.net/en/locations/terminals-n-z/nuernberg/', icon: 'terminal', primary: true },
-      { label: 'News', url: 'https://www.contargo.net/en/news', icon: 'news' },
     ],
     mapsQuery: 'Contargo+Nuernberg+CDN+Terminal',
   },
@@ -204,8 +196,7 @@ const TERMINALS: Terminal[] = [
     ports: ['RTM', 'ANR'],
     hasSchedule: false,
     links: [
-      { label: 'Intermodal', url: 'https://www.hgk.de/en/hgk-logistics-and-intermodal/', icon: 'terminal', primary: true },
-      { label: 'News', url: 'https://www.hgk.de/en/news', icon: 'news' },
+      { label: 'Website', url: 'https://www.hgk.de', icon: 'globe', primary: true },
     ],
     mapsQuery: 'HGK+Intermodal+Cologne',
   },

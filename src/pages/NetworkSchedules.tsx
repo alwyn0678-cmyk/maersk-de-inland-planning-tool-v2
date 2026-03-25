@@ -56,6 +56,21 @@ export function NetworkSchedules() {
   return (
     <div className="space-y-6 pb-10">
 
+      {/* ── DISCLAIMER ──────────────────────────────────────────────────── */}
+      <div className="flex items-start gap-3 px-5 py-4 bg-amber-50 border-2 border-amber-300 rounded-2xl shadow-sm">
+        <AlertTriangle className="h-5 w-5 text-amber-600 flex-none mt-0.5" />
+        <div>
+          <p className="text-sm font-black text-amber-900 uppercase tracking-wide mb-1">
+            For Visibility Purposes Only — Do Not Use for Booking
+          </p>
+          <p className="text-sm font-bold text-amber-800 leading-relaxed">
+            These schedules are displayed <strong>for visibility and reference only</strong>.
+            They <strong>must NOT be used to make inland planning bookings</strong>.
+            Always use the Import or Export Planner to calculate exact dates and generate a valid transport order.
+          </p>
+        </div>
+      </div>
+
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -120,25 +135,24 @@ export function NetworkSchedules() {
         Click any row to view service intel &amp; booking tips
       </div>
 
-      {/* Main content: Board + Detail Panel */}
-      <div className="flex gap-5 items-start">
+      {/* Main content: Board + Detail Panel (overlay — no layout shift) */}
+      <div className="relative">
 
-        {/* Schedule Board */}
-        <div className={cn("transition-all duration-300 min-w-0", selectedDep ? "flex-1" : "w-full")}>
+        {/* Schedule Board — always full width */}
+        <div className={cn("transition-[padding] duration-300", selectedDep ? "pr-[356px]" : "")}>
           <NetworkScheduleBoard direction={direction} onRowClick={handleRowClick} />
         </div>
 
-        {/* Detail Panel */}
+        {/* Detail Panel — absolute overlay, no layout reflow */}
         <AnimatePresence>
           {selectedDep && (
             <motion.div
               key="detail"
-              initial={{ opacity: 0, x: 30, width: 0 }}
-              animate={{ opacity: 1, x: 0, width: 340 }}
-              exit={{ opacity: 0, x: 30, width: 0 }}
-              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="shrink-0 overflow-hidden"
-              style={{ width: 340 }}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute top-0 right-0 w-[340px]"
             >
               <div className="bg-[#0a1628] rounded-2xl border border-white/10 overflow-hidden">
                 {/* Panel header */}

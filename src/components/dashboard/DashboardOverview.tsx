@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRhineWaterLevels } from '../../hooks/useRhineWaterLevels';
 import { motion } from 'motion/react';
 import { usePlannerStore } from '../../store/usePlannerStore';
@@ -34,7 +34,10 @@ import {
   FileText,
   ClipboardCheck,
   Loader2,
+  AlertTriangle,
+  Wind,
 } from 'lucide-react';
+import { useWeatherForecast } from '../../hooks/useWeatherForecast';
 import { generateWaterLevelReport } from '../../lib/waterLevelReport';
 import * as XLSX from 'xlsx';
 import { Button } from '../ui/button';
@@ -69,25 +72,27 @@ const getWeekNumber = (d: Date) => {
   return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
 };
 
-// 15 working days (3 calendar weeks) starting from today.
-// If today is Saturday or Sunday, starts from the next Monday instead.
-const allDays: Date[] = [];
-const _dayCursor = new Date();
-_dayCursor.setHours(0, 0, 0, 0);
-if (_dayCursor.getDay() === 6) _dayCursor.setDate(_dayCursor.getDate() + 2); // Sat → Mon
-if (_dayCursor.getDay() === 0) _dayCursor.setDate(_dayCursor.getDate() + 1); // Sun → Mon
-while (allDays.length < 15) {
-  if (_dayCursor.getDay() !== 0 && _dayCursor.getDay() !== 6) {
-    allDays.push(new Date(_dayCursor));
+// buildWorkingDays: 15 working days (3 calendar weeks) starting from today.
+// Called inside the component via useMemo so dates stay current if the tab is
+// left open overnight instead of being frozen at module-load time.
+function buildWorkingDays() {
+  const result: Date[] = [];
+  const cursor = new Date();
+  cursor.setHours(0, 0, 0, 0);
+  if (cursor.getDay() === 6) cursor.setDate(cursor.getDate() + 2); // Sat → Mon
+  if (cursor.getDay() === 0) cursor.setDate(cursor.getDate() + 1); // Sun → Mon
+  while (result.length < 15) {
+    if (cursor.getDay() !== 0 && cursor.getDay() !== 6) {
+      result.push(new Date(cursor));
+    }
+    cursor.setDate(cursor.getDate() + 1);
   }
-  _dayCursor.setDate(_dayCursor.getDate() + 1);
+  return result.map(d => ({
+    date: d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }),
+    dayName: d.toLocaleDateString('en-GB', { weekday: 'short' }),
+    weekNum: getWeekNumber(d)
+  }));
 }
-
-const days = allDays.map(d => ({
-  date: d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }),
-  dayName: d.toLocaleDateString('en-GB', { weekday: 'short' }),
-  weekNum: getWeekNumber(d)
-}));
 
 const TERMINAL_OPTIONS = [
   { value: 'NLROTTM|5|RTM',  label: 'APM Terminals Rotterdam',    port: 'RTM' },
@@ -112,6 +117,7 @@ function containerToSizeType(ct: string): { size: string; type: string } {
 
 export function DashboardOverview() {
   const { setActiveTab, setExportRequest, setExpRunResult, truckCapacityData, setTruckCapacityData } = usePlannerStore();
+  const weather = useWeatherForecast();
   const { data: waterLevelData, loading: waterLoading, lastRefresh } = useRhineWaterLevels(30 * 60 * 1000);
   const [selectedDay, setSelectedDay] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -123,6 +129,8 @@ export function DashboardOverview() {
   });
   const [reportGenerating, setReportGenerating] = useState(false);
   const [reportCopied, setReportCopied] = useState(false);
+  // Recomputed once per component mount so dates are always current
+  const days = useMemo(() => buildWorkingDays(), []);
 
   const handleDayClick = (day: any, status: number) => {
     if (status === 1) {
@@ -160,24 +168,27 @@ export function DashboardOverview() {
   const handleGenerateReport = async () => {
     setReportGenerating(true);
     setReportCopied(false);
+    let report: string | null = null;
     try {
-      const report = await generateWaterLevelReport();
+      report = await generateWaterLevelReport();
       await navigator.clipboard.writeText(report);
       setReportCopied(true);
       setTimeout(() => setReportCopied(false), 3000);
-    } catch {
-      // Clipboard may fail in some browsers — fallback: open in new window as plain text
-      try {
-        const report = await generateWaterLevelReport();
-        const blob = new Blob([report], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Water_Level_Report_${new Date().toISOString().split('T')[0]}.txt`;
-        a.click();
-        URL.revokeObjectURL(url);
-      } catch {
-        // silent fail
+    } catch (clipErr) {
+      console.warn('[Report] Clipboard write failed, falling back to file download:', clipErr);
+      // Reuse already-generated report — avoid calling generateWaterLevelReport() twice
+      if (report) {
+        try {
+          const blob = new Blob([report], { type: 'text/plain' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Water_Level_Report_${new Date().toISOString().split('T')[0]}.txt`;
+          a.click();
+          URL.revokeObjectURL(url);
+        } catch (downloadErr) {
+          console.warn('[Report] File download fallback also failed:', downloadErr);
+        }
       }
     } finally {
       setReportGenerating(false);
@@ -223,6 +234,7 @@ export function DashboardOverview() {
         setTruckCapacityData(updatedData);
       }
     };
+    reader.onerror = () => console.warn('[TruckCapacity] FileReader error:', reader.error);
     reader.readAsArrayBuffer(file);
   };
 
@@ -344,6 +356,111 @@ export function DashboardOverview() {
               <Anchor className="h-3 w-3 text-white/35" />
               <span className="text-[10px] font-black text-white/40 uppercase tracking-wide">Port</span>
             </div>
+          </motion.div>
+
+          {/* ── 7-Day Weather Forecast Strip ─────────────────────────────── */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="mt-5 pt-4 border-t border-white/10"
+          >
+            {/* Header row */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-[9px] font-black text-white/40 uppercase tracking-[0.25em]">
+                  7-Day Forecast · Rotterdam / Rhine
+                </span>
+                {weather.lastRefresh && (
+                  <span className="text-[8px] text-white/20">
+                    · {weather.lastRefresh.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                )}
+              </div>
+              {weather.loading && (
+                <span className="text-[8px] text-white/25 uppercase tracking-widest animate-pulse">
+                  Loading…
+                </span>
+              )}
+            </div>
+
+            {/* Day tiles */}
+            {!weather.error && weather.days.length > 0 && (
+              <div className="grid grid-cols-7 gap-1.5">
+                {weather.days.map((day, i) => (
+                  <div
+                    key={day.date}
+                    className={cn(
+                      'flex flex-col items-center gap-1 px-1.5 py-2.5 rounded-xl border transition-all',
+                      i === 0
+                        ? 'bg-white/12 border-white/25'
+                        : day.isSevere
+                        ? 'bg-rose-500/15 border-rose-500/30'
+                        : day.isWindy
+                        ? 'bg-amber-500/10 border-amber-500/20'
+                        : 'bg-white/5 border-white/10'
+                    )}
+                  >
+                    <span className="text-[8px] font-black text-white/40 uppercase tracking-wider leading-none">
+                      {day.dayLabel}
+                    </span>
+                    <span className="text-lg leading-none select-none">{day.icon}</span>
+                    <span className="text-[11px] font-black text-white leading-none">{day.tempMax}°</span>
+                    <div className="flex items-center gap-0.5">
+                      <Wind className="h-2 w-2 text-white/25" />
+                      <span className="text-[8px] text-white/30 font-bold">{day.windMax}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Operational weather alert */}
+            {weather.alert && (
+              <motion.div
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className={cn(
+                  'mt-3 flex items-start gap-3 px-4 py-3 rounded-xl border',
+                  weather.alert.type === 'storm'
+                    ? 'bg-rose-500/15 border-rose-500/35'
+                    : weather.alert.type === 'wind'
+                    ? 'bg-amber-500/15 border-amber-500/35'
+                    : weather.alert.type === 'snow'
+                    ? 'bg-sky-400/15 border-sky-400/30'
+                    : 'bg-slate-400/15 border-slate-400/25'
+                )}
+              >
+                <AlertTriangle
+                  className={cn(
+                    'h-4 w-4 flex-none mt-0.5',
+                    weather.alert.type === 'storm'
+                      ? 'text-rose-400'
+                      : weather.alert.type === 'wind'
+                      ? 'text-amber-400'
+                      : 'text-sky-300'
+                  )}
+                />
+                <div>
+                  <p
+                    className={cn(
+                      'text-[10px] font-black uppercase tracking-widest mb-1',
+                      weather.alert.type === 'storm'
+                        ? 'text-rose-300'
+                        : weather.alert.type === 'wind'
+                        ? 'text-amber-300'
+                        : 'text-sky-200'
+                    )}
+                  >
+                    ⚠ Weather Alert — {weather.alert.days.join(' · ')}
+                  </p>
+                  <p className="text-xs font-bold text-white/60 leading-relaxed">
+                    {weather.alert.message}
+                  </p>
+                </div>
+              </motion.div>
+            )}
           </motion.div>
         </div>
       </div>

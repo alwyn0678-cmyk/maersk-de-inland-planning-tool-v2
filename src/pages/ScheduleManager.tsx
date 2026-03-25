@@ -577,18 +577,22 @@ export function ScheduleManager() {
 
           <div className="px-5 py-4 space-y-4">
             <p className="text-sm text-slate-600 leading-relaxed">
-              Download the current schedule data as a structured Excel file.
-              Edit departure/arrival days and transit times directly in the sheet, then upload it back to update the tool.
+              Download the current schedule data as an Excel file. Edit only the ETD Day and ETA Day columns —
+              transit and buffer are calculated automatically. Upload back to apply changes.
             </p>
 
             <div className="space-y-2">
               <div className="flex items-start gap-2 text-xs text-slate-500">
                 <Anchor className="h-3.5 w-3.5 text-blue-400 mt-0.5 shrink-0" />
-                <span><span className="font-bold">Import Schedules</span> — {IMP_SCHEDULES.length} rows · port, terminal, mode, departure, arrival day</span>
+                <span><span className="font-bold">Import Schedules</span> — {IMP_SCHEDULES.length} rows · Port · Terminal Code · Mode · ETD Day · ETA Day</span>
               </div>
               <div className="flex items-start gap-2 text-xs text-slate-500">
                 <Send className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
-                <span><span className="font-bold">Export Schedules</span> — {Object.values(EXP_SCHED).flatMap(p => [...(p.RTM ?? []), ...(p.ANR ?? [])]).length} rows · port, depot, mode, departure day, transit, buffer</span>
+                <span><span className="font-bold">Export Schedules</span> — {Object.values(EXP_SCHED).flatMap(p => [...(p.RTM ?? []), ...(p.ANR ?? [])]).length} rows · Port · Depot Code · Mode · ETD Day · ETA Day</span>
+              </div>
+              <div className="flex items-start gap-2 text-xs text-slate-400">
+                <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                <span>Transit days are auto-calculated from ETD→ETA. Buffer defaults: Rail = 2d, Barge = 1d.</span>
               </div>
             </div>
 

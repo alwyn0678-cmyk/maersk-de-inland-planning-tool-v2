@@ -69,7 +69,7 @@ function TopBar({ activeTab }: { activeTab: string }) {
 }
 
 export default function App() {
-  const { activeTab, setActiveTab, setScheduleOverrideMeta } = usePlannerStore();
+  const { activeTab, setActiveTab, setScheduleOverrideMeta, resetImport, resetExport, resetCYCY } = usePlannerStore();
 
   // Load schedule overrides from Supabase on startup so all users share the same data
   useEffect(() => {
@@ -78,20 +78,26 @@ export default function App() {
         const { data, error } = await supabase
           .from('schedule_overrides')
           .select('id, data');
-        if (error || !data) return; // fail silently — built-in schedules remain active
+        if (error) { console.warn('[Schedules] Remote override fetch error:', error); return; }
+        if (!data) return;
         const imp  = data.find(r => r.id === 'imp')?.data  ?? null;
         const exp  = data.find(r => r.id === 'exp')?.data  ?? null;
         const meta = data.find(r => r.id === 'meta')?.data ?? null;
         loadRemoteOverrides(imp, exp, meta);
         if (meta) setScheduleOverrideMeta(meta);
-      } catch {
-        // Network error — built-in schedules remain active
+      } catch (err) {
+        console.warn('[Schedules] Network error loading remote overrides:', err);
+        // Built-in schedules remain active
       }
     }
     fetchOverrides();
   }, []);
 
   function handleTabChange(tab: string) {
+    // Always open planner tabs in a clean, refreshed state
+    if (tab === 'import') resetImport();
+    else if (tab === 'export') resetExport();
+    else if (tab === 'cycy') resetCYCY();
     setActiveTab(tab);
   }
 

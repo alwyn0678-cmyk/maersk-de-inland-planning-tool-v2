@@ -4,8 +4,13 @@
  * Download current schedule data as an .xlsx workbook, and parse
  * an uploaded .xlsx workbook back into schedule override objects.
  *
- * Import sheet columns:  Port | Terminal Code | Terminal Name | Mode | Departure Day | Arrival Day
- * Export sheet columns:  Port | Depot Code | Depot Name | Mode | Departure Day | Transit Days | Buffer Days | Terminal Filter
+ * Both sheets use the same simplified structure:
+ *   Import: Port | Terminal Code | Mode | ETD Day | ETA Day
+ *   Export: Port | Depot Code   | Mode | ETD Day | ETA Day
+ *
+ * Transit days are auto-calculated from the ETD→ETA day difference.
+ * Buffer days default to: Rail = 2, Barge = 1.
+ * Terminal Filter (Export) is no longer required — advanced use only via manual upload.
  */
 
 import * as XLSX from 'xlsx';
@@ -42,7 +47,7 @@ export function downloadSchedulesExcel(
   const wb = XLSX.utils.book_new();
 
   // ── Sheet 1: Import Schedules ──────────────────────────────────────────────
-  const impHeader = ['Port', 'Terminal Code', 'Terminal Name', 'Mode', 'Departure Day', 'Arrival Day'];
+  const impHeader = ['Port', 'Terminal Code', 'Terminal Name (reference only)', 'Mode', 'ETD Day', 'ETA Day'];
   const impData = impSchedules.map(s => [
     s.t,
     s.loc,
@@ -53,39 +58,36 @@ export function downloadSchedulesExcel(
   ]);
   const wsImp = XLSX.utils.aoa_to_sheet([impHeader, ...impData]);
   wsImp['!cols'] = [
-    { wch: 12 }, { wch: 14 }, { wch: 32 }, { wch: 8 }, { wch: 14 }, { wch: 12 },
+    { wch: 12 }, { wch: 14 }, { wch: 32 }, { wch: 8 }, { wch: 10 }, { wch: 10 },
   ];
-  // Freeze the header row
   wsImp['!freeze'] = { xSplit: 0, ySplit: 1 };
   XLSX.utils.book_append_sheet(wb, wsImp, 'Import Schedules');
 
-  // ── Sheet 2: Export Schedules ──────────────────────────────────────────────
+  // ── Sheet 2: Export Schedules (simplified — ETD + ETA only) ───────────────
   const expHeader = [
-    'Port', 'Depot Code', 'Depot Name', 'Mode',
-    'Departure Day', 'Transit Days', 'Buffer Days', 'Terminal Filter',
+    'Port', 'Depot Code', 'Depot Name (reference only)', 'Mode', 'ETD Day', 'ETA Day',
   ];
   const expData: (string | number)[][] = [];
   for (const [depotCode, ports] of Object.entries(expSched)) {
     for (const [portKey, entries] of Object.entries(ports)) {
       if (!entries) continue;
       for (const e of entries) {
+        // Calculate the ETA day from departure + transit
+        const etaDayNum = ((e.dep - 1 + e.transit) % 7) + 1;
         expData.push([
           portKey,
           depotCode,
           EXP_DEPOTS[depotCode] ?? depotCode,
           e.mod,
           ISO_TO_DAY[e.dep] ?? String(e.dep),
-          e.transit,
-          e.buffer,
-          e.terms ? e.terms.join(', ') : '',
+          ISO_TO_DAY[etaDayNum] ?? String(etaDayNum),
         ]);
       }
     }
   }
   const wsExp = XLSX.utils.aoa_to_sheet([expHeader, ...expData]);
   wsExp['!cols'] = [
-    { wch: 6 }, { wch: 12 }, { wch: 32 }, { wch: 8 },
-    { wch: 14 }, { wch: 13 }, { wch: 13 }, { wch: 45 },
+    { wch: 6 }, { wch: 12 }, { wch: 32 }, { wch: 8 }, { wch: 10 }, { wch: 10 },
   ];
   wsExp['!freeze'] = { xSplit: 0, ySplit: 1 };
   XLSX.utils.book_append_sheet(wb, wsExp, 'Export Schedules');
@@ -94,21 +96,21 @@ export function downloadSchedulesExcel(
   const instrData = [
     ['MAERSK DE INLAND PLANNING TOOL — Schedule Update Template'],
     [''],
+    ['SIMPLIFIED STRUCTURE — both sheets work the same way:'],
+    ['  Port | Code | Mode | ETD Day | ETA Day'],
+    [''],
     ['HOW TO UPDATE SCHEDULES'],
     ['1. Edit the "Import Schedules" or "Export Schedules" sheets only.'],
-    ['2. You can update just one terminal / depot — other rows are not affected.'],
-    ['   Only include rows for the terminals/depots that have changed.'],
+    ['2. Only include rows for the terminals/depots that have changed.'],
     ['3. Valid values for Port (Import):  Rotterdam | Antwerpen'],
     ['4. Valid values for Port (Export):  RTM | ANR'],
     ['5. Valid values for Mode:           Barge | Rail'],
-    ['6. Valid values for Departure/Arrival Day:  Mon Tue Wed Thu Fri Sat Sun'],
-    ['7. Transit Days and Buffer Days must be whole numbers.'],
-    ['8. Terminal Filter (Export only): comma-separated terminal codes,'],
-    ['   e.g. "NLROTTM, NLROT01". Leave blank if the schedule applies to all terminals.'],
+    ['6. Valid values for ETD Day / ETA Day:  Mon  Tue  Wed  Thu  Fri  Sat  Sun'],
     [''],
-    ['PARTIAL UPLOAD SUPPORT'],
-    ['If you only upload rows for one terminal (e.g. DEDUI01), the tool will'],
-    ['update only that terminal and leave all others unchanged.'],
+    ['AUTOMATIC CALCULATIONS'],
+    ['Transit days are auto-calculated from the ETD→ETA day difference.'],
+    ['Buffer days default to: Rail = 2 days, Barge = 1 day.'],
+    ['You do NOT need to enter transit or buffer — just ETD and ETA days.'],
     [''],
     ['To reset all custom schedules back to built-in defaults, use the'],
     ['"Reset to defaults" button in the Schedule Manager page.'],
@@ -170,8 +172,9 @@ export function parseScheduleFile(file: File): Promise<ParseResult> {
             const port = String(row['Port'] ?? '').trim();
             const loc  = String(row['Terminal Code'] ?? '').trim().toUpperCase();
             const mod  = String(row['Mode'] ?? '').trim();
-            const etd  = String(row['Departure Day'] ?? '').trim();
-            const eta  = String(row['Arrival Day'] ?? '').trim();
+            // Accept both new simplified names and old column names
+            const etd  = String(row['ETD Day'] ?? row['Departure Day'] ?? '').trim();
+            const eta  = String(row['ETA Day'] ?? row['Arrival Day'] ?? '').trim();
 
             // Skip blank or header-repeat rows
             if (!port && !loc) continue;
@@ -226,10 +229,14 @@ export function parseScheduleFile(file: File): Promise<ParseResult> {
             const port      = String(row['Port'] ?? '').trim().toUpperCase();
             const depotCode = String(row['Depot Code'] ?? '').trim().toUpperCase();
             const mod       = String(row['Mode'] ?? '').trim();
-            const depDay    = String(row['Departure Day'] ?? '').trim();
-            const transit   = Number(row['Transit Days']);
-            const buffer    = Number(row['Buffer Days']);
-            const termsRaw  = String(row['Terminal Filter'] ?? '').trim();
+            // Support both old column name ("Departure Day") and new simplified ("ETD Day")
+            const depDay    = String(row['ETD Day'] ?? row['Departure Day'] ?? '').trim();
+            // Support both old column name ("Arrival Day") and new simplified ("ETA Day")
+            const arrDay    = String(row['ETA Day'] ?? row['Arrival Day'] ?? '').trim();
+            // Legacy fields — optional for backward compatibility
+            const transitRaw = row['Transit Days'];
+            const bufferRaw  = row['Buffer Days'];
+            const termsRaw   = String(row['Terminal Filter'] ?? '').trim();
 
             if (!port && !depotCode) continue;
 
@@ -247,12 +254,33 @@ export function parseScheduleFile(file: File): Promise<ParseResult> {
             }
             const dep = DAY_TO_ISO[depDay];
             if (!dep) {
-              warnings.push(`Export: unknown departure day "${depDay}" for depot ${depotCode}`);
+              warnings.push(`Export: unknown ETD day "${depDay}" for depot ${depotCode}`);
               continue;
             }
-            if (isNaN(transit) || isNaN(buffer) || transit < 0 || buffer < 0) {
-              warnings.push(`Export: invalid transit (${transit}) or buffer (${buffer}) for depot ${depotCode}`);
+
+            // Calculate transit from ETD→ETA if ETA day provided; otherwise use legacy Transit Days column
+            let transit: number;
+            if (arrDay && DAY_TO_ISO[arrDay]) {
+              const arr = DAY_TO_ISO[arrDay];
+              transit = ((arr - dep + 7) % 7) || 7; // 0 → same day = 7 days
+            } else if (transitRaw !== undefined && transitRaw !== '') {
+              transit = Number(transitRaw);
+              if (isNaN(transit) || transit < 0) {
+                warnings.push(`Export: invalid transit "${transitRaw}" for depot ${depotCode}`);
+                continue;
+              }
+            } else {
+              warnings.push(`Export row skipped — no ETA Day or Transit Days for depot ${depotCode}`);
               continue;
+            }
+
+            // Default buffer: Rail = 2, Barge = 1 — override only if explicit column present
+            let buffer: number;
+            if (bufferRaw !== undefined && bufferRaw !== '') {
+              buffer = Number(bufferRaw);
+              if (isNaN(buffer) || buffer < 0) buffer = mod === 'Rail' ? 2 : 1;
+            } else {
+              buffer = mod === 'Rail' ? 2 : 1;
             }
 
             if (!expOverrides[depotCode]) {

@@ -35,7 +35,12 @@ export function StatsOverview({ waterLevelData }: StatsOverviewProps) {
         icon: Truck,
         color: colors[i % colors.length].text,
         bg: colors[i % colors.length].bg,
-        chart: hub.forecast.map(v => v === 1 ? 80 + Math.random() * 20 : 20 + Math.random() * 30)
+        // Deterministic sparkline: stable visual variation derived from index + location name
+        // Avoids re-randomization on every waterLevelData refresh (every 30 min)
+        chart: hub.forecast.map((v, idx) => {
+          const seed = (idx * 17 + hub.location.charCodeAt(0) * 3 + hub.location.charCodeAt(hub.location.length - 1)) % 100;
+          return v === 1 ? 75 + (seed % 25) : 15 + (seed % 25);
+        })
       };
     });
 

@@ -29,17 +29,23 @@ function UrgencyBadge({ date }: { date: Date }) {
 
 function CopyBtn({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
+  const [failed, setFailed] = useState(false);
   const copy = async () => {
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setFailed(true);
+      setTimeout(() => setFailed(false), 2000);
+    }
   };
   return (
     <button
       onClick={copy}
       className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/15 hover:bg-white/25 text-white text-[9px] font-black uppercase tracking-widest transition-all border border-white/20"
     >
-      {copied ? <><Check className="h-2.5 w-2.5" />Done</> : <><Copy className="h-2.5 w-2.5" />Copy</>}
+      {copied ? <><Check className="h-2.5 w-2.5" />Done</> : failed ? <><Copy className="h-2.5 w-2.5" />Failed</> : <><Copy className="h-2.5 w-2.5" />Copy</>}
     </button>
   );
 }
@@ -57,16 +63,17 @@ function buildImpCopyText(inst: ImpInstance, result: CYCYImpRunResult): string {
     `Modality     : ${inst.mod} (${inst.etdDay} schedule)`,
     `Terminal ETD : ${fmt(inst.etd)}`,
     `Depot Arrival: ${fmt(inst.eta)}`,
-    `Customer Delivery: ${fmt(inst.custDel)}${result.termCode === 'DEDUI01' ? ' (after 12:00)' : ''}`,
+    `Container Pick-Up Date: ${fmt(inst.custDel)}${result.termCode === 'DEDUI01' ? ' (after 12:00)' : ''}`,
     `Order Deadline: ${fmt(inst.orderDL)}`,
     inst.custDL ? `Customs Deadline: ${fmt(inst.custDL)} ${inst.custDL.getHours().toString().padStart(2,'0')}:${inst.custDL.getMinutes().toString().padStart(2,'0')}` : '',
     '',
     `Transport Order Remarks: Please plan on ${modName} departure with ETD ${inst.etdDay} ${inst.etd.getDate().toString().padStart(2,'0')}/${(inst.etd.getMonth()+1).toString().padStart(2,'0')}`,
+    '⚠ IMPORTANT: TIR documentation MUST be included with the transport order.',
     '',
     '⚠ REMINDERS',
     '- Always send copy of Customs document to nlaopsinlrbc@maersk.com (DO NOT send this to us)',
     '- When multistop is needed, send ATA at least 2 days before customer Delivery date',
-  ].filter(l => l !== undefined && l !== null);
+  ].filter(Boolean);
   return lines.join('\n');
 }
 
@@ -93,6 +100,7 @@ function buildExpCopyText(card: ExpCard, result: CYCYExpRunResult): string {
     '',
     `Order Deadline: ${fmt(card.orderDL)}`,
     `Transport Order Remarks: Please plan on ${modName} departure with ETD ${card.etd.toLocaleDateString('en-GB', { weekday: 'short' })} ${card.etd.getDate().toString().padStart(2,'0')}/${(card.etd.getMonth()+1).toString().padStart(2,'0')}`,
+    '⚠ IMPORTANT: TIR documentation MUST be included with the transport order.',
   ].filter(Boolean);
   return lines.join('\n');
 }
@@ -174,7 +182,7 @@ function ImportCard({ inst, result, idx }: { inst: ImpInstance; result: CYCYImpR
                 </div>
                 <ArrowRight className="h-4 w-4 text-slate-300 flex-none" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Customer Delivery</p>
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Full Container Pick-Up Date</p>
                   <p className="text-base font-black text-maersk-dark leading-tight">{fmtS(inst.custDel)}</p>
                   {isDui && <p className="text-[10px] text-amber-500 font-black mt-0.5">after 12:00</p>}
                 </div>

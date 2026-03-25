@@ -7,18 +7,19 @@ import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 
 export function CYCYPlanner() {
-  const { cycyRequest, cycyRunResult, setCYCYRequest, resetCYCY } = usePlannerStore();
+  const { cycyRequest, cycyRunResult, setCYCYRequest, setCycyRunResult, resetCYCY } = usePlannerStore();
   const [filterOpen, setFilterOpen] = useState(false);
 
   const isImport = cycyRequest.direction === 'Import';
 
   function switchDirection(dir: 'Import' | 'Export') {
+    // Clear previous results without wiping the direction we're about to set
+    setCycyRunResult(null);
     if (dir === 'Import') {
-      setCYCYRequest({ direction: 'Import', originTerminal: 'RTM', destinationTerminal: 'DEDUI01' });
+      setCYCYRequest({ direction: 'Import', originTerminal: 'RTM', inlandTerminal: 'DEDUI01' });
     } else {
-      setCYCYRequest({ direction: 'Export', originTerminal: 'DEDUI01', destinationTerminal: 'NLROTTM|5|RTM' });
+      setCYCYRequest({ direction: 'Export', originTerminal: 'DEDUI01', inlandTerminal: 'DEDUI01', destinationTerminal: 'NLROTTM|5|RTM' });
     }
-    resetCYCY();
     setFilterOpen(true);
   }
 
@@ -42,7 +43,7 @@ export function CYCYPlanner() {
           <motion.button
             whileHover={{ scale: 1.02, y: -3 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => { setCYCYRequest({ direction: 'Import', originTerminal: 'RTM', destinationTerminal: 'DEDUI01' }); setFilterOpen(true); }}
+            onClick={() => { setCYCYRequest({ direction: 'Import', originTerminal: 'RTM', inlandTerminal: 'DEDUI01' }); setFilterOpen(true); }}
             className="group relative p-6 rounded-2xl bg-white border border-slate-100 hover:border-maersk-blue/40 transition-all duration-300 hover:shadow-[0_16px_32px_-8px_rgba(66,176,213,0.2)] flex flex-col items-center text-center space-y-3 overflow-hidden"
           >
             <div className="absolute -top-4 -right-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
@@ -63,7 +64,7 @@ export function CYCYPlanner() {
           <motion.button
             whileHover={{ scale: 1.02, y: -3 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => { setCYCYRequest({ direction: 'Export', originTerminal: 'DEDUI01', destinationTerminal: 'NLROTTM|5|RTM' }); setFilterOpen(true); }}
+            onClick={() => { setCYCYRequest({ direction: 'Export', inlandTerminal: 'DEDUI01', destinationTerminal: 'NLROTTM|5|RTM' }); setFilterOpen(true); }}
             className="group relative p-6 rounded-2xl bg-white border border-slate-100 hover:border-emerald-500/40 transition-all duration-300 hover:shadow-[0_16px_32px_-8px_rgba(16,185,129,0.2)] flex flex-col items-center text-center space-y-3 overflow-hidden"
           >
             <div className="absolute -top-4 -right-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
@@ -199,7 +200,7 @@ export function CYCYPlanner() {
             {isImport ? 'Import Flow' : 'Export Flow'} Ready
           </p>
           <p className="text-sm text-slate-300 font-bold mb-7">
-            {isImport ? 'Enter ZIP, port & vessel ETD to plan inland delivery' : 'Enter ZIP, terminal & loading date to plan export route'}
+            {isImport ? 'Select port, inland terminal & vessel ETD to plan inland delivery' : 'Select depot, port terminal & loading date to plan export route'}
           </p>
           <button
             onClick={() => setFilterOpen(true)}

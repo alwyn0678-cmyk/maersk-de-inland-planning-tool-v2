@@ -116,6 +116,7 @@ export const usePlannerStore = create<PlannerState>()(
       },
       cycyRequest: {
         direction: undefined,
+        inlandTerminal: 'DEDUI01',
         zip: '',
         originTerminal: 'RTM',
         destinationTerminal: 'NLROTTM|5|RTM',
@@ -191,6 +192,7 @@ export const usePlannerStore = create<PlannerState>()(
       resetCYCY: () => set({
         cycyRequest: {
           direction: undefined,
+          inlandTerminal: 'DEDUI01',
           zip: '',
           originTerminal: 'RTM',
           destinationTerminal: 'NLROTTM|5|RTM',

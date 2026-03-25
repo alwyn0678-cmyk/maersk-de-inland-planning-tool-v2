@@ -11,19 +11,26 @@ import * as XLSX from 'xlsx';
 export function TerminalCongestionOverview() {
   const { terminalCongestionData, setTerminalCongestionData } = usePlannerStore();
 
+  // Auto-classify congestion status from waiting hours:
+  // Low ≤ 8h · Medium ≤ 24h · High > 24h
+  function classifyStatus(hours: number): 'Low' | 'Medium' | 'High' {
+    if (hours <= 8)  return 'Low';
+    if (hours <= 24) return 'Medium';
+    return 'High';
+  }
+
   const handleExport = () => {
+    // Simplified template — only Terminal + Waiting Hours required
     const dataToExport = terminalCongestionData.map(item => ({
       Port: item.port,
       Terminal: item.terminal,
-      'Waiting Time (Hours)': item.waitingTime,
-      Status: item.status,
-      'Last Updated': item.lastUpdated
+      'Waiting Hours': item.waitingTime,
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Terminal Congestion');
-    XLSX.writeFile(workbook, 'Terminal_Congestion_Overview.xlsx');
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Congestion');
+    XLSX.writeFile(workbook, 'Terminal_Congestion_Update.xlsx');
   };
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,20 +45,30 @@ export function TerminalCongestionOverview() {
       const worksheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet) as any[];
 
-      const updatedData: TerminalCongestion[] = jsonData.map((row, idx) => ({
-        id: `upd-${idx}`,
-        port: row.Port as 'Rotterdam' | 'Antwerp',
-        terminal: row.Terminal,
-        waitingTime: Number(row['Waiting Time (Hours)']),
-        status: row.Status as 'Low' | 'Medium' | 'High',
-        lastUpdated: new Date().toISOString()
-      }));
+      const updatedData: TerminalCongestion[] = jsonData
+        .filter(row => row.Terminal && (row['Waiting Hours'] !== undefined || row['Waiting Time (Hours)'] !== undefined))
+        .map((row, idx) => {
+          // Accept both column name variants for backward compatibility
+          const hours = Number(row['Waiting Hours'] ?? row['Waiting Time (Hours)'] ?? 0);
+          return {
+            id: `upd-${idx}`,
+            port: (row.Port ?? 'Rotterdam') as 'Rotterdam' | 'Antwerp',
+            terminal: String(row.Terminal),
+            waitingTime: hours,
+            // Status is auto-calculated — no manual input needed
+            status: classifyStatus(hours),
+            lastUpdated: new Date().toISOString(),
+          };
+        });
 
       if (updatedData.length > 0) {
         setTerminalCongestionData(updatedData);
       }
     };
+    reader.onerror = () => console.warn('[TerminalCongestion] FileReader error:', reader.error);
     reader.readAsArrayBuffer(file);
+    // Reset input so the same file can be re-uploaded
+    e.target.value = '';
   };
 
   const getStatusColor = (status: string) => {
@@ -247,7 +264,7 @@ export function TerminalCongestionOverview() {
         <div className="p-3 bg-white/5 border-t border-white/10 flex items-center justify-end">
           <div className="flex items-center space-x-2 text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">
             <Info className="h-3.5 w-3.5 text-maersk-blue" />
-            Data uploaded via Excel — update to reflect current port conditions
+            Upload: Terminal + Waiting Hours only — Low ≤8h · Medium ≤24h · High &gt;24h (auto-classified)
           </div>
         </div>
       </CardContent>
