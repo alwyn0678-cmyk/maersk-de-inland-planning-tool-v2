@@ -4,6 +4,7 @@ import { ImportPlanner } from './pages/ImportPlanner';
 import { ExportPlanner } from './pages/ExportPlanner';
 import { CYCYPlanner } from './pages/CYCYPlanner';
 import { NetworkSchedules } from './pages/NetworkSchedules';
+import { InlandNews } from './pages/InlandNews';
 import { PRD } from './pages/PRD';
 import { Settings } from './pages/Settings';
 import { Help } from './pages/Help';
@@ -37,6 +38,8 @@ export default function App() {
         return <CYCYPlanner />;
       case 'schedules':
         return <NetworkSchedules />;
+      case 'news':
+        return <InlandNews />;
       case 'prd':
         return <PRD />;
       case 'settings':

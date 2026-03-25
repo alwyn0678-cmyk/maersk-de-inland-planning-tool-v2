@@ -11,7 +11,8 @@ import {
   ChevronRight,
   Ship,
   ArrowRightLeft,
-  CalendarDays
+  CalendarDays,
+  Newspaper
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
@@ -28,6 +29,7 @@ const menuItems = [
   { id: 'export', label: 'Export Booking', icon: Send },
   { id: 'cycy', label: 'CY/CY Booking', icon: ArrowRightLeft },
   { id: 'schedules', label: 'Network Schedules', icon: CalendarDays },
+  { id: 'news', label: 'Inland News', icon: Newspaper },
   { id: 'prd', label: 'Specifications', icon: FileText },
 ];
 

@@ -16,7 +16,6 @@ import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { StatsOverview } from './StatsOverview';
 import { TerminalCongestionOverview } from './TerminalCongestionOverview';
-import { InlandNewsOverview } from './InlandNewsOverview';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import {
   TrendingUp,
@@ -598,9 +597,6 @@ export function DashboardOverview() {
 
         {/* Terminal Barge Congestion Overview */}
         <TerminalCongestionOverview />
-
-        {/* Inland Terminal News */}
-        <InlandNewsOverview />
       </div>
 
       {/* Export Schedule Dialog */}
