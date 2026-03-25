@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ImportForm } from '../components/planner/ImportForm';
 import { ImportResultView } from '../components/planner/ImportResultView';
-import { NetworkScheduleBoard } from '../components/planner/NetworkScheduleBoard';
 import { usePlannerStore } from '../store/usePlannerStore';
-import { Settings2, ChevronDown, ChevronUp, Ship, Anchor, Train, Activity, MapPin } from 'lucide-react';
+import { Settings2, ChevronDown, ChevronUp, Anchor, Train, Activity, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 
@@ -119,26 +118,6 @@ export function ImportPlanner() {
         )
       )}
 
-      {/* ── Network Departure Board ──────────────────────────────── */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-maersk-dark rounded-xl shadow-md">
-              <Ship className="h-4 w-4 text-maersk-blue" />
-            </div>
-            <div>
-              <h3 className="text-base font-black text-maersk-dark uppercase tracking-tight">
-                Network <span className="text-maersk-blue">Schedule</span>
-              </h3>
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.25em]">
-                Barge & Rail · Upcoming Departures
-              </p>
-            </div>
-          </div>
-          <div className="h-px flex-1 bg-slate-100 hidden md:block" />
-        </div>
-        <NetworkScheduleBoard direction="Import" />
-      </div>
     </div>
   );
 }

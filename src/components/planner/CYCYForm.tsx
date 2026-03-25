@@ -224,7 +224,7 @@ export function CYCYForm() {
               <div className="h-px flex-1 bg-slate-100" />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Customer Postcode</Label>
                 <div className="relative">
@@ -266,10 +266,10 @@ export function CYCYForm() {
                     value={cycyRequest.destinationTerminal || 'NLROTTM|5|RTM'}
                     onValueChange={(val) => setCYCYRequest({ destinationTerminal: val })}
                   >
-                    <SelectTrigger className="bg-slate-50 border-slate-200 h-10 rounded-xl font-bold text-xs text-maersk-dark">
+                    <SelectTrigger className="w-full bg-slate-50 border-slate-200 h-10 rounded-xl font-bold text-xs text-maersk-dark">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-slate-100 shadow-xl min-w-[300px]">
+                    <SelectContent className="rounded-xl border-slate-100 shadow-xl min-w-[320px]">
                       <div className="px-2 py-1 text-[9px] font-black text-slate-400 uppercase tracking-widest">Rotterdam</div>
                       {PORT_TERMINALS.filter(t => t.port === 'RTM').map((opt) => (
                         <SelectItem key={opt.value} value={opt.value} className="text-xs font-bold">{opt.label}</SelectItem>

@@ -180,7 +180,7 @@ export function ExportForm() {
                   value={terminalValue}
                   onValueChange={setTerminalValue}
                 >
-                  <SelectTrigger id="export-portTerminal" className="bg-slate-50/50 border-slate-200/60 focus:ring-emerald-500 h-10 rounded-xl hover:bg-white transition-all font-black text-maersk-dark text-xs px-3">
+                  <SelectTrigger id="export-portTerminal" className="w-full bg-slate-50/50 border-slate-200/60 focus:ring-emerald-500 h-10 rounded-xl hover:bg-white transition-all font-black text-maersk-dark text-xs px-3">
                     <SelectValue placeholder="Select terminal" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-slate-100 shadow-xl p-1 backdrop-blur-xl bg-white/90 min-w-[320px]">
