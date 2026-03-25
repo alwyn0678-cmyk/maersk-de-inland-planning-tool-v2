@@ -131,8 +131,8 @@ export const usePlannerStore = create<PlannerState>()(
       cycyRunResult: null,
       scheduleOverrideMeta: null,
       truckCapacityData: [
-        { location: 'Duisburg', forecast: [1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1] },
-        { location: 'Mainz', forecast: [1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1] },
+        { location: 'Duisburg',    forecast: [1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1] },
+        { location: 'Mainz',       forecast: [1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1] },
         { location: 'Germersheim', forecast: [1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1] },
       ],
       terminalCongestionData: [

@@ -27,11 +27,15 @@ import {
   MapPin,
   Anchor,
   ArrowRight,
-  ChevronLeft,
   TrendingUp,
   TrendingDown,
   Minus,
+  ExternalLink,
+  FileText,
+  ClipboardCheck,
+  Loader2,
 } from 'lucide-react';
+import { generateWaterLevelReport } from '../../lib/waterLevelReport';
 import * as XLSX from 'xlsx';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
@@ -65,17 +69,19 @@ const getWeekNumber = (d: Date) => {
   return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
 };
 
-const allDays = Array.from({ length: 30 }, (_, i) => {
-  const d = new Date();
-  const day = d.getDay();
-  // Find current Monday (or last Monday if today is weekend)
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  const monday = new Date(d.setDate(diff));
-  
-  const currentDay = new Date(monday);
-  currentDay.setDate(monday.getDate() + i);
-  return currentDay;
-}).filter(d => d.getDay() !== 0 && d.getDay() !== 6).slice(0, 15);
+// 15 working days (3 calendar weeks) starting from today.
+// If today is Saturday or Sunday, starts from the next Monday instead.
+const allDays: Date[] = [];
+const _dayCursor = new Date();
+_dayCursor.setHours(0, 0, 0, 0);
+if (_dayCursor.getDay() === 6) _dayCursor.setDate(_dayCursor.getDate() + 2); // Sat → Mon
+if (_dayCursor.getDay() === 0) _dayCursor.setDate(_dayCursor.getDate() + 1); // Sun → Mon
+while (allDays.length < 15) {
+  if (_dayCursor.getDay() !== 0 && _dayCursor.getDay() !== 6) {
+    allDays.push(new Date(_dayCursor));
+  }
+  _dayCursor.setDate(_dayCursor.getDate() + 1);
+}
 
 const days = allDays.map(d => ({
   date: d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }),
@@ -115,6 +121,8 @@ export function DashboardOverview() {
     terminalValue: 'NLROTTM|5|RTM',
     loadingTime: '08:00',
   });
+  const [reportGenerating, setReportGenerating] = useState(false);
+  const [reportCopied, setReportCopied] = useState(false);
 
   const handleDayClick = (day: any, status: number) => {
     if (status === 1) {
@@ -149,11 +157,38 @@ export function DashboardOverview() {
     setActiveTab('export');
   };
 
+  const handleGenerateReport = async () => {
+    setReportGenerating(true);
+    setReportCopied(false);
+    try {
+      const report = await generateWaterLevelReport();
+      await navigator.clipboard.writeText(report);
+      setReportCopied(true);
+      setTimeout(() => setReportCopied(false), 3000);
+    } catch {
+      // Clipboard may fail in some browsers — fallback: open in new window as plain text
+      try {
+        const report = await generateWaterLevelReport();
+        const blob = new Blob([report], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Water_Level_Report_${new Date().toISOString().split('T')[0]}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } catch {
+        // silent fail
+      }
+    } finally {
+      setReportGenerating(false);
+    }
+  };
+
   const handleDownloadTemplate = () => {
     const data = truckCapacityData.map(hub => {
       const row: any = { Hub: hub.location };
-      hub.forecast.forEach((status, i) => {
-        row[`${days[i].dayName} ${days[i].date}`] = status === 1 ? 'Available' : 'Booked Out';
+      days.forEach((day, i) => {
+        row[`${day.dayName} ${day.date}`] = hub.forecast[i] === 1 ? 'Available' : 'Booked Out';
       });
       return row;
     });
@@ -378,11 +413,11 @@ export function DashboardOverview() {
                       <div className="relative flex h-2 w-2">
                         <span className={cn(
                           "animate-ping absolute inline-flex h-full w-full rounded-full opacity-75",
-                          hub.forecast.filter(v => v === 1).length > 10 ? "bg-emerald-400" : "bg-amber-400"
+                          hub.forecast.slice(0, days.length).filter(v => v === 1).length > days.length * 2 / 3 ? "bg-emerald-400" : "bg-amber-400"
                         )}></span>
                         <span className={cn(
                           "relative inline-flex rounded-full h-2 w-2",
-                          hub.forecast.filter(v => v === 1).length > 10 ? "bg-emerald-500" : "bg-amber-500"
+                          hub.forecast.slice(0, days.length).filter(v => v === 1).length > days.length * 2 / 3 ? "bg-emerald-500" : "bg-amber-500"
                         )}></span>
                       </div>
                       <span className="text-sm font-black text-maersk-dark tracking-tight">{hub.location}</span>
@@ -390,19 +425,21 @@ export function DashboardOverview() {
                     <div className="flex items-center space-x-2">
                       <div className="flex items-baseline space-x-0.5">
                         <span className="text-base font-black text-maersk-dark tracking-tighter">
-                          {Math.round((hub.forecast.filter(v => v === 1).length / 15) * 100)}
+                          {Math.round((hub.forecast.slice(0, days.length).filter(v => v === 1).length / days.length) * 100)}
                         </span>
                         <span className="text-[10px] font-black text-slate-500">%</span>
                       </div>
                       <div className="h-4 w-px bg-slate-200" />
                       <Badge variant="secondary" className="bg-maersk-blue text-white border-maersk-blue font-black text-[9px] px-2 py-0 rounded-full">
-                        {hub.forecast.filter(v => v === 1).length}/15d
+                        {hub.forecast.slice(0, days.length).filter(v => v === 1).length}/{days.length}d
                       </Badge>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-[repeat(15,minmax(0,1fr))] gap-1.5">
-                    {hub.forecast.map((status, i) => (
+                    {days.map((day, i) => {
+                      const status = hub.forecast[i] ?? 0;
+                      return (
                       <div key={i} className="flex flex-col items-center group/day">
                         {/* Week Number */}
                         <div className="h-4 flex items-center justify-center w-full mb-0.5">
@@ -442,21 +479,22 @@ export function DashboardOverview() {
 
                         {/* Month/Day under block */}
                         <span className="text-[7px] font-bold text-slate-400 mt-0.5 group-hover/day:text-maersk-blue transition-colors">
-                          {days[i].date.split('/')[1]}/{days[i].date.split('/')[0]}
+                          {day.date.split('/')[1]}/{day.date.split('/')[0]}
                         </span>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
 
                   {/* Progress Bar */}
                   <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
-                      animate={{ width: `${(hub.forecast.filter(v => v === 1).length / 15) * 100}%` }}
+                      animate={{ width: `${(hub.forecast.slice(0, days.length).filter(v => v === 1).length / days.length) * 100}%` }}
                       transition={{ duration: 1.2, ease: "easeOut" }}
                       className={cn(
                         "h-full rounded-full",
-                        hub.forecast.filter(v => v === 1).length > 10 ? "bg-emerald-500" : "bg-amber-500"
+                        hub.forecast.slice(0, days.length).filter(v => v === 1).length > days.length * 2 / 3 ? "bg-emerald-500" : "bg-amber-500"
                       )}
                     />
                   </div>
@@ -486,6 +524,28 @@ export function DashboardOverview() {
                   <Activity className={cn("h-3 w-3 mr-1.5", waterLoading ? "animate-spin" : "animate-pulse")} />
                   {waterLoading ? 'Loading...' : 'Live Sync'}
                 </Badge>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleGenerateReport}
+                  disabled={reportGenerating}
+                  className={cn(
+                    "h-8 px-3 gap-1.5 text-[10px] font-black uppercase tracking-widest transition-all duration-200 border",
+                    reportCopied
+                      ? "text-emerald-300 border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/15"
+                      : "text-white/70 border-white/20 hover:text-white hover:bg-white/10"
+                  )}
+                  title="Generate weekly water level report and copy to clipboard"
+                >
+                  {reportGenerating ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : reportCopied ? (
+                    <ClipboardCheck className="h-3 w-3" />
+                  ) : (
+                    <FileText className="h-3 w-3" />
+                  )}
+                  {reportGenerating ? 'Generating...' : reportCopied ? 'Copied!' : 'Export Report'}
+                </Button>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -661,21 +721,13 @@ export function DashboardOverview() {
       </div>
 
       {/* Export Schedule Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) { setBookingStep('form'); setExpResult(null); } }}>
-        <DialogContent className={cn(
-          "bg-white border-none shadow-2xl rounded-3xl overflow-hidden p-0 transition-all duration-300",
-          bookingStep === 'results' ? "sm:max-w-[580px]" : "sm:max-w-[460px]"
-        )}>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="bg-white border-none shadow-2xl rounded-3xl overflow-hidden p-0 sm:max-w-[460px]">
           <div className="h-1.5 w-full bg-gradient-to-r from-maersk-dark via-maersk-blue to-[#42b0d5]" />
           <div className="p-7">
             <DialogHeader className="mb-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  {bookingStep === 'results' && (
-                    <button onClick={() => { setBookingStep('form'); setExpResult(null); }} className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors">
-                      <ChevronLeft className="h-4 w-4 text-slate-500" />
-                    </button>
-                  )}
                   <div className="p-2 bg-maersk-blue/10 rounded-xl">
                     <Truck className="h-5 w-5 text-maersk-blue" />
                   </div>

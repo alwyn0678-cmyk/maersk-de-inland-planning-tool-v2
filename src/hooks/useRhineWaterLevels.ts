@@ -13,61 +13,64 @@ export interface WaterLevelSite {
 }
 
 // Operationally relevant Rhine gauge stations for Maersk DE inland planning
-const STATIONS: { site: string; station: string }[] = [
-  { site: 'Kaub',       station: 'KAUB' },           // Middle Rhine chokepoint — critical for Andernach/Mainz/Mannheim/Germersheim
-  { site: 'Cologne',    station: 'KÖLN' },            // NRW corridor — Duisburg, Bonn terminals
-  { site: 'Duisburg',   station: 'DUISBURG-RUHRORT' },// Key terminal hub
-  { site: 'Mannheim',   station: 'MANNHEIM' },        // Southern Rhine hub
-  { site: 'Maxau',      station: 'MAXAU' },           // Karlsruhe / Bavaria feeder
+// thresholdCm = official low-water threshold for each station
+const STATIONS: { site: string; station: string; thresholdCm: number; criticalCm: number }[] = [
+  { site: 'Kaub',     station: 'KAUB',             thresholdCm: 150, criticalCm: 100 }, // Middle Rhine chokepoint
+  { site: 'Cologne',  station: 'KÖLN',             thresholdCm: 195, criticalCm: 130 }, // NRW corridor
+  { site: 'Duisburg', station: 'DUISBURG-RUHRORT', thresholdCm: 300, criticalCm: 200 }, // Key terminal hub
+  { site: 'Mannheim', station: 'MANNHEIM',          thresholdCm: 200, criticalCm: 130 }, // Southern Rhine hub
+  { site: 'Maxau',    station: 'MAXAU',             thresholdCm: 250, criticalCm: 160 }, // Karlsruhe / Bavaria feeder
 ];
 
-// Generate today-relative timestamps (last 24h, 6 points every ~4 hours, oldest first)
-function todayHistory(vals: number[]): { time: string; val: number }[] {
+// Static fallback baselines — only used when the API is unreachable.
+// Clearly marked as estimated in the UI.
+function makeBaseline(levelCm: number): { levelCm: number; history: { time: string; val: number }[] } {
+  const levelM = levelCm / 100;
   const now = Date.now();
-  return vals.map((val, i) => {
-    const t = new Date(now - (vals.length - 1 - i) * 4 * 60 * 60 * 1000);
+  const history = Array.from({ length: 6 }, (_, i) => {
+    const t = new Date(now - (5 - i) * 4 * 60 * 60 * 1000);
     const hh = t.getHours().toString().padStart(2, '0');
     const mm = t.getMinutes().toString().padStart(2, '0');
-    return { time: `${hh}:${mm}`, val };
+    return { time: `${hh}:${mm}`, val: levelM };
   });
+  return { levelCm, history };
 }
 
-// Realistic static baselines — typical March Rhine levels (cm).
-// Varied histories so trend computation returns meaningful up/down/stable values.
-const STATIC_BASELINES: Record<string, { levelCm: number; history: { time: string; val: number }[] }> = {
-  'KAUB':             { levelCm: 213, history: todayHistory([2.02, 2.05, 2.08, 2.10, 2.12, 2.13]) }, // rising
-  'KÖLN':             { levelCm: 318, history: todayHistory([3.28, 3.26, 3.24, 3.22, 3.20, 3.18]) }, // falling
-  'DUISBURG-RUHRORT': { levelCm: 362, history: todayHistory([3.60, 3.61, 3.62, 3.62, 3.63, 3.62]) }, // stable
-  'MANNHEIM':         { levelCm: 398, history: todayHistory([3.88, 3.91, 3.95, 3.97, 3.98, 3.98]) }, // rising
-  'MAXAU':            { levelCm: 445, history: todayHistory([4.55, 4.52, 4.50, 4.48, 4.46, 4.45]) }, // falling
+const STATIC_BASELINES: Record<string, ReturnType<typeof makeBaseline>> = {
+  'KAUB':             makeBaseline(150),
+  'KÖLN':             makeBaseline(200),
+  'DUISBURG-RUHRORT': makeBaseline(300),
+  'MANNHEIM':         makeBaseline(200),
+  'MAXAU':            makeBaseline(250),
 };
 
 const PEGEL_BASE = 'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations';
 
-// Status thresholds (cm) — Rhine operational classification
-function classify(levelCm: number): 'Normal' | 'Low' | 'Critical' {
-  if (levelCm < 100) return 'Critical';
-  if (levelCm < 200) return 'Low';
+// Station-specific status classification
+function classify(levelCm: number, thresholdCm: number, criticalCm: number): 'Normal' | 'Low' | 'Critical' {
+  if (levelCm <= criticalCm) return 'Critical';
+  if (levelCm <= thresholdCm) return 'Low';
   return 'Normal';
 }
 
-// Compare oldest to newest reading; 5cm delta = meaningful trend
+// Compare oldest to newest reading; 3cm delta = meaningful trend
 function computeTrend(history: { val: number }[]): 'up' | 'down' | 'stable' {
   if (history.length < 2) return 'stable';
-  const first = history[0].val;
-  const last = history[history.length - 1].val;
-  const diff = last - first;
-  if (diff > 0.05) return 'up';
-  if (diff < -0.05) return 'down';
+  const diff = history[history.length - 1].val - history[0].val;
+  if (diff > 0.03) return 'up';
+  if (diff < -0.03) return 'down';
   return 'stable';
 }
 
-async function fetchStation(station: string): Promise<{ measurements: { timestamp: string; value: number }[] }> {
+// Pegelonline v2 API returns a bare JSON array — NOT wrapped in { measurements: [...] }
+async function fetchStation(station: string): Promise<{ timestamp: string; value: number }[]> {
   const start = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const url = `${PEGEL_BASE}/${encodeURIComponent(station)}/W/measurements.json?start=${start}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+  const data = await res.json();
+  if (!Array.isArray(data) || data.length === 0) throw new Error('No data');
+  return data;
 }
 
 export function useRhineWaterLevels(refreshIntervalMs = 60 * 60 * 1000) {
@@ -77,10 +80,9 @@ export function useRhineWaterLevels(refreshIntervalMs = 60 * 60 * 1000) {
 
   const fetchAll = useCallback(async () => {
     const results: WaterLevelSite[] = await Promise.all(
-      STATIONS.map(async ({ site, station }) => {
+      STATIONS.map(async ({ site, station, thresholdCm, criticalCm }) => {
         try {
-          const { measurements } = await fetchStation(station);
-          if (!measurements || measurements.length === 0) throw new Error('No data');
+          const measurements = await fetchStation(station);
 
           // Sample 6 evenly-spaced points across the last 24h (oldest → newest)
           const step = Math.max(1, Math.floor(measurements.length / 6));
@@ -89,7 +91,7 @@ export function useRhineWaterLevels(refreshIntervalMs = 60 * 60 * 1000) {
             const d = new Date(m.timestamp);
             const hh = d.getHours().toString().padStart(2, '0');
             const mm = d.getMinutes().toString().padStart(2, '0');
-            return { time: `${hh}:${mm}`, val: Math.round(m.value) / 100 }; // cm → m
+            return { time: `${hh}:${mm}`, val: Math.round(m.value) / 100 };
           });
 
           const latestCm = measurements[measurements.length - 1].value;
@@ -100,21 +102,21 @@ export function useRhineWaterLevels(refreshIntervalMs = 60 * 60 * 1000) {
             station,
             level: latestM,
             trend: computeTrend(history),
-            status: classify(latestCm),
+            status: classify(latestCm, thresholdCm, criticalCm),
             history,
             lastUpdated: new Date().toISOString(),
             isEstimated: false,
           };
         } catch {
-          // Fall back to realistic static baseline — always show data, never blank
+          // Network/API failure — fall back to static baseline, clearly marked as estimated
           const baseline = STATIC_BASELINES[station];
           if (baseline) {
             return {
               site,
               station,
               level: baseline.levelCm / 100,
-              trend: computeTrend(baseline.history),
-              status: classify(baseline.levelCm),
+              trend: 'stable' as const,
+              status: classify(baseline.levelCm, thresholdCm, criticalCm),
               history: baseline.history,
               lastUpdated: new Date().toISOString(),
               isEstimated: true,
@@ -127,11 +129,7 @@ export function useRhineWaterLevels(refreshIntervalMs = 60 * 60 * 1000) {
             level: null,
             trend: 'stable' as const,
             status: 'Normal' as const,
-            history: [
-              { time: '00:00', val: 3.0 }, { time: '04:00', val: 3.0 },
-              { time: '08:00', val: 3.0 }, { time: '12:00', val: 3.0 },
-              { time: '16:00', val: 3.0 }, { time: '20:00', val: 3.0 },
-            ],
+            history: Array.from({ length: 6 }, (_, i) => ({ time: `${(i * 4).toString().padStart(2, '0')}:00`, val: 2.0 })),
             lastUpdated: new Date().toISOString(),
             isEstimated: true,
             error: true,
