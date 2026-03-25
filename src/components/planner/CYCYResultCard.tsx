@@ -73,7 +73,7 @@ function buildExpCopyText(card: ExpCard, result: CYCYExpRunResult): string {
   const modName = card.mod.toLowerCase();
   const lines = [
     'CY/CY EXPORT PLAN',
-    `Loading Date : ${fmt(result.loadingDate)} ${result.loadTime} CET`,
+    `Full Drop Off Date : ${fmt(result.loadingDate)} ${result.loadTime} CET`,
     `Direction    : Inland → Port`,
     '',
     'INLAND TRANSPORT',

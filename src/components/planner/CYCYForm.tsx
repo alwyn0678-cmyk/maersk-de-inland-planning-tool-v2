@@ -309,7 +309,7 @@ export function CYCYForm() {
             </div>
             <div className="space-y-1.5">
               <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                <CalendarIcon className="h-3 w-3" />{isImport ? 'Vessel ETD' : 'Loading Date'}
+                <CalendarIcon className="h-3 w-3" />{isImport ? 'Vessel ETD' : 'Full Drop Off Date'}
               </Label>
               <Input
                 type="date"
