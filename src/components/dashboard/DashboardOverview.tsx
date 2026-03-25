@@ -228,20 +228,20 @@ export function DashboardOverview() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
+    <div className="space-y-5 animate-in fade-in duration-700">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-4xl font-black tracking-tighter text-maersk-dark flex items-center">
+          <h2 className="text-2xl font-black tracking-tighter text-maersk-dark flex items-center">
             Export Capacity Germany
-            <div className="ml-4 flex items-center">
-              <span className="relative flex h-3 w-3">
+            <div className="ml-3 flex items-center">
+              <span className="relative flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
               </span>
-              <span className="ml-2 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600">Live System</span>
+              <span className="ml-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-emerald-600">Live</span>
             </div>
           </h2>
-          <p className="text-slate-700 mt-1 font-bold italic">Maersk Germany · Inland Delivery Planning & Network Intelligence</p>
+          <p className="text-slate-500 mt-0.5 text-xs font-bold">Maersk Germany · Inland Delivery Planning & Network Intelligence</p>
         </div>
         <div className="flex items-center space-x-3">
           <div className="hidden xl:flex items-center space-x-6 mr-6 px-6 py-2 bg-white/40 border border-white/20 rounded-2xl shadow-sm">
@@ -267,17 +267,17 @@ export function DashboardOverview() {
 
       <StatsOverview />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Truck Capacity Forecast */}
-        <Card className="lg:col-span-12 border border-slate-100 bg-white overflow-hidden group rounded-2xl shadow-lg">
-          <CardHeader className="pb-6 border-b border-slate-200/50 bg-white/80">
+        <Card className="lg:col-span-12 border border-slate-100 bg-white overflow-hidden group rounded-2xl shadow-sm">
+          <CardHeader className="pb-4 border-b border-slate-200/50 bg-white/80 pt-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="p-2.5 bg-maersk-blue rounded-xl shadow-lg shadow-maersk-blue/30">
-                  <Truck className="h-5 w-5 text-white" />
+              <div className="flex items-center space-x-2.5">
+                <div className="p-2 bg-maersk-blue rounded-lg shadow-md shadow-maersk-blue/30">
+                  <Truck className="h-4 w-4 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl font-black tracking-tight text-maersk-dark">Export Truck Capacity Forecast</CardTitle>
+                  <CardTitle className="text-base font-black tracking-tight text-maersk-dark">Export Truck Capacity Forecast</CardTitle>
                 </div>
               </div>
               <div className="flex items-center space-x-6">
@@ -321,80 +321,80 @@ export function DashboardOverview() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-4">
-            <div className="space-y-5">
+          <CardContent className="p-3">
+            <div className="space-y-4">
               {truckCapacityData.map((hub) => (
-                <div key={hub.location} className="space-y-3">
+                <div key={hub.location} className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <div className="relative flex h-2.5 w-2.5">
+                    <div className="flex items-center space-x-1.5">
+                      <div className="relative flex h-2 w-2">
                         <span className={cn(
                           "animate-ping absolute inline-flex h-full w-full rounded-full opacity-75",
                           hub.forecast.filter(v => v === 1).length > 10 ? "bg-emerald-400" : "bg-amber-400"
                         )}></span>
                         <span className={cn(
-                          "relative inline-flex rounded-full h-2.5 w-2.5",
+                          "relative inline-flex rounded-full h-2 w-2",
                           hub.forecast.filter(v => v === 1).length > 10 ? "bg-emerald-500" : "bg-amber-500"
                         )}></span>
                       </div>
-                      <span className="text-base font-black text-maersk-dark tracking-tight">{hub.location}</span>
+                      <span className="text-sm font-black text-maersk-dark tracking-tight">{hub.location}</span>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="flex items-baseline space-x-1">
-                        <span className="text-xl font-black text-maersk-dark tracking-tighter">
+                    <div className="flex items-center space-x-2">
+                      <div className="flex items-baseline space-x-0.5">
+                        <span className="text-base font-black text-maersk-dark tracking-tighter">
                           {Math.round((hub.forecast.filter(v => v === 1).length / 15) * 100)}
                         </span>
-                        <span className="text-xs font-black text-slate-500">%</span>
+                        <span className="text-[10px] font-black text-slate-500">%</span>
                       </div>
-                      <div className="h-6 w-px bg-slate-200" />
-                      <Badge variant="secondary" className="bg-maersk-blue text-white border-maersk-blue font-black text-[10px] px-3 py-0.5 rounded-full">
-                        {hub.forecast.filter(v => v === 1).length}/15 days
+                      <div className="h-4 w-px bg-slate-200" />
+                      <Badge variant="secondary" className="bg-maersk-blue text-white border-maersk-blue font-black text-[9px] px-2 py-0 rounded-full">
+                        {hub.forecast.filter(v => v === 1).length}/15d
                       </Badge>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-[repeat(15,minmax(0,1fr))] gap-2">
+                  <div className="grid grid-cols-[repeat(15,minmax(0,1fr))] gap-1.5">
                     {hub.forecast.map((status, i) => (
                       <div key={i} className="flex flex-col items-center group/day">
                         {/* Week Number */}
-                        <div className="h-6 flex items-center justify-center w-full mb-1">
+                        <div className="h-4 flex items-center justify-center w-full mb-0.5">
                           {(i === 0 || days[i].weekNum !== days[i-1].weekNum) ? (
-                            <span className="text-[9px] font-black text-white bg-maersk-blue px-2 py-0.5 rounded-md shadow">
+                            <span className="text-[7px] font-black text-white bg-maersk-blue px-1 py-0 rounded shadow">
                               KW{days[i].weekNum}
                             </span>
                           ) : null}
                         </div>
 
                         {/* Day Name */}
-                        <div className="text-[9px] font-black text-slate-500 mb-1 uppercase tracking-wider group-hover/day:text-maersk-blue transition-colors">
+                        <div className="text-[8px] font-black text-slate-400 mb-0.5 uppercase tracking-wider group-hover/day:text-maersk-blue transition-colors">
                           {days[i].dayName.substring(0, 2)}
                         </div>
 
                         {/* Capacity Block */}
                         <motion.div
-                          whileHover={{ y: -3, scale: 1.05 }}
+                          whileHover={{ y: -2, scale: 1.05 }}
                           onClick={() => handleDayClick(days[i], status)}
                           className={cn(
-                            "w-full h-10 rounded-lg shadow transition-all duration-200 cursor-pointer relative overflow-hidden",
+                            "w-full h-8 rounded-md shadow-sm transition-all duration-200 cursor-pointer relative overflow-hidden",
                             status === 1
                               ? "bg-emerald-500 hover:bg-emerald-400"
                               : "bg-rose-500 hover:bg-rose-400"
                           )}
                         >
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-[10px] font-black text-white">
+                            <span className="text-[9px] font-black text-white">
                               {days[i].date.split('/')[0]}
                             </span>
                           </div>
                           {status === 1 && (
                             <div className="absolute bottom-0.5 right-0.5">
-                              <CheckCircle2 className="h-3 w-3 text-white/70" />
+                              <CheckCircle2 className="h-2.5 w-2.5 text-white/70" />
                             </div>
                           )}
                         </motion.div>
 
                         {/* Month/Day under block */}
-                        <span className="text-[8px] font-bold text-slate-400 mt-0.5 group-hover/day:text-maersk-blue transition-colors">
+                        <span className="text-[7px] font-bold text-slate-400 mt-0.5 group-hover/day:text-maersk-blue transition-colors">
                           {days[i].date.split('/')[1]}/{days[i].date.split('/')[0]}
                         </span>
                       </div>
@@ -402,7 +402,7 @@ export function DashboardOverview() {
                   </div>
 
                   {/* Progress Bar */}
-                  <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(hub.forecast.filter(v => v === 1).length / 15) * 100}%` }}
@@ -420,15 +420,15 @@ export function DashboardOverview() {
         </Card>
 
         {/* Rhine Water Levels Monitor */}
-        <Card className="lg:col-span-12 border-none bg-maersk-dark shadow-2xl overflow-hidden group rounded-2xl">
-          <CardHeader className="pb-6 border-b border-white/10 bg-white/5">
+        <Card className="lg:col-span-12 border-none bg-maersk-dark shadow-xl overflow-hidden group rounded-2xl">
+          <CardHeader className="pb-4 border-b border-white/10 bg-white/5 pt-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-maersk-blue rounded-lg shadow-lg shadow-maersk-blue/40">
-                  <Waves className="h-5 w-5 text-white" />
+              <div className="flex items-center space-x-2.5">
+                <div className="p-1.5 bg-maersk-blue rounded-lg shadow-md shadow-maersk-blue/40">
+                  <Waves className="h-4 w-4 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl font-black tracking-tight text-white drop-shadow-sm">Rhine Water Levels Monitor</CardTitle>
+                  <CardTitle className="text-base font-black tracking-tight text-white drop-shadow-sm">Rhine Water Levels Monitor</CardTitle>
                   <CardDescription className="text-white/80 font-bold">
                     Live PEGEL data via pegelonline.wsv.de{lastRefresh ? ` · Updated ${lastRefresh.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}` : ' · Connecting...'}
                   </CardDescription>
@@ -471,7 +471,6 @@ export function DashboardOverview() {
             ) : (
               <div className="grid md:grid-cols-5 divide-x divide-white/10">
                 {waterLevelData.map((item, i) => {
-                  // Ensure chart always has data — use flat placeholder if empty
                   const chartData = item.history.length >= 2
                     ? item.history
                     : [
@@ -487,9 +486,9 @@ export function DashboardOverview() {
                   const maxVal = Math.max(...chartData.map(d => d.val)) * 1.03;
 
                   return (
-                    <div key={i} className="p-6 hover:bg-white/5 transition-all duration-500 flex flex-col group/site relative">
-                      <div className="flex items-center justify-between mb-4 relative z-10">
-                        <span className="text-xs font-black text-[#42b0d5] uppercase tracking-[0.25em]">{item.site}</span>
+                    <div key={i} className="p-4 hover:bg-white/5 transition-all duration-500 flex flex-col group/site relative">
+                      <div className="flex items-center justify-between mb-2 relative z-10">
+                        <span className="text-[10px] font-black text-[#42b0d5] uppercase tracking-[0.25em]">{item.site}</span>
                         <div className={cn(
                           "px-2 py-0.5 rounded-md font-black text-[9px] uppercase tracking-wider",
                           item.error ? 'bg-white/10 text-white/40' :
@@ -501,11 +500,11 @@ export function DashboardOverview() {
                         </div>
                       </div>
 
-                      <div className="flex items-baseline space-x-1.5 mb-4 relative z-10">
-                        <span className="text-3xl font-black text-white tracking-tighter">
+                      <div className="flex items-baseline space-x-1 mb-2 relative z-10">
+                        <span className="text-xl font-black text-white tracking-tighter">
                           {item.error ? '—' : item.level?.toFixed(2) ?? '—'}
                         </span>
-                        <span className="text-sm font-bold text-white/50">m</span>
+                        <span className="text-xs font-bold text-white/50">m</span>
                         <span className={cn(
                           "ml-auto text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded",
                           item.status === 'Normal' ? 'bg-emerald-500/80 text-white' :
@@ -515,7 +514,7 @@ export function DashboardOverview() {
                       </div>
 
                       {/* Water level chart — always renders */}
-                      <div className="h-24 w-full relative z-10">
+                      <div className="h-16 w-full relative z-10">
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={chartData} margin={{ top: 4, right: 2, left: 2, bottom: 0 }}>
                             <defs>
@@ -573,7 +572,7 @@ export function DashboardOverview() {
                         )}
                       </div>
 
-                      <div className="mt-4 flex items-center justify-between pt-3 border-t border-white/10 relative z-10">
+                      <div className="mt-2 flex items-center justify-between pt-2 border-t border-white/10 relative z-10">
                         <Badge className={cn(
                           "text-[9px] font-black border-none px-2.5 py-0.5 uppercase tracking-widest",
                           item.error ? 'bg-white/10 text-white/40' :

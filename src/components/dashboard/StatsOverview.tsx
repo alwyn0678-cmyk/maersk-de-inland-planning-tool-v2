@@ -64,45 +64,32 @@ export function StatsOverview() {
   const stats = getStats();
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
       {stats.map((stat, i) => (
         <motion.div
           key={stat.label}
-          initial={{ opacity: 0, scale: 0.95, y: 12 }}
+          initial={{ opacity: 0, scale: 0.95, y: 8 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{
-            delay: i * 0.08,
-            duration: 0.45,
-            ease: [0.22, 1, 0.36, 1]
-          }}
-          whileHover={{ y: -4, scale: 1.01 }}
+          transition={{ delay: i * 0.06, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          whileHover={{ y: -2, scale: 1.005 }}
         >
           <Card className="bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 group rounded-xl overflow-hidden">
-            <CardContent className="p-4 relative">
-              {/* Shimmer Effect on Hover */}
+            <CardContent className="p-3 relative">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-maersk-blue/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
 
-              {/* Pulse for high capacity */}
-              {parseInt(stat.value) > 80 && (
-                <div className="absolute top-2.5 right-2.5 flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600"></span>
+              <div className="flex items-start justify-between mb-2">
+                <div className={`p-1.5 rounded-lg ${stat.bg} ${stat.color} transition-all group-hover:scale-105 duration-200`}>
+                  <stat.icon className="h-3.5 w-3.5" />
                 </div>
-              )}
-
-              <div className="flex items-start justify-between mb-3">
-                <div className={`p-2 rounded-lg ${stat.bg} ${stat.color} shadow-sm transition-all group-hover:scale-105 duration-200`}>
-                  <stat.icon className="h-4 w-4" />
-                </div>
-                <div className="flex flex-col items-end space-y-1">
-                  <div className={`flex items-center space-x-1 text-[8px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded-full border ${
+                <div className="flex flex-col items-end gap-0.5">
+                  <div className={`flex items-center space-x-0.5 text-[7px] font-black uppercase tracking-wide px-1 py-0.5 rounded-full border ${
                     stat.trend === 'up' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700'
                   }`}>
-                    {stat.trend === 'up' ? <TrendingUp className="h-2.5 w-2.5" /> : <TrendingDown className="h-2.5 w-2.5" />}
+                    {stat.trend === 'up' ? <TrendingUp className="h-2 w-2" /> : <TrendingDown className="h-2 w-2" />}
                     <span>{stat.change}</span>
                   </div>
                   <span className={cn(
-                    "text-[8px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded border",
+                    "text-[7px] font-black uppercase tracking-wide px-1 py-0.5 rounded border",
                     stat.status.includes('Full') ? "bg-emerald-600 text-white border-emerald-700" :
                     stat.status.includes('Medium') ? "bg-amber-500 text-white border-amber-600" :
                     stat.status === 'Low' ? "bg-amber-500 text-white border-amber-600" :
@@ -113,32 +100,31 @@ export function StatsOverview() {
                 </div>
               </div>
 
-              <div className="space-y-0.5">
-                <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.15em] group-hover:text-maersk-blue transition-colors duration-200">{stat.label}</p>
-                <div className="flex items-baseline space-x-1">
-                  <h3 className="text-2xl font-black text-maersk-dark tracking-tighter group-hover:text-maersk-blue transition-colors duration-200">
+              <div className="space-y-0">
+                <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.12em] group-hover:text-maersk-blue transition-colors duration-200">{stat.label}</p>
+                <div className="flex items-baseline space-x-0.5">
+                  <h3 className="text-xl font-black text-maersk-dark tracking-tighter group-hover:text-maersk-blue transition-colors duration-200">
                     {stat.value === '—' ? '—' : stat.value.replace('%', '').replace('m', '')}
                   </h3>
                   {stat.value !== '—' && (
-                    <span className="text-sm font-black text-slate-500">{stat.value.includes('%') ? '%' : 'm'}</span>
+                    <span className="text-xs font-black text-slate-500">{stat.value.includes('%') ? '%' : 'm'}</span>
                   )}
                 </div>
               </div>
 
               {/* Sparkline */}
-              <div className="mt-3 h-8 flex items-end space-x-0.5">
+              <div className="mt-2 h-6 flex items-end space-x-0.5">
                 {stat.chart.map((val, idx) => (
                   <motion.div
                     key={idx}
                     initial={{ height: 0 }}
                     animate={{ height: `${(val / (stat.value.includes('m') ? 4 : 100)) * 100}%` }}
-                    transition={{ delay: 0.3 + (idx * 0.06), duration: 0.7, ease: "circOut" }}
+                    transition={{ delay: 0.2 + (idx * 0.05), duration: 0.6, ease: "circOut" }}
                     className={`flex-1 rounded-sm ${stat.color.replace('text', 'bg')} opacity-25 group-hover:opacity-70 transition-all duration-300`}
                   />
                 ))}
               </div>
 
-              {/* Bottom Accent Line */}
               <div className={cn(
                 "absolute bottom-0 left-0 h-0.5 transition-all duration-400 ease-out group-hover:w-full w-0",
                 stat.color.replace('text', 'bg')
