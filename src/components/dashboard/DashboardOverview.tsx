@@ -298,15 +298,20 @@ export function DashboardOverview() {
 
             {/* Centre — Maersk star watermark filling the gap */}
             <div className="hidden md:flex flex-1 items-center justify-center pointer-events-none select-none">
+              {/*
+                Accurate 7-pointed star (heptagram):
+                outer R=47, inner r=17, center (50,50), first point at -90° (straight up).
+                Outer points at -90° + k×(360°/7), inner points at -90° + (180°/7) + k×(360°/7).
+              */}
               <svg
-                width="210" height="210"
+                width="220" height="220"
                 viewBox="0 0 100 100"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                style={{ opacity: 0.07, filter: 'blur(0.6px)' }}
+                style={{ opacity: 0.18 }}
               >
                 <path
-                  d="M50 5 L57 35 L85 20 L67 45 L97 47 L70 60 L85 88 L55 72 L52 100 L45 72 L15 88 L30 60 L3 47 L33 45 L15 20 L43 35 Z"
+                  d="M50,3 L57.4,34.7 L86.7,20.7 L66.6,46.2 L95.8,60.5 L63.3,60.6 L70.4,92.3 L50,67 L29.6,92.3 L36.7,60.6 L4.2,60.5 L33.4,46.2 L13.3,20.7 L42.6,34.7 Z"
                   fill="white"
                 />
               </svg>
