@@ -14,37 +14,47 @@ export function ImportPlanner() {
   return (
     <div className="space-y-5 pb-10">
       {/* Page header */}
-      <div className="flex items-center justify-between">
-        <div className="relative pl-4">
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-10 bg-maersk-blue rounded-full shadow-[0_0_10px_rgba(66,176,213,0.6)]" />
-          <h2 className="text-3xl font-black tracking-tighter text-maersk-dark uppercase italic leading-tight">
-            Import <span className="text-maersk-blue not-italic">Booking</span>
-          </h2>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Port → Inland Delivery</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {impRunResult && !impRunResult.error && (
-            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-white border border-slate-100 rounded-xl text-xs font-bold text-slate-500 shadow-sm">
-              <span className="font-mono font-black text-maersk-dark">{impRunResult.zip}</span>
-              <span className="text-slate-200">·</span>
-              <span>{impRunResult.portName}</span>
-              <span className="text-slate-200">·</span>
-              <span>{fmtS(impRunResult.vesselETD)}</span>
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#001829] via-[#00243d] to-[#001829] border border-maersk-blue/20 shadow-lg mb-1">
+        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'repeating-linear-gradient(90deg,#fff 0,#fff 1px,transparent 0,transparent 28px),repeating-linear-gradient(180deg,#fff 0,#fff 1px,transparent 0,transparent 28px)' }} />
+        <div className="absolute right-0 top-0 h-full w-64 bg-gradient-to-l from-[#42b0d5]/8 to-transparent pointer-events-none" />
+        <div className="relative z-10 flex items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-4">
+            <div className="p-2.5 bg-[#42b0d5]/15 rounded-xl border border-[#42b0d5]/20">
+              <Anchor className="h-5 w-5 text-[#42b0d5]" />
             </div>
-          )}
-          <button
-            onClick={() => setFilterOpen(true)}
-            className={cn(
-              'flex items-center gap-2 px-4 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest transition-all duration-200',
-              impRunResult
-                ? 'bg-white border border-slate-200 text-slate-600 hover:border-maersk-blue/40 hover:text-maersk-blue shadow-sm'
-                : 'bg-maersk-blue text-white shadow-lg shadow-maersk-blue/30 hover:bg-maersk-blue/90'
+            <div>
+              <div className="flex items-center gap-2.5 mb-0.5">
+                <h2 className="text-xl font-black text-white uppercase tracking-tight leading-none">
+                  Import <span className="text-[#42b0d5]">Booking</span>
+                </h2>
+                <span className="text-[9px] font-black text-[#42b0d5]/50 uppercase tracking-widest border border-[#42b0d5]/20 px-1.5 py-0.5 rounded">Beta</span>
+              </div>
+              <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.25em]">Port → Inland Depot → Customer Delivery</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            {impRunResult && !impRunResult.error && (
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white/8 border border-white/10 rounded-xl text-xs font-bold text-white/60">
+                <span className="font-mono font-black text-white/80">{impRunResult.zip}</span>
+                <span className="text-white/20">·</span>
+                <span>{impRunResult.portName}</span>
+                <span className="text-white/20">·</span>
+                <span>{fmtS(impRunResult.vesselETD)}</span>
+              </div>
             )}
-          >
-            <SlidersHorizontal className="h-3.5 w-3.5" />
-            {impRunResult ? 'Change Filters' : 'Configure Search'}
-          </button>
+            <button
+              onClick={() => setFilterOpen(true)}
+              className={cn(
+                'flex items-center gap-2 px-4 py-2 rounded-xl font-black text-xs uppercase tracking-widest transition-all duration-200',
+                impRunResult
+                  ? 'bg-white/10 border border-white/15 text-white/70 hover:bg-white/15 hover:text-white'
+                  : 'bg-[#42b0d5] text-white shadow-lg shadow-[#42b0d5]/30 hover:bg-[#42b0d5]/90'
+              )}
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" />
+              {impRunResult ? 'Change Filters' : 'Configure Search'}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -55,20 +65,26 @@ export function ImportPlanner() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="py-24 text-center bg-white border border-slate-100 rounded-2xl shadow-sm"
+          className="relative overflow-hidden py-20 text-center bg-white border border-slate-100 rounded-2xl shadow-sm"
         >
-          <div className="inline-flex p-5 bg-maersk-blue/5 rounded-2xl mb-5">
-            <Anchor className="h-12 w-12 text-maersk-blue/25" />
+          {/* subtle grid bg */}
+          <div className="absolute inset-0 opacity-[0.025]" style={{ backgroundImage: 'repeating-linear-gradient(90deg,#0063a5 0,#0063a5 1px,transparent 0,transparent 32px),repeating-linear-gradient(180deg,#0063a5 0,#0063a5 1px,transparent 0,transparent 32px)' }} />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-maersk-blue/5 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-maersk-blue/5 rounded-full blur-3xl pointer-events-none translate-y-1/2 -translate-x-1/2" />
+          <div className="relative z-10">
+            <div className="inline-flex p-5 bg-maersk-blue/8 rounded-2xl border border-maersk-blue/15 mb-5 shadow-inner">
+              <Anchor className="h-10 w-10 text-maersk-blue/40" />
+            </div>
+            <p className="text-base font-black text-slate-500 uppercase tracking-widest mb-1.5">Import Booking</p>
+            <p className="text-sm text-slate-300 font-bold mb-8 max-w-xs mx-auto">Enter postcode, port &amp; vessel ETD to calculate the best inland schedule</p>
+            <button
+              onClick={() => setFilterOpen(true)}
+              className="inline-flex items-center gap-2 px-8 py-3 bg-maersk-blue text-white rounded-xl font-black text-sm uppercase tracking-wider shadow-lg shadow-maersk-blue/30 hover:bg-maersk-blue/90 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              Configure Search
+            </button>
           </div>
-          <p className="text-base font-black text-slate-400 uppercase tracking-widest mb-2">Import Booking Ready</p>
-          <p className="text-sm text-slate-300 font-bold mb-7">Enter postcode, port &amp; vessel date to find the best inland route</p>
-          <button
-            onClick={() => setFilterOpen(true)}
-            className="inline-flex items-center gap-2 px-8 py-3 bg-maersk-blue text-white rounded-xl font-black text-sm uppercase tracking-wider shadow-lg shadow-maersk-blue/30 hover:bg-maersk-blue/90 transition-all hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <SlidersHorizontal className="h-4 w-4" />
-            Configure Search
-          </button>
         </motion.div>
       )}
 

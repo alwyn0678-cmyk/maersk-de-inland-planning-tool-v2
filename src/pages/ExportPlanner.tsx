@@ -13,37 +13,48 @@ export function ExportPlanner() {
 
   return (
     <div className="space-y-5 pb-10">
-      <div className="flex items-center justify-between">
-        <div className="relative pl-4">
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-10 bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.6)]" />
-          <h2 className="text-3xl font-black tracking-tighter text-maersk-dark uppercase italic leading-tight">
-            Export <span className="text-emerald-500 not-italic">Booking</span>
-          </h2>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Inland Collection → Port</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {expRunResult && !expRunResult.error && !expRunResult.isrRequired && !expRunResult.notServicedAntwerp && (
-            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-white border border-slate-100 rounded-xl text-xs font-bold text-slate-500 shadow-sm">
-              <span className="font-mono font-black text-maersk-dark">{expRunResult.zip}</span>
-              <span className="text-slate-200">·</span>
-              <span>{expRunResult.termCode}</span>
-              <span className="text-slate-200">·</span>
-              <span>{fmtS(expRunResult.loadingDate)}</span>
+      {/* Page header */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#001a0e] via-[#002d1a] to-[#001a0e] border border-emerald-500/20 shadow-lg mb-1">
+        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'repeating-linear-gradient(90deg,#fff 0,#fff 1px,transparent 0,transparent 28px),repeating-linear-gradient(180deg,#fff 0,#fff 1px,transparent 0,transparent 28px)' }} />
+        <div className="absolute right-0 top-0 h-full w-64 bg-gradient-to-l from-emerald-500/8 to-transparent pointer-events-none" />
+        <div className="relative z-10 flex items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-4">
+            <div className="p-2.5 bg-emerald-500/15 rounded-xl border border-emerald-500/20">
+              <Send className="h-5 w-5 text-emerald-400" />
             </div>
-          )}
-          <button
-            onClick={() => setFilterOpen(true)}
-            className={cn(
-              'flex items-center gap-2 px-4 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest transition-all duration-200',
-              expRunResult
-                ? 'bg-white border border-slate-200 text-slate-600 hover:border-emerald-500/40 hover:text-emerald-600 shadow-sm'
-                : 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-600'
+            <div>
+              <div className="flex items-center gap-2.5 mb-0.5">
+                <h2 className="text-xl font-black text-white uppercase tracking-tight leading-none">
+                  Export <span className="text-emerald-400">Booking</span>
+                </h2>
+                <span className="text-[9px] font-black text-emerald-400/50 uppercase tracking-widest border border-emerald-500/20 px-1.5 py-0.5 rounded">Beta</span>
+              </div>
+              <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.25em]">Inland Collection → Depot → Port Terminal</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            {expRunResult && !expRunResult.error && !expRunResult.isrRequired && !expRunResult.notServicedAntwerp && (
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white/8 border border-white/10 rounded-xl text-xs font-bold text-white/60">
+                <span className="font-mono font-black text-white/80">{expRunResult.zip}</span>
+                <span className="text-white/20">·</span>
+                <span>{expRunResult.termCode}</span>
+                <span className="text-white/20">·</span>
+                <span>{fmtS(expRunResult.loadingDate)}</span>
+              </div>
             )}
-          >
-            <SlidersHorizontal className="h-3.5 w-3.5" />
-            {expRunResult ? 'Change Filters' : 'Configure Search'}
-          </button>
+            <button
+              onClick={() => setFilterOpen(true)}
+              className={cn(
+                'flex items-center gap-2 px-4 py-2 rounded-xl font-black text-xs uppercase tracking-widest transition-all duration-200',
+                expRunResult
+                  ? 'bg-white/10 border border-white/15 text-white/70 hover:bg-white/15 hover:text-white'
+                  : 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-600'
+              )}
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" />
+              {expRunResult ? 'Change Filters' : 'Configure Search'}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -53,20 +64,25 @@ export function ExportPlanner() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="py-24 text-center bg-white border border-slate-100 rounded-2xl shadow-sm"
+          className="relative overflow-hidden py-20 text-center bg-white border border-slate-100 rounded-2xl shadow-sm"
         >
-          <div className="inline-flex p-5 bg-emerald-500/5 rounded-2xl mb-5">
-            <Send className="h-12 w-12 text-emerald-500/25" />
+          <div className="absolute inset-0 opacity-[0.025]" style={{ backgroundImage: 'repeating-linear-gradient(90deg,#10b981 0,#10b981 1px,transparent 0,transparent 32px),repeating-linear-gradient(180deg,#10b981 0,#10b981 1px,transparent 0,transparent 32px)' }} />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none translate-y-1/2 -translate-x-1/2" />
+          <div className="relative z-10">
+            <div className="inline-flex p-5 bg-emerald-500/8 rounded-2xl border border-emerald-500/15 mb-5 shadow-inner">
+              <Send className="h-10 w-10 text-emerald-500/40" />
+            </div>
+            <p className="text-base font-black text-slate-500 uppercase tracking-widest mb-1.5">Export Booking</p>
+            <p className="text-sm text-slate-300 font-bold mb-8 max-w-xs mx-auto">Enter postcode, terminal &amp; loading date to find the earliest vessel window</p>
+            <button
+              onClick={() => setFilterOpen(true)}
+              className="inline-flex items-center gap-2 px-8 py-3 bg-emerald-500 text-white rounded-xl font-black text-sm uppercase tracking-wider shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              Configure Search
+            </button>
           </div>
-          <p className="text-base font-black text-slate-400 uppercase tracking-widest mb-2">Export Booking Ready</p>
-          <p className="text-sm text-slate-300 font-bold mb-7">Enter postcode, terminal &amp; loading date to find the best export route</p>
-          <button
-            onClick={() => setFilterOpen(true)}
-            className="inline-flex items-center gap-2 px-8 py-3 bg-emerald-500 text-white rounded-xl font-black text-sm uppercase tracking-wider shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 transition-all hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <SlidersHorizontal className="h-4 w-4" />
-            Configure Search
-          </button>
         </motion.div>
       )}
 

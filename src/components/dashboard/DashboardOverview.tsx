@@ -9,7 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter
 } from '../ui/dialog';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -18,35 +17,25 @@ import { StatsOverview } from './StatsOverview';
 import { TerminalCongestionOverview } from './TerminalCongestionOverview';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import {
-  TrendingUp,
-  TrendingDown,
-  Map as MapIcon,
-  Clock,
-  AlertTriangle,
-  ArrowUpRight,
   Activity,
-  Calendar,
-  Package,
-  Globe,
-  Zap,
-  Ship,
-  Anchor,
-  Newspaper,
   Waves,
-  Timer,
   Truck,
-  ChevronRight,
   Info,
   ExternalLink,
-  MapPin,
   CheckCircle2,
   Download,
   Upload,
+  Clock,
+  MapPin,
+  Anchor,
   Train,
   ArrowRight,
   Star,
   ChevronLeft,
-  Loader2
+  Loader2,
+  TrendingUp,
+  TrendingDown,
+  Minus,
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { Button } from '../ui/button';
@@ -65,24 +54,6 @@ import {
   Cell
 } from 'recharts';
 
-const TERMINAL_OPTIONS = [
-  { value: 'NLROTTM|5|RTM',  label: 'APM Terminals Rotterdam',    port: 'RTM' },
-  { value: 'NLROTWG|7|RTM',  label: 'Rotterdam World Gateway',    port: 'RTM' },
-  { value: 'NLROT01|8|RTM',  label: 'Hutchison Ports Delta II',   port: 'RTM' },
-  { value: 'NLROT21|8|RTM',  label: 'ECT Delta Terminal',         port: 'RTM' },
-  { value: 'BEANT869|7|ANR', label: 'PSA Europa Terminal (ANR)',  port: 'ANR' },
-  { value: 'BEANT913|7|ANR', label: 'PSA Noordzee Terminal (ANR)', port: 'ANR' },
-];
-
-function containerToSizeType(ct: string): { size: string; type: string } {
-  if (ct === '20DC') return { size: '20', type: 'dc' };
-  if (ct === '40DC') return { size: '40', type: 'dc' };
-  if (ct === '40HC') return { size: '40', type: 'hc' };
-  if (ct === '20RF') return { size: '20', type: 'reefer' };
-  if (ct === '40RF') return { size: '40', type: 'reefer' };
-  if (ct === 'IMO')  return { size: '40', type: 'imo' };
-  return { size: '40', type: 'hc' };
-}
 
 function fmtDate(d: Date): string {
   return d.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
@@ -117,11 +88,30 @@ const days = allDays.map(d => ({
   weekNum: getWeekNumber(d)
 }));
 
+const TERMINAL_OPTIONS = [
+  { value: 'NLROTTM|5|RTM',  label: 'APM Terminals Rotterdam',    port: 'RTM' },
+  { value: 'NLROTWG|7|RTM',  label: 'Rotterdam World Gateway',    port: 'RTM' },
+  { value: 'NLROT01|8|RTM',  label: 'Hutchison Ports Delta II',   port: 'RTM' },
+  { value: 'NLROT21|8|RTM',  label: 'ECT Delta Terminal',         port: 'RTM' },
+  { value: 'BEANT869|7|ANR', label: 'PSA Europa Terminal (ANR)',  port: 'ANR' },
+  { value: 'BEANT913|7|ANR', label: 'PSA Noordzee Terminal (ANR)', port: 'ANR' },
+];
+
+function containerToSizeType(ct: string): { size: string; type: string } {
+  if (ct === '20DC') return { size: '20', type: 'dc' };
+  if (ct === '40DC') return { size: '40', type: 'dc' };
+  if (ct === '40HC') return { size: '40', type: 'hc' };
+  if (ct === '20RF') return { size: '20', type: 'reefer' };
+  if (ct === '40RF') return { size: '40', type: 'reefer' };
+  if (ct === 'IMO')  return { size: '40', type: 'imo' };
+  return { size: '40', type: 'hc' };
+}
+
 // waterLevelData is now fetched live via useRhineWaterLevels hook
 
 export function DashboardOverview() {
   const { setActiveTab, setExportRequest, setExpRunResult, truckCapacityData, setTruckCapacityData } = usePlannerStore();
-  const { data: waterLevelData, loading: waterLoading, lastRefresh } = useRhineWaterLevels(5 * 60 * 1000);
+  const { data: waterLevelData, loading: waterLoading, lastRefresh } = useRhineWaterLevels(30 * 60 * 1000);
   const [selectedDay, setSelectedDay] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [bookingStep, setBookingStep] = useState<'form' | 'results'>('form');
@@ -141,6 +131,46 @@ export function DashboardOverview() {
       setExpResult(null);
       setIsDialogOpen(true);
     }
+  };
+
+  const handleFindSchedules = () => {
+    if (!bookingInfo.zipcode || !selectedDay) return;
+    setBookingLoading(true);
+    const [dd, mm] = selectedDay.date.split('/');
+    const loadDate = new Date(new Date().getFullYear(), parseInt(mm) - 1, parseInt(dd)).toISOString().split('T')[0];
+    const { size, type } = containerToSizeType(bookingInfo.containerType);
+    const result = expRun({
+      zip: bookingInfo.zipcode,
+      size,
+      type,
+      loadDate,
+      loadTime: bookingInfo.loadingTime,
+      terminalValue: bookingInfo.terminalValue,
+    });
+    setExportRequest({
+      postcode: bookingInfo.zipcode,
+      containerType: bookingInfo.containerType as any,
+      loadingDate: loadDate,
+      loadingTime: bookingInfo.loadingTime,
+    });
+    setExpRunResult(result);
+    setExpResult(result);
+    setBookingStep('results');
+    setBookingLoading(false);
+  };
+
+  const handleOpenInPlanner = () => {
+    if (!expResult || !selectedDay) return;
+    const [dd, mm] = selectedDay.date.split('/');
+    setExportRequest({
+      postcode: bookingInfo.zipcode,
+      containerType: bookingInfo.containerType as any,
+      loadingDate: new Date(new Date().getFullYear(), parseInt(mm) - 1, parseInt(dd)).toISOString().split('T')[0],
+      loadingTime: bookingInfo.loadingTime,
+    });
+    setExpRunResult(expResult);
+    setIsDialogOpen(false);
+    setActiveTab('export');
   };
 
   const handleDownloadTemplate = () => {
@@ -185,87 +215,129 @@ export function DashboardOverview() {
     reader.readAsArrayBuffer(file);
   };
 
-  const handleFindSchedules = () => {
-    if (!bookingInfo.zipcode || !selectedDay) return;
-    setBookingLoading(true);
-    const [dd, mm] = selectedDay.date.split('/');
-    const loadDate = new Date(new Date().getFullYear(), parseInt(mm) - 1, parseInt(dd)).toISOString().split('T')[0];
-    const { size, type } = containerToSizeType(bookingInfo.containerType);
-    setTimeout(() => {
-      const result = expRun({
-        zip: bookingInfo.zipcode,
-        size,
-        type,
-        loadDate,
-        loadTime: bookingInfo.loadingTime,
-        terminalValue: bookingInfo.terminalValue,
-      });
-      setExportRequest({
-        postcode: bookingInfo.zipcode,
-        containerType: bookingInfo.containerType as any,
-        loadingDate: loadDate,
-        loadingTime: bookingInfo.loadingTime,
-      });
-      setExpRunResult(result);
-      setIsDialogOpen(false);
-      setBookingLoading(false);
-      setActiveTab('export');
-    }, 600);
-  };
-
-  const handleOpenInPlanner = () => {
-    if (!expResult || !selectedDay) return;
-    const [dd, mm] = selectedDay.date.split('/');
-    setExportRequest({
-      postcode: bookingInfo.zipcode,
-      containerType: bookingInfo.containerType as any,
-      loadingDate: new Date(new Date().getFullYear(), parseInt(mm) - 1, parseInt(dd)).toISOString().split('T')[0],
-      loadingTime: bookingInfo.loadingTime,
-    });
-    setExpRunResult(expResult);
-    setIsDialogOpen(false);
-    setActiveTab('export');
-  };
-
   return (
     <div className="space-y-5 animate-in fade-in duration-700">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-black tracking-tighter text-maersk-dark flex items-center">
-            Export Capacity Germany
-            <div className="ml-3 flex items-center">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-              </span>
-              <span className="ml-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-emerald-600">Live</span>
+
+      {/* ── Hero Banner ─────────────────────────────────────────────────── */}
+      <div className="relative overflow-hidden rounded-2xl shadow-xl">
+        {/* Layered gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#001829] via-[#002d52] to-[#00437a]" />
+        {/* Subtle grid */}
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+          }}
+        />
+        {/* Glow blobs */}
+        <div className="absolute -right-20 -top-16 h-72 w-72 rounded-full bg-[#42b0d5]/15 blur-3xl pointer-events-none" />
+        <div className="absolute -left-10 -bottom-8 h-44 w-44 rounded-full bg-maersk-blue/20 blur-2xl pointer-events-none" />
+        {/* Bottom accent line */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#42b0d5]/40 to-transparent" />
+
+        <div className="relative z-10 px-7 pt-6 pb-6">
+          {/* Live pill + Maersk logo row */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/8 border border-white/12">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
+              <span className="text-[8px] font-black text-white/50 uppercase tracking-[0.25em]">Live Data</span>
             </div>
-          </h2>
-          <p className="text-slate-500 mt-0.5 text-xs font-bold">Maersk Germany · Inland Delivery Planning & Network Intelligence</p>
-        </div>
-        <div className="flex items-center space-x-3">
-          <div className="hidden xl:flex items-center space-x-6 mr-6 px-6 py-2 bg-white/40 border border-white/20 rounded-2xl shadow-sm">
-            <div className="flex flex-col">
-              <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Network Load</span>
-              <span className="text-sm font-black text-maersk-dark">74.2%</span>
-            </div>
-            <div className="h-8 w-px bg-slate-300" />
-            <div className="flex flex-col">
-              <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Active Assets</span>
-              <span className="text-sm font-black text-maersk-dark">1,248</span>
+            {/* Maersk logo — 7-pointed star + wordmark */}
+            <div className="flex items-center gap-2.5 opacity-80">
+              <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M50 5 L57 35 L85 20 L67 45 L97 47 L70 60 L85 88 L55 72 L52 100 L45 72 L15 88 L30 60 L3 47 L33 45 L15 20 L43 35 Z"
+                  fill="white"
+                  fillOpacity="0.9"
+                />
+              </svg>
+              <div>
+                <div className="text-[11px] font-black text-white tracking-[0.15em] uppercase">Maersk</div>
+                <div className="text-[8px] font-bold text-white/40 uppercase tracking-widest leading-none">Germany</div>
+              </div>
             </div>
           </div>
-          <Button variant="outline" className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-sm rounded-xl font-bold">
-            <Calendar className="h-4 w-4 mr-2" />
-            March 2026
-          </Button>
-          <Button className="bg-maersk-dark text-white hover:bg-maersk-blue shadow-xl shadow-maersk-dark/20 rounded-xl transition-all duration-300 font-bold">
-            Export Report
-          </Button>
+
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            {/* Left — title */}
+            <div>
+              <h1 className="text-4xl font-black tracking-tighter text-white leading-[1.05]">
+                Inland Operations
+                <br />
+                <span className="text-[#42b0d5]">Export Truck Capacity</span>
+              </h1>
+              <p className="text-sm text-white/40 mt-3 leading-relaxed max-w-md">
+                Real-time export capacity, Rhine water levels, and terminal congestion across Maersk Germany's inland network.
+              </p>
+            </div>
+
+            {/* Right — stat chips */}
+            <div className="flex flex-row md:flex-col gap-2 flex-none">
+              <motion.div
+                initial={{ opacity: 0, x: 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+                className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-white/8 border border-white/10"
+              >
+                <div className="p-1.5 rounded-lg bg-[#42b0d5]/20">
+                  <Truck className="h-3.5 w-3.5 text-[#42b0d5]" />
+                </div>
+                <div>
+                  <div className="text-sm font-black text-white tracking-tight">3 Active Hubs</div>
+                  <div className="text-[8px] text-white/30 uppercase tracking-widest">Germany</div>
+                </div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, x: 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.18 }}
+                className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-white/8 border border-white/10"
+              >
+                <div className="p-1.5 rounded-lg bg-blue-500/20">
+                  <Waves className="h-3.5 w-3.5 text-[#42b0d5]" />
+                </div>
+                <div>
+                  <div className="text-sm font-black text-white tracking-tight">5 Rhine Gauges</div>
+                  <div className="text-[8px] text-white/30 uppercase tracking-widest">Live PEGEL</div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+
+          {/* Route flow strip */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="mt-5 flex items-center gap-2"
+          >
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/6 border border-white/10">
+              <MapPin className="h-3 w-3 text-white/35" />
+              <span className="text-[10px] font-black text-white/40 uppercase tracking-wide">Customer</span>
+            </div>
+            <div className="flex-1 flex items-center">
+              <div className="flex-1 h-px bg-gradient-to-r from-white/10 to-white/20" />
+              <ArrowRight className="h-3 w-3 text-white/20 flex-none mx-1" />
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#42b0d5]/15 border border-[#42b0d5]/25">
+              <Truck className="h-3 w-3 text-[#42b0d5]" />
+              <span className="text-[10px] font-black text-[#42b0d5] uppercase tracking-wide">Inland Hub</span>
+            </div>
+            <div className="flex-1 flex items-center">
+              <div className="flex-1 h-px bg-gradient-to-r from-white/20 to-white/10" />
+              <ArrowRight className="h-3 w-3 text-white/20 flex-none mx-1" />
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/6 border border-white/10">
+              <Anchor className="h-3 w-3 text-white/35" />
+              <span className="text-[10px] font-black text-white/40 uppercase tracking-wide">Port</span>
+            </div>
+          </motion.div>
         </div>
       </div>
 
-      <StatsOverview />
+      <StatsOverview waterLevelData={waterLevelData} />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Truck Capacity Forecast */}
@@ -371,11 +443,10 @@ export function DashboardOverview() {
                         </div>
 
                         {/* Capacity Block */}
-                        <motion.div
-                          whileHover={{ y: -2, scale: 1.05 }}
+                        <div
                           onClick={() => handleDayClick(days[i], status)}
                           className={cn(
-                            "w-full h-8 rounded-md shadow-sm transition-all duration-200 cursor-pointer relative overflow-hidden",
+                            "w-full h-8 rounded-md shadow-sm transition-transform duration-150 hover:-translate-y-0.5 hover:scale-105 cursor-pointer relative overflow-hidden",
                             status === 1
                               ? "bg-emerald-500 hover:bg-emerald-400"
                               : "bg-rose-500 hover:bg-rose-400"
@@ -391,7 +462,7 @@ export function DashboardOverview() {
                               <CheckCircle2 className="h-2.5 w-2.5 text-white/70" />
                             </div>
                           )}
-                        </motion.div>
+                        </div>
 
                         {/* Month/Day under block */}
                         <span className="text-[7px] font-bold text-slate-400 mt-0.5 group-hover/day:text-maersk-blue transition-colors">
@@ -486,17 +557,30 @@ export function DashboardOverview() {
                   const maxVal = Math.max(...chartData.map(d => d.val)) * 1.03;
 
                   return (
-                    <div key={i} className="p-5 hover:bg-white/5 transition-all duration-500 flex flex-col group/site relative">
+                    <div key={i} className="p-5 hover:bg-white/5 transition-colors duration-200 flex flex-col group/site relative">
                       <div className="flex items-center justify-between mb-2.5 relative z-10">
-                        <span className="text-[11px] font-black text-[#42b0d5] uppercase tracking-[0.25em]">{item.site}</span>
+                        <div>
+                          <span className="text-[11px] font-black text-[#42b0d5] uppercase tracking-[0.25em]">{item.site}</span>
+                          {item.isEstimated && (
+                            <span className="ml-1.5 text-[7px] font-black text-white/25 uppercase tracking-widest">est.</span>
+                          )}
+                        </div>
                         <div className={cn(
-                          "px-2 py-0.5 rounded-md font-black text-[9px] uppercase tracking-wider",
+                          "flex items-center gap-1 px-2 py-0.5 rounded-md font-black text-[9px] uppercase tracking-wider",
                           item.error ? 'bg-white/10 text-white/40' :
                           item.trend === 'up' ? 'bg-emerald-500 text-white' :
                           item.trend === 'down' ? 'bg-rose-500 text-white' :
                           'bg-slate-600 text-white'
                         )}>
-                          {item.error ? 'offline' : item.trend}
+                          {item.error ? (
+                            'offline'
+                          ) : item.trend === 'up' ? (
+                            <><TrendingUp className="h-2.5 w-2.5" /> rising</>
+                          ) : item.trend === 'down' ? (
+                            <><TrendingDown className="h-2.5 w-2.5" /> falling</>
+                          ) : (
+                            <><Minus className="h-2.5 w-2.5" /> stable</>
+                          )}
                         </div>
                       </div>
 
@@ -507,10 +591,11 @@ export function DashboardOverview() {
                         <span className="text-sm font-bold text-white/50">m</span>
                         <span className={cn(
                           "ml-auto text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded",
-                          item.status === 'Normal' ? 'bg-emerald-500/80 text-white' :
-                          item.status === 'Low' ? 'bg-amber-500/80 text-white' :
-                          'bg-rose-500/80 text-white'
-                        )}>{item.status}</span>
+                          item.error ? 'bg-white/10 text-white/30' :
+                          item.status === 'Normal' ? 'bg-emerald-500 text-white' :
+                          item.status === 'Low' ? 'bg-amber-500 text-white' :
+                          'bg-rose-600 text-white'
+                        )}>{item.error ? '—' : item.status}</span>
                       </div>
 
                       {/* Water level chart — always renders */}
@@ -561,7 +646,7 @@ export function DashboardOverview() {
                               fillOpacity={1}
                               fill={`url(#wl-${i})`}
                               dot={false}
-                              animationDuration={1200}
+                              isAnimationActive={false}
                             />
                           </AreaChart>
                         </ResponsiveContainer>

@@ -34,7 +34,7 @@ function containerToSizeType(ct: string): { size: string; type: string } {
 export function ImportForm({ onSuccess }: { onSuccess?: () => void }) {
   const { importRequest, setImportRequest, setImpRunResult, resetImport } = usePlannerStore();
   const [loading, setLoading] = useState(false);
-  const [etdTime, setEtdTime] = useState('08:00');
+  const etdTime = importRequest.vesselEtdTime || '08:00';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,7 +209,7 @@ export function ImportForm({ onSuccess }: { onSuccess?: () => void }) {
                     id="etdTime"
                     type="time"
                     value={etdTime}
-                    onChange={(e) => setEtdTime(e.target.value)}
+                    onChange={(e) => setImportRequest({ vesselEtdTime: e.target.value })}
                     className="pl-9 bg-slate-50/50 border-slate-200 focus-visible:ring-maersk-blue/30 h-10 rounded-xl transition-all hover:bg-white font-black text-xs"
                   />
                 </div>

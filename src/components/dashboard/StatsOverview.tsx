@@ -1,14 +1,17 @@
+import { useMemo } from 'react';
 import { motion } from 'motion/react';
-import { Ship, Truck, Clock, CheckCircle2, TrendingUp, TrendingDown, Activity, Package, Waves } from 'lucide-react';
+import { Truck, Waves } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { cn } from '../../lib/utils';
-
 import { usePlannerStore } from '../../store/usePlannerStore';
-import { useRhineWaterLevels } from '../../hooks/useRhineWaterLevels';
+import { WaterLevelSite } from '../../hooks/useRhineWaterLevels';
 
-export function StatsOverview() {
+interface StatsOverviewProps {
+  waterLevelData: WaterLevelSite[];
+}
+
+export function StatsOverview({ waterLevelData }: StatsOverviewProps) {
   const { truckCapacityData } = usePlannerStore();
-  const { data: waterLevelData } = useRhineWaterLevels(5 * 60 * 1000);
 
   const getStatus = (val: number) => {
     if (val > 80) return 'Capacity Full';
@@ -16,7 +19,8 @@ export function StatsOverview() {
     return 'Capacity Low';
   };
 
-  const getStats = () => {
+  // Memoize stats so Math.random() only runs when truckCapacityData or waterLevelData changes
+  const stats = useMemo(() => {
     const truckStats = truckCapacityData.map((hub, i) => {
       const capacity = Math.round((hub.forecast.filter(v => v === 1).length / 15) * 100);
       const colors = [
@@ -24,13 +28,10 @@ export function StatsOverview() {
         { text: 'text-amber-600', bg: 'bg-amber-50' },
         { text: 'text-emerald-600', bg: 'bg-emerald-50' }
       ];
-      
       return {
         label: `Truck Cap. ${hub.location}`,
         value: `${capacity}%`,
         status: getStatus(capacity),
-        change: i === 1 ? '-8.2%' : '+2.4%', // Keeping some static variety for trend
-        trend: i === 1 ? 'down' : 'up',
         icon: Truck,
         color: colors[i % colors.length].text,
         bg: colors[i % colors.length].bg,
@@ -40,28 +41,25 @@ export function StatsOverview() {
 
     const liveLevels = waterLevelData.filter(s => s.level !== null && !s.error).map(s => s.level as number);
     const avgLevel = liveLevels.length > 0 ? liveLevels.reduce((a, b) => a + b, 0) / liveLevels.length : null;
-    const rhineTrend = waterLevelData.filter(s => !s.error).reduce((acc, s) => {
-      if (s.trend === 'up') return acc + 1;
-      if (s.trend === 'down') return acc - 1;
-      return acc;
-    }, 0);
     const rhineStatus = avgLevel === null ? 'No Data' : avgLevel < 1.5 ? 'Low' : avgLevel > 4.0 ? 'High Flow' : 'Normal Flow';
+
+    const repStation = waterLevelData.find(s => !s.error && s.history.length >= 2);
+    const rhineSparkline = repStation
+      ? repStation.history.map(h => h.val)
+      : liveLevels.length >= 2 ? liveLevels : [avgLevel ?? 2.0, avgLevel ?? 2.0];
+
     const rhineStat = {
       label: 'Avg. Rhine Level',
       value: avgLevel !== null ? `${avgLevel.toFixed(2)}m` : '—',
       status: rhineStatus,
-      change: rhineTrend >= 0 ? '+rising' : '-falling',
-      trend: rhineTrend >= 0 ? 'up' : 'down',
       icon: Waves,
       color: rhineStatus === 'Low' ? 'text-amber-600' : rhineStatus === 'High Flow' ? 'text-rose-600' : 'text-blue-600',
       bg: rhineStatus === 'Low' ? 'bg-amber-50' : rhineStatus === 'High Flow' ? 'bg-rose-50' : 'bg-blue-50',
-      chart: liveLevels.length >= 2 ? liveLevels : [avgLevel ?? 2.0, avgLevel ?? 2.0]
+      chart: rhineSparkline,
     };
 
     return [...truckStats, rhineStat];
-  };
-
-  const stats = getStats();
+  }, [truckCapacityData, waterLevelData]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -81,23 +79,15 @@ export function StatsOverview() {
                 <div className={`p-1.5 rounded-lg ${stat.bg} ${stat.color} transition-all group-hover:scale-105 duration-200`}>
                   <stat.icon className="h-3.5 w-3.5" />
                 </div>
-                <div className="flex flex-col items-end gap-0.5">
-                  <div className={`flex items-center space-x-0.5 text-[7px] font-black uppercase tracking-wide px-1 py-0.5 rounded-full border ${
-                    stat.trend === 'up' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700'
-                  }`}>
-                    {stat.trend === 'up' ? <TrendingUp className="h-2 w-2" /> : <TrendingDown className="h-2 w-2" />}
-                    <span>{stat.change}</span>
-                  </div>
-                  <span className={cn(
-                    "text-[7px] font-black uppercase tracking-wide px-1 py-0.5 rounded border",
-                    stat.status.includes('Full') ? "bg-emerald-600 text-white border-emerald-700" :
-                    stat.status.includes('Medium') ? "bg-amber-500 text-white border-amber-600" :
-                    stat.status === 'Low' ? "bg-amber-500 text-white border-amber-600" :
-                    "bg-maersk-blue text-white border-maersk-blue/80"
-                  )}>
-                    {stat.status}
-                  </span>
-                </div>
+                <span className={cn(
+                  "text-[7px] font-black uppercase tracking-wide px-1 py-0.5 rounded border",
+                  stat.status.includes('Full') ? "bg-emerald-600 text-white border-emerald-700" :
+                  stat.status.includes('Medium') ? "bg-amber-500 text-white border-amber-600" :
+                  stat.status === 'Low' ? "bg-amber-500 text-white border-amber-600" :
+                  "bg-maersk-blue text-white border-maersk-blue/80"
+                )}>
+                  {stat.status}
+                </span>
               </div>
 
               <div className="space-y-0">
@@ -115,12 +105,10 @@ export function StatsOverview() {
               {/* Sparkline */}
               <div className="mt-2 h-6 flex items-end space-x-0.5">
                 {stat.chart.map((val, idx) => (
-                  <motion.div
+                  <div
                     key={idx}
-                    initial={{ height: 0 }}
-                    animate={{ height: `${(val / (stat.value.includes('m') ? 4 : 100)) * 100}%` }}
-                    transition={{ delay: 0.2 + (idx * 0.05), duration: 0.6, ease: "circOut" }}
-                    className={`flex-1 rounded-sm ${stat.color.replace('text', 'bg')} opacity-25 group-hover:opacity-70 transition-all duration-300`}
+                    style={{ height: `${(val / (stat.value.includes('m') ? 4 : 100)) * 100}%` }}
+                    className={`flex-1 rounded-sm ${stat.color.replace('text', 'bg')} opacity-25 group-hover:opacity-70 transition-opacity duration-300`}
                   />
                 ))}
               </div>

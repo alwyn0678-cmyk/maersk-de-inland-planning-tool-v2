@@ -312,9 +312,13 @@ export function ImportResultView({ result }: { result: ImpRunResult }) {
 
       {/* Result cards — vertical stack, full width */}
       {show.length === 0 ? (
-        <div className="p-8 text-center bg-slate-50 border border-slate-200 rounded-2xl">
-          <p className="text-sm font-black text-slate-500">No plannable departures found.</p>
-          <p className="text-xs text-slate-400 mt-1">Contact inland operations.</p>
+        <div className="p-10 text-center bg-white border border-slate-100 rounded-2xl shadow-sm">
+          <div className="inline-flex p-4 bg-slate-100 rounded-2xl mb-4">
+            <AlertTriangle className="h-7 w-7 text-slate-400" />
+          </div>
+          <p className="text-sm font-black text-slate-600 uppercase tracking-widest mb-1">No Plannable Departures</p>
+          <p className="text-xs text-slate-400 font-bold">All options are outside the booking window or customs deadline has passed.</p>
+          <p className="text-xs text-slate-400 font-bold mt-0.5">Contact Inland Operations for alternatives.</p>
         </div>
       ) : (
         <div className="space-y-4 max-w-5xl mx-auto">

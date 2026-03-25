@@ -12,42 +12,46 @@ export interface WaterLevelSite {
   isEstimated?: boolean;
 }
 
+// Operationally relevant Rhine gauge stations for Maersk DE inland planning
 const STATIONS: { site: string; station: string }[] = [
-  { site: 'Bonn',        station: 'BONN' },
-  { site: 'Köln',        station: 'KÖLN' },
-  { site: 'Düsseldorf',  station: 'DÜSSELDORF' },
-  { site: 'Duisburg',   station: 'DUISBURG-RUHRORT' },
-  { site: 'Emmerich',   station: 'EMMERICH' },
+  { site: 'Kaub',       station: 'KAUB' },           // Middle Rhine chokepoint — critical for Andernach/Mainz/Mannheim/Germersheim
+  { site: 'Cologne',    station: 'KÖLN' },            // NRW corridor — Duisburg, Bonn terminals
+  { site: 'Duisburg',   station: 'DUISBURG-RUHRORT' },// Key terminal hub
+  { site: 'Mannheim',   station: 'MANNHEIM' },        // Southern Rhine hub
+  { site: 'Maxau',      station: 'MAXAU' },           // Karlsruhe / Bavaria feeder
 ];
 
-// Generate today-relative timestamps (last 24h, every 4 hours ending now)
+// Generate today-relative timestamps (last 24h, 6 points every ~4 hours, oldest first)
 function todayHistory(vals: number[]): { time: string; val: number }[] {
   const now = Date.now();
   return vals.map((val, i) => {
-    const t = new Date(now - (5 - i) * 4 * 60 * 60 * 1000);
+    const t = new Date(now - (vals.length - 1 - i) * 4 * 60 * 60 * 1000);
     const hh = t.getHours().toString().padStart(2, '0');
     const mm = t.getMinutes().toString().padStart(2, '0');
     return { time: `${hh}:${mm}`, val };
   });
 }
 
-// Realistic static baseline data for Rhine stations (typical levels, cm)
+// Realistic static baselines — typical March Rhine levels (cm).
+// Varied histories so trend computation returns meaningful up/down/stable values.
 const STATIC_BASELINES: Record<string, { levelCm: number; history: { time: string; val: number }[] }> = {
-  'BONN':             { levelCm: 382, history: todayHistory([3.91, 3.88, 3.85, 3.82, 3.80, 3.83]) },
-  'KÖLN':             { levelCm: 315, history: todayHistory([3.21, 3.19, 3.17, 3.15, 3.14, 3.16]) },
-  'DÜSSELDORF':       { levelCm: 322, history: todayHistory([3.28, 3.26, 3.24, 3.22, 3.21, 3.23]) },
-  'DUISBURG-RUHRORT': { levelCm: 358, history: todayHistory([3.65, 3.63, 3.61, 3.59, 3.57, 3.58]) },
-  'EMMERICH':         { levelCm: 892, history: todayHistory([9.01, 8.98, 8.95, 8.92, 8.90, 8.92]) },
+  'KAUB':             { levelCm: 213, history: todayHistory([2.02, 2.05, 2.08, 2.10, 2.12, 2.13]) }, // rising
+  'KÖLN':             { levelCm: 318, history: todayHistory([3.28, 3.26, 3.24, 3.22, 3.20, 3.18]) }, // falling
+  'DUISBURG-RUHRORT': { levelCm: 362, history: todayHistory([3.60, 3.61, 3.62, 3.62, 3.63, 3.62]) }, // stable
+  'MANNHEIM':         { levelCm: 398, history: todayHistory([3.88, 3.91, 3.95, 3.97, 3.98, 3.98]) }, // rising
+  'MAXAU':            { levelCm: 445, history: todayHistory([4.55, 4.52, 4.50, 4.48, 4.46, 4.45]) }, // falling
 };
 
 const PEGEL_BASE = 'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations';
 
+// Status thresholds (cm) — Rhine operational classification
 function classify(levelCm: number): 'Normal' | 'Low' | 'Critical' {
   if (levelCm < 100) return 'Critical';
   if (levelCm < 200) return 'Low';
   return 'Normal';
 }
 
+// Compare oldest to newest reading; 5cm delta = meaningful trend
 function computeTrend(history: { val: number }[]): 'up' | 'down' | 'stable' {
   if (history.length < 2) return 'stable';
   const first = history[0].val;
@@ -78,7 +82,7 @@ export function useRhineWaterLevels(refreshIntervalMs = 60 * 60 * 1000) {
           const { measurements } = await fetchStation(station);
           if (!measurements || measurements.length === 0) throw new Error('No data');
 
-          // Build 6-point history (sample from last 24h)
+          // Sample 6 evenly-spaced points across the last 24h (oldest → newest)
           const step = Math.max(1, Math.floor(measurements.length / 6));
           const history = Array.from({ length: 6 }, (_, i) => {
             const m = measurements[Math.min(i * step, measurements.length - 1)];
@@ -102,7 +106,7 @@ export function useRhineWaterLevels(refreshIntervalMs = 60 * 60 * 1000) {
             isEstimated: false,
           };
         } catch {
-          // Fall back to static baseline — always show realistic data
+          // Fall back to realistic static baseline — always show data, never blank
           const baseline = STATIC_BASELINES[station];
           if (baseline) {
             return {

@@ -215,35 +215,69 @@ function ExportCard({ card, result, idx }: { card: ExpCard; result: ExpRunResult
 export function ExportResultView({ result }: { result: ExpRunResult }) {
   if (result.isrRequired) {
     return (
-      <div className="p-8 bg-amber-50 border-2 border-amber-300 rounded-2xl text-center space-y-3">
-        <ShieldAlert className="h-10 w-10 text-amber-600 mx-auto" />
-        <p className="text-lg font-black text-amber-800 uppercase tracking-tight">ISR Required</p>
-        <p className="text-sm font-bold text-amber-700">
-          IMO and Reefer containers via Duisburg (DEDUI01) are on request only.<br />
-          CX must raise an ISR before any booking can be made.
-        </p>
+      <div className="relative overflow-hidden rounded-2xl border border-rose-900/40 shadow-2xl shadow-rose-900/20">
+        {/* dark gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1a0008] via-[#2d0010] to-[#1a0008]" />
+        <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 0, transparent 50%)', backgroundSize: '16px 16px' }} />
+        {/* red glow */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="w-64 h-64 rounded-full bg-rose-600/20 blur-3xl" />
+        </div>
+        <div className="relative z-10 px-8 py-12 flex flex-col items-center text-center gap-5">
+          <div className="p-4 rounded-2xl bg-rose-500/20 border border-rose-500/30 shadow-inner">
+            <ShieldAlert className="h-10 w-10 text-rose-400" />
+          </div>
+          <div className="space-y-2">
+            <p className="text-[10px] font-black text-rose-400/70 uppercase tracking-[0.35em]">Action Required Before Booking</p>
+            <p className="text-2xl font-black text-white uppercase tracking-tight">ISR Required</p>
+          </div>
+          <div className="max-w-md space-y-1.5">
+            <p className="text-sm font-black text-rose-200 leading-relaxed">
+              IMO and Reefer containers via <span className="text-white">Duisburg (DEDUI01)</span> are on request only.
+            </p>
+            <p className="text-sm text-rose-300/70 font-bold">
+              CX must raise an ISR before any booking can be made.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-rose-500/15 border border-rose-500/30 mt-2">
+            <AlertTriangle className="h-3.5 w-3.5 text-rose-400 flex-none" />
+            <span className="text-[11px] font-black text-rose-300 uppercase tracking-wider">Contact Inland Ops to raise an ISR</span>
+          </div>
+        </div>
+        {/* bottom accent line */}
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-rose-500/60 to-transparent" />
       </div>
     );
   }
 
   if (result.notServicedAntwerp) {
     return (
-      <div className="p-6 bg-blue-50 border border-blue-200 rounded-2xl flex items-start gap-3">
-        <Info className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
-        <p className="text-sm font-bold text-blue-700">
-          This ZIP code area is not serviced via Antwerp by barge. Please select a Rotterdam terminal.
-        </p>
+      <div className="p-6 bg-[#001e33] border border-maersk-blue/20 rounded-2xl flex items-start gap-4 shadow-xl">
+        <div className="p-2.5 bg-maersk-blue/20 rounded-xl border border-maersk-blue/30 shrink-0">
+          <Info className="h-5 w-5 text-[#42b0d5]" />
+        </div>
+        <div>
+          <p className="text-sm font-black text-white mb-1">Not Serviced via Antwerp</p>
+          <p className="text-sm font-bold text-white/60">
+            This ZIP code area is not serviced via Antwerp by barge. Please select a Rotterdam terminal.
+          </p>
+        </div>
       </div>
     );
   }
 
   if (result.noSchedule) {
     return (
-      <div className="p-6 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3">
-        <Info className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-        <p className="text-sm font-bold text-amber-700">
-          Schedule not yet available for <strong>{result.noScheduleDepotName}</strong>. Please raise an ISR.
-        </p>
+      <div className="p-6 bg-amber-950/30 border border-amber-500/25 rounded-2xl flex items-start gap-4 shadow-xl">
+        <div className="p-2.5 bg-amber-500/15 rounded-xl border border-amber-500/25 shrink-0">
+          <Info className="h-5 w-5 text-amber-400" />
+        </div>
+        <div>
+          <p className="text-sm font-black text-white mb-1">Schedule Not Yet Available</p>
+          <p className="text-sm font-bold text-amber-200/70">
+            <strong className="text-amber-200">{result.noScheduleDepotName}</strong> — Please raise an ISR with Inland Ops.
+          </p>
+        </div>
       </div>
     );
   }
@@ -259,11 +293,14 @@ export function ExportResultView({ result }: { result: ExpRunResult }) {
 
   if (result.orderDLPassed) {
     return (
-      <div className="p-6 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3">
-        <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+      <div className="p-6 bg-red-950/30 border border-red-500/25 rounded-2xl flex items-start gap-4 shadow-xl">
+        <div className="p-2.5 bg-red-500/15 rounded-xl border border-red-500/25 shrink-0">
+          <AlertTriangle className="h-5 w-5 text-red-400" />
+        </div>
         <div>
-          <p className="text-sm font-black text-red-700">Order deadline has passed</p>
-          {result.orderDL && <p className="text-xs text-red-600 mt-1">Deadline was: {fmt(result.orderDL)}</p>}
+          <p className="text-sm font-black text-white mb-1">Order Deadline Has Passed</p>
+          {result.orderDL && <p className="text-xs text-red-300/70 font-bold mt-1">Deadline was: {fmt(result.orderDL)}</p>}
+          <p className="text-xs text-red-200/50 font-bold mt-0.5">Contact Inland Ops immediately if a booking is still needed.</p>
         </div>
       </div>
     );
@@ -341,9 +378,13 @@ export function ExportResultView({ result }: { result: ExpRunResult }) {
 
       {/* Departure cards — vertical stack, full width */}
       {result.cards.length === 0 ? (
-        <div className="p-8 text-center bg-slate-50 border border-slate-200 rounded-2xl">
-          <p className="text-sm font-black text-slate-500">No departures found.</p>
-          <p className="text-xs text-slate-400 mt-1">Contact inland team.</p>
+        <div className="p-10 text-center bg-white border border-slate-100 rounded-2xl shadow-sm max-w-5xl mx-auto">
+          <div className="inline-flex p-4 bg-slate-100 rounded-2xl mb-4">
+            <AlertTriangle className="h-7 w-7 text-slate-400" />
+          </div>
+          <p className="text-sm font-black text-slate-600 uppercase tracking-widest mb-1">No Departures Found</p>
+          <p className="text-xs text-slate-400 font-bold">No schedulable departures within the planning window.</p>
+          <p className="text-xs text-slate-400 font-bold mt-0.5">Contact Inland Operations for alternatives.</p>
         </div>
       ) : (
         <div className="space-y-4 max-w-5xl mx-auto">

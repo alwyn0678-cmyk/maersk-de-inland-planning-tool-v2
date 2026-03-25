@@ -1,6 +1,7 @@
-import { EXP_SCHED } from '../../data/export/schedules';
+import { EXP_SCHED, ExpScheduleEntry } from '../../data/export/schedules';
 import { addDays, jsDay } from '../dateUtils';
 import { prevBizDay } from '../bizDayUtils';
+import { getExpOverrides } from '../scheduleOverrides';
 
 export interface ExpDeparture {
   mod: 'Barge' | 'Rail';
@@ -18,6 +19,18 @@ export interface ExpDepsResult {
   orderDL?: Date;
 }
 
+/** Return the schedule entries for a depot+port, checking overrides first. */
+function getActiveExpSched(
+  code: string,
+  port: 'RTM' | 'ANR',
+): ExpScheduleEntry[] | undefined {
+  const overrides = getExpOverrides();
+  if (overrides?.[code]) {
+    return overrides[code][port];
+  }
+  return EXP_SCHED[code]?.[port];
+}
+
 export function expGetNextDeps(
   code: string,
   port: 'RTM' | 'ANR',
@@ -26,9 +39,7 @@ export function expGetNextDeps(
   n = 2,
   termCode?: string
 ): ExpDepsResult {
-  const schedByPort = EXP_SCHED[code];
-  if (!schedByPort) return { deps: [], skipped: [] };
-  const sch = schedByPort[port];
+  const sch = getActiveExpSched(code, port);
   if (!sch || !sch.length) return { deps: [], skipped: [] };
 
   const filtered = termCode

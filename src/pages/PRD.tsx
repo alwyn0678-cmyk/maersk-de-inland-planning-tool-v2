@@ -1,7 +1,7 @@
 import Markdown from 'react-markdown';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
-import { FileText, BookOpen, Layers, Zap } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import { motion } from 'motion/react';
 
 const PRD_CONTENT = `
@@ -71,22 +71,6 @@ export function PRD() {
         <Badge className="bg-blue-50 text-blue-700 border-blue-100 px-4 py-1.5 text-sm font-bold w-fit">
           v2.4.0 Stable
         </Badge>
-      </div>
-
-      <div className="grid md:grid-cols-3 gap-6">
-        {[
-          { icon: BookOpen, title: 'Documentation', desc: 'Core business logic and routing rules.', color: 'text-blue-600', bg: 'bg-blue-50' },
-          { icon: Layers, title: 'Architecture', desc: 'System design and integration patterns.', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { icon: Zap, title: 'Performance', desc: 'Optimization targets and SLA metrics.', color: 'text-amber-600', bg: 'bg-amber-50' },
-        ].map((item, i) => (
-          <Card key={i} className="border-none shadow-sm bg-white/50 backdrop-blur-sm p-6 hover:scale-[1.02] transition-transform cursor-default">
-            <div className={`h-12 w-12 ${item.bg} rounded-2xl flex items-center justify-center mb-4`}>
-              <item.icon className={`h-6 w-6 ${item.color}`} />
-            </div>
-            <h3 className="text-lg font-bold text-slate-900 mb-1">{item.title}</h3>
-            <p className="text-sm text-slate-500 leading-relaxed">{item.desc}</p>
-          </Card>
-        ))}
       </div>
 
       <Card className="border-none shadow-xl shadow-slate-200/50 rounded-3xl overflow-hidden bg-white">

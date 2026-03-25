@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Anchor, Clock, Download, Upload, AlertCircle, CheckCircle2, Info, Activity, Ship, Gauge, Globe } from 'lucide-react';
+import { Anchor, Download, Upload, CheckCircle2, Info, Activity, Globe } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
@@ -244,20 +244,10 @@ export function TerminalCongestionOverview() {
           </div>
         </div>
 
-        {/* Footer Advisory */}
-        <div className="p-4 bg-white/5 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="flex items-center space-x-4">
-            <div className="p-2 bg-rose-500/20 rounded-xl border border-rose-500/30">
-              <AlertCircle className="h-5 w-5 text-rose-500" />
-            </div>
-            <p className="text-xs font-bold text-white/70 max-w-2xl leading-relaxed">
-              <span className="text-rose-500 font-black uppercase tracking-widest mr-2">Critical Alert:</span>
-              ECT Delta is experiencing severe bunching. Estimated waiting times have increased by <span className="text-white font-black">12%</span> in the last 24 hours. Consider rail diversion for time-sensitive cargo.
-            </p>
-          </div>
-          <div className="flex items-center space-x-3 text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">
-            <Info className="h-4 w-4 text-maersk-blue" />
-            Last Sync: {new Date().toLocaleTimeString()}
+        <div className="p-3 bg-white/5 border-t border-white/10 flex items-center justify-end">
+          <div className="flex items-center space-x-2 text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">
+            <Info className="h-3.5 w-3.5 text-maersk-blue" />
+            Data uploaded via Excel — update to reflect current port conditions
           </div>
         </div>
       </CardContent>

@@ -46,7 +46,7 @@ const TERMINAL_OPTIONS = [
 export function ExportForm({ onSuccess }: { onSuccess?: () => void }) {
   const { exportRequest, setExportRequest, setExpRunResult, resetExport } = usePlannerStore();
   const [loading, setLoading] = useState(false);
-  const [terminalValue, setTerminalValue] = useState('NLROTTM|5|RTM');
+  const terminalValue = exportRequest.portTerminal || 'NLROTTM|5|RTM';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -179,7 +179,7 @@ export function ExportForm({ onSuccess }: { onSuccess?: () => void }) {
                 <Label htmlFor="export-portTerminal" className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Port Terminal</Label>
                 <Select
                   value={terminalValue}
-                  onValueChange={setTerminalValue}
+                  onValueChange={(v) => setExportRequest({ portTerminal: v })}
                 >
                   <SelectTrigger id="export-portTerminal" className="w-full bg-slate-50/50 border-slate-200/60 focus:ring-emerald-500 h-10 rounded-xl hover:bg-white transition-all font-black text-maersk-dark text-xs px-3">
                     <SelectValue placeholder="Select terminal" />

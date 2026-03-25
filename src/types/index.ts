@@ -30,6 +30,7 @@ export interface ImportRequest {
   containerType: ContainerType;
   dischargePort: Port;
   vesselEtd: string; // ISO Date
+  vesselEtdTime: string; // HH:mm
   isDischarged: boolean;
   preferredTerminal?: string; // 'Auto' or terminal ID
 }
@@ -39,7 +40,7 @@ export interface ExportRequest {
   containerType: ContainerType;
   loadingDate: string; // ISO Date
   loadingTime: string; // HH:mm
-  portTerminal: Port;
+  portTerminal: string; // "CODE|YOT|PORT" e.g. "NLROTTM|5|RTM"
   preferredTerminal?: string; // 'Auto' or terminal ID
 }
 

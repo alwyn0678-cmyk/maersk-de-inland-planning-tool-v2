@@ -6,6 +6,7 @@ export interface NewsItem {
   pubDate: string;
   source: string;
   description: string;
+  category: 'ops' | 'business';
 }
 
 export interface TerminalNews {
@@ -14,15 +15,20 @@ export interface TerminalNews {
   shortName: string;
   website: string;
   newsPageUrl: string;
-  items: NewsItem[];
+  items: NewsItem[];         // all items (ops + business)
+  opsItems: NewsItem[];      // operational alerts — current month
+  businessItems: NewsItem[]; // business / strategic news — last 60 days
   rssUrl: string | null;
-  feedSource: string | null;   // 'rss-known' | 'rss-autodiscovered' | 'rss-probed' | 'no-feed' | null
+  feedSource: string | null;
   loading: boolean;
   error: boolean;
   lastFetched: Date | null;
 }
 
-export const TERMINAL_CONFIGS: Omit<TerminalNews, 'items' | 'rssUrl' | 'feedSource' | 'loading' | 'error' | 'lastFetched'>[] = [
+export const TERMINAL_CONFIGS: Omit<
+  TerminalNews,
+  'items' | 'opsItems' | 'businessItems' | 'rssUrl' | 'feedSource' | 'loading' | 'error' | 'lastFetched'
+>[] = [
   {
     id: 'duisburg',
     name: 'Hutchison Ports Duisburg',
@@ -97,27 +103,55 @@ export const TERMINAL_CONFIGS: Omit<TerminalNews, 'items' | 'rssUrl' | 'feedSour
 
 const CACHE_TTL_MS = 30 * 60 * 1000;
 
-interface CacheEntry { items: NewsItem[]; rssUrl: string | null; feedSource: string | null; fetchedAt: number }
+interface CacheEntry {
+  opsItems: NewsItem[];
+  businessItems: NewsItem[];
+  rssUrl: string | null;
+  feedSource: string | null;
+  fetchedAt: number;
+}
 const cache: Record<string, CacheEntry> = {};
 
-async function fetchFromApi(id: string): Promise<{ items: NewsItem[]; rssUrl: string | null; feedSource: string | null }> {
+function isCurrentMonth(dateStr: string): boolean {
+  if (!dateStr) return false;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return false;
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+}
+
+function isLast60Days(dateStr: string): boolean {
+  if (!dateStr) return false;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return false;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 60);
+  return d >= cutoff;
+}
+
+async function fetchFromApi(
+  id: string
+): Promise<{ opsItems: NewsItem[]; businessItems: NewsItem[]; rssUrl: string | null; feedSource: string | null }> {
   const cached = cache[id];
   if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
-    return { items: cached.items, rssUrl: cached.rssUrl, feedSource: cached.feedSource };
+    return { opsItems: cached.opsItems, businessItems: cached.businessItems, rssUrl: cached.rssUrl, feedSource: cached.feedSource };
   }
 
   const res = await fetch(`/api/terminal-news?id=${encodeURIComponent(id)}`, {
-    signal: AbortSignal.timeout(20000),
+    signal: AbortSignal.timeout(25000),
   });
   if (!res.ok) throw new Error(`API ${res.status}`);
 
   const data = await res.json();
-  const items: NewsItem[] = data.items ?? [];
+
+  // API already handles categorisation and sorting; pass through as-is
+  const opsItems: NewsItem[] = data.opsItems ?? [];
+  const businessItems: NewsItem[] = data.businessItems ?? [];
   const rssUrl: string | null = data.rssUrl ?? null;
   const feedSource: string | null = data.source ?? null;
 
-  cache[id] = { items, rssUrl, feedSource, fetchedAt: Date.now() };
-  return { items, rssUrl, feedSource };
+  cache[id] = { opsItems, businessItems, rssUrl, feedSource, fetchedAt: Date.now() };
+  return { opsItems, businessItems, rssUrl, feedSource };
 }
 
 export function timeAgo(dateStr: string): string {
@@ -133,11 +167,17 @@ export function timeAgo(dateStr: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
+export function currentMonthLabel(): string {
+  return new Date().toLocaleString('en-GB', { month: 'long', year: 'numeric' });
+}
+
 export function useInlandNews(autoRefreshMs = CACHE_TTL_MS) {
   const [terminals, setTerminals] = useState<TerminalNews[]>(() =>
     TERMINAL_CONFIGS.map(cfg => ({
       ...cfg,
       items: [],
+      opsItems: [],
+      businessItems: [],
       rssUrl: null,
       feedSource: null,
       loading: true,
@@ -154,18 +194,38 @@ export function useInlandNews(autoRefreshMs = CACHE_TTL_MS) {
     await Promise.all(
       TERMINAL_CONFIGS.map(async (cfg, idx) => {
         try {
-          const { items, rssUrl, feedSource } = await fetchFromApi(cfg.id);
+          const { opsItems, businessItems, rssUrl, feedSource } = await fetchFromApi(cfg.id);
           if (!mountedRef.current) return;
           setTerminals(prev => {
             const next = [...prev];
-            next[idx] = { ...next[idx], items, rssUrl, feedSource, loading: false, error: false, lastFetched: new Date() };
+            next[idx] = {
+              ...next[idx],
+              opsItems,
+              businessItems,
+              items: [...opsItems, ...businessItems],
+              rssUrl,
+              feedSource,
+              loading: false,
+              error: false,
+              lastFetched: new Date(),
+            };
             return next;
           });
         } catch {
           if (!mountedRef.current) return;
           setTerminals(prev => {
             const next = [...prev];
-            next[idx] = { ...next[idx], items: [], rssUrl: null, feedSource: 'error', loading: false, error: true, lastFetched: null };
+            next[idx] = {
+              ...next[idx],
+              opsItems: [],
+              businessItems: [],
+              items: [],
+              rssUrl: null,
+              feedSource: 'error',
+              loading: false,
+              error: true,
+              lastFetched: null,
+            };
             return next;
           });
         }
@@ -180,5 +240,9 @@ export function useInlandNews(autoRefreshMs = CACHE_TTL_MS) {
     return () => { mountedRef.current = false; clearInterval(interval); };
   }, [fetchAll, autoRefreshMs]);
 
-  return { terminals, refresh: () => fetchAll(true) };
+  const newsChecked = terminals.every(t => !t.loading);
+  const hasCurrentMonthNews = terminals.some(t => t.opsItems.length > 0 || t.businessItems.length > 0);
+  const showNewsTab = !newsChecked || hasCurrentMonthNews;
+
+  return { terminals, refresh: () => fetchAll(true), newsChecked, hasCurrentMonthNews, showNewsTab };
 }

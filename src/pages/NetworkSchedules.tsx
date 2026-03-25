@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { NetworkScheduleBoard, DepartureRow } from '../components/planner/NetworkScheduleBoard';
 import {
-  CalendarDays, Ship, Download, Upload, Anchor, Train, ArrowRight,
+  CalendarDays, Ship, Anchor, Train, ArrowRight, Send,
   Clock, X, Info, AlertTriangle, CheckCircle2, Package, MapPin,
   Zap, ChevronRight
 } from 'lucide-react';
@@ -108,7 +108,7 @@ export function NetworkSchedules() {
                 : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
             )}
           >
-            {d === 'Import' ? <Download className="h-3.5 w-3.5" /> : <Upload className="h-3.5 w-3.5" />}
+            {d === 'Import' ? <Anchor className="h-3.5 w-3.5" /> : <Send className="h-3.5 w-3.5" />}
             {d}
           </button>
         ))}
