@@ -296,6 +296,22 @@ export function DashboardOverview() {
               </p>
             </div>
 
+            {/* Centre — Maersk star watermark filling the gap */}
+            <div className="hidden md:flex flex-1 items-center justify-center pointer-events-none select-none">
+              <svg
+                width="210" height="210"
+                viewBox="0 0 100 100"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                style={{ opacity: 0.07, filter: 'blur(0.6px)' }}
+              >
+                <path
+                  d="M50 5 L57 35 L85 20 L67 45 L97 47 L70 60 L85 88 L55 72 L52 100 L45 72 L15 88 L30 60 L3 47 L33 45 L15 20 L43 35 Z"
+                  fill="white"
+                />
+              </svg>
+            </div>
+
             {/* Right — stat chips */}
             <div className="flex flex-row md:flex-col gap-2 flex-none">
               <motion.div
