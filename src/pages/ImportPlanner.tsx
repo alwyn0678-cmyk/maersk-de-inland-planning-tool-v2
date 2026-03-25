@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ImportForm } from '../components/planner/ImportForm';
 import { ImportResultView } from '../components/planner/ImportResultView';
 import { usePlannerStore } from '../store/usePlannerStore';
@@ -10,6 +10,14 @@ import { fmtS } from '../logic/dateUtils';
 export function ImportPlanner() {
   const { impRunResult } = usePlannerStore();
   const [filterOpen, setFilterOpen] = useState(!impRunResult);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && filterOpen && impRunResult) setFilterOpen(false);
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [filterOpen, impRunResult]);
 
   return (
     <div className="space-y-5 pb-10">
@@ -27,7 +35,6 @@ export function ImportPlanner() {
                 <h2 className="text-xl font-black text-white uppercase tracking-tight leading-none">
                   Import <span className="text-[#42b0d5]">Booking</span>
                 </h2>
-                <span className="text-[9px] font-black text-[#42b0d5]/50 uppercase tracking-widest border border-[#42b0d5]/20 px-1.5 py-0.5 rounded">Beta</span>
               </div>
               <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.25em]">Port → Inland Depot → Customer Delivery</p>
             </div>

@@ -6,10 +6,8 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../ui/card';
 import { Checkbox } from '../ui/checkbox';
 import {
-  Loader2,
   MapPin,
   Calendar as CalendarIcon,
   Clock,
@@ -33,28 +31,24 @@ function containerToSizeType(ct: string): { size: string; type: string } {
 
 export function ImportForm({ onSuccess }: { onSuccess?: () => void }) {
   const { importRequest, setImportRequest, setImpRunResult, resetImport } = usePlannerStore();
-  const [loading, setLoading] = useState(false);
+  const [zipError, setZipError] = useState('');
   const etdTime = importRequest.vesselEtdTime || '08:00';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!importRequest.postcode || !importRequest.vesselEtd) return;
-    setLoading(true);
-    setTimeout(() => {
-      const { size, type } = containerToSizeType(importRequest.containerType || '40HC');
-      const port = importRequest.dischargePort === 'Antwerp' ? 'ANR' : 'RTM';
-      const result = impRun({
-        zip: importRequest.postcode!,
-        size,
-        type,
-        port,
-        etdDate: importRequest.vesselEtd!,
-        etdTime,
-      });
-      setImpRunResult(result);
-      onSuccess?.();
-      setLoading(false);
-    }, 400);
+    const { size, type } = containerToSizeType(importRequest.containerType || '40HC');
+    const port = importRequest.dischargePort === 'Antwerp' ? 'ANR' : 'RTM';
+    const result = impRun({
+      zip: importRequest.postcode!,
+      size,
+      type,
+      port,
+      etdDate: importRequest.vesselEtd!,
+      etdTime,
+    });
+    setImpRunResult(result);
+    onSuccess?.();
   };
 
   const quickPostcodes = ['40210', '47051', '68159', '80331'];
@@ -102,12 +96,16 @@ export function ImportForm({ onSuccess }: { onSuccess?: () => void }) {
                     id="postcode"
                     placeholder="00000"
                     value={importRequest.postcode}
-                    onChange={(e) => setImportRequest({ postcode: e.target.value })}
+                    onChange={(e) => { setImportRequest({ postcode: e.target.value }); setZipError(''); }}
+                    onBlur={(e) => {
+                      const v = e.target.value;
+                      if (v && (v.length < 4 || !/^\d+$/.test(v))) setZipError('Enter a valid German ZIP (4–5 digits)');
+                    }}
                     required
                     maxLength={5}
-                    pattern="\d{5}"
-                    className="pl-9 font-mono text-base font-black tracking-[0.3em] bg-slate-50/50 border-slate-200 focus-visible:ring-maersk-blue/30 h-10 rounded-xl transition-all hover:bg-white focus:bg-white"
+                    className={cn("pl-9 font-mono text-base font-black tracking-[0.3em] bg-slate-50/50 border-slate-200 focus-visible:ring-maersk-blue/30 h-10 rounded-xl transition-all hover:bg-white focus:bg-white", zipError && "border-red-400 focus-visible:ring-red-400/30")}
                   />
+                  {zipError && <p className="text-[10px] font-bold text-red-500 mt-1 ml-1">{zipError}</p>}
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {quickPostcodes.map(pc => (
@@ -248,16 +246,12 @@ export function ImportForm({ onSuccess }: { onSuccess?: () => void }) {
           </Button>
           <Button
             type="submit"
-            disabled={loading || !importRequest.postcode || importRequest.postcode.length < 2}
+            disabled={!importRequest.postcode || importRequest.postcode.length < 4}
             className="bg-maersk-blue hover:bg-maersk-blue/90 text-white px-6 h-9 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all hover:scale-[1.03] active:scale-[0.97] group relative overflow-hidden shadow-lg shadow-maersk-blue/30"
           >
             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
             <div className="flex items-center relative z-10 space-x-2">
-              {loading ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <TrendingUp className="h-3.5 w-3.5" />
-              )}
+              <TrendingUp className="h-3.5 w-3.5" />
               <span>Run Optimizer</span>
             </div>
           </Button>

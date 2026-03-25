@@ -119,6 +119,7 @@ export function DashboardOverview() {
   const handleDayClick = (day: any, status: number) => {
     if (status === 1) {
       setSelectedDay(day);
+      setBookingInfo(prev => ({ ...prev, zipcode: '' })); // clear zip for each new day
       setIsDialogOpen(true);
     }
   };

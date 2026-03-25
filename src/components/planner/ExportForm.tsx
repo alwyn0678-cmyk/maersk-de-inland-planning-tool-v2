@@ -6,20 +6,15 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../ui/card';
-import { Checkbox } from '../ui/checkbox';
-import { 
-  Loader2, 
-  MapPin, 
-  Calendar as CalendarIcon, 
-  Clock, 
-  TrendingUp, 
-  Upload,
+import {
+  MapPin,
+  Calendar as CalendarIcon,
+  Clock,
+  TrendingUp,
   Settings2,
   Box,
   Navigation,
   History,
-  Info
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -45,27 +40,23 @@ const TERMINAL_OPTIONS = [
 
 export function ExportForm({ onSuccess }: { onSuccess?: () => void }) {
   const { exportRequest, setExportRequest, setExpRunResult, resetExport } = usePlannerStore();
-  const [loading, setLoading] = useState(false);
+  const [zipError, setZipError] = useState('');
   const terminalValue = exportRequest.portTerminal || 'NLROTTM|5|RTM';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!exportRequest.postcode || !exportRequest.loadingDate) return;
-    setLoading(true);
-    setTimeout(() => {
-      const { size, type } = containerToSizeType(exportRequest.containerType || '40HC');
-      const result = expRun({
-        zip: exportRequest.postcode!,
-        size,
-        type,
-        loadDate: exportRequest.loadingDate!,
-        loadTime: exportRequest.loadingTime || '08:00',
-        terminalValue,
-      });
-      setExpRunResult(result);
-      onSuccess?.();
-      setLoading(false);
-    }, 400);
+    const { size, type } = containerToSizeType(exportRequest.containerType || '40HC');
+    const result = expRun({
+      zip: exportRequest.postcode!,
+      size,
+      type,
+      loadDate: exportRequest.loadingDate!,
+      loadTime: exportRequest.loadingTime || '08:00',
+      terminalValue,
+    });
+    setExpRunResult(result);
+    onSuccess?.();
   };
 
   const quickPostcodes = ['70173', '60311', '50667', '20095'];
@@ -113,12 +104,16 @@ export function ExportForm({ onSuccess }: { onSuccess?: () => void }) {
                     id="export-postcode"
                     placeholder="00000"
                     value={exportRequest.postcode}
-                    onChange={(e) => setExportRequest({ postcode: e.target.value })}
+                    onChange={(e) => { setExportRequest({ postcode: e.target.value }); setZipError(''); }}
+                    onBlur={(e) => {
+                      const v = e.target.value;
+                      if (v && (v.length < 4 || !/^\d+$/.test(v))) setZipError('Enter a valid German ZIP (4–5 digits)');
+                    }}
                     required
                     maxLength={5}
-                    pattern="\d{5}"
-                    className="pl-9 font-mono text-base font-black tracking-[0.3em] bg-slate-50/50 border-slate-200/60 focus-visible:ring-emerald-500 h-10 rounded-xl transition-all hover:bg-white focus:bg-white"
+                    className={cn("pl-9 font-mono text-base font-black tracking-[0.3em] bg-slate-50/50 border-slate-200/60 focus-visible:ring-emerald-500 h-10 rounded-xl transition-all hover:bg-white focus:bg-white", zipError && "border-red-400 focus-visible:ring-red-400/30")}
                   />
+                  {zipError && <p className="text-[10px] font-bold text-red-500 mt-1 ml-1">{zipError}</p>}
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {quickPostcodes.map(pc => (
@@ -258,16 +253,12 @@ export function ExportForm({ onSuccess }: { onSuccess?: () => void }) {
           </Button>
           <Button
             type="submit"
-            disabled={loading || !exportRequest.postcode || exportRequest.postcode.length < 2}
+            disabled={!exportRequest.postcode || exportRequest.postcode.length < 4}
             className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 h-9 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all hover:scale-[1.03] active:scale-[0.97] group overflow-hidden relative z-10 shadow-lg shadow-emerald-600/30"
           >
             <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
             <div className="relative z-10 flex items-center space-x-2">
-              {loading ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <TrendingUp className="h-3.5 w-3.5" />
-              )}
+              <TrendingUp className="h-3.5 w-3.5" />
               <span>Run Optimizer</span>
             </div>
           </Button>

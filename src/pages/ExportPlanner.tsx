@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ExportForm } from '../components/planner/ExportForm';
 import { ExportResultView } from '../components/planner/ExportResultView';
 import { usePlannerStore } from '../store/usePlannerStore';
@@ -10,6 +10,14 @@ import { fmtS } from '../logic/dateUtils';
 export function ExportPlanner() {
   const { expRunResult } = usePlannerStore();
   const [filterOpen, setFilterOpen] = useState(!expRunResult);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && filterOpen && expRunResult) setFilterOpen(false);
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [filterOpen, expRunResult]);
 
   return (
     <div className="space-y-5 pb-10">
@@ -27,7 +35,6 @@ export function ExportPlanner() {
                 <h2 className="text-xl font-black text-white uppercase tracking-tight leading-none">
                   Export <span className="text-emerald-400">Booking</span>
                 </h2>
-                <span className="text-[9px] font-black text-emerald-400/50 uppercase tracking-widest border border-emerald-500/20 px-1.5 py-0.5 rounded">Beta</span>
               </div>
               <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.25em]">Inland Collection → Depot → Port Terminal</p>
             </div>

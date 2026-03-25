@@ -69,19 +69,24 @@ function TopBar({ activeTab }: { activeTab: string }) {
 }
 
 export default function App() {
-  const { activeTab, setActiveTab } = usePlannerStore();
+  const { activeTab, setActiveTab, setScheduleOverrideMeta } = usePlannerStore();
 
   // Load schedule overrides from Supabase on startup so all users share the same data
   useEffect(() => {
     async function fetchOverrides() {
-      const { data } = await supabase
-        .from('schedule_overrides')
-        .select('id, data');
-      if (!data) return;
-      const imp  = data.find(r => r.id === 'imp')?.data  ?? null;
-      const exp  = data.find(r => r.id === 'exp')?.data  ?? null;
-      const meta = data.find(r => r.id === 'meta')?.data ?? null;
-      loadRemoteOverrides(imp, exp, meta);
+      try {
+        const { data, error } = await supabase
+          .from('schedule_overrides')
+          .select('id, data');
+        if (error || !data) return; // fail silently — built-in schedules remain active
+        const imp  = data.find(r => r.id === 'imp')?.data  ?? null;
+        const exp  = data.find(r => r.id === 'exp')?.data  ?? null;
+        const meta = data.find(r => r.id === 'meta')?.data ?? null;
+        loadRemoteOverrides(imp, exp, meta);
+        if (meta) setScheduleOverrideMeta(meta);
+      } catch {
+        // Network error — built-in schedules remain active
+      }
     }
     fetchOverrides();
   }, []);

@@ -4,6 +4,7 @@ import { ImportRequest, ExportRequest, ImportResult, ExportResult, CYCYRequest, 
 import { ImpRunResult } from '../logic/import/impRun';
 import { ExpRunResult, ExpCard } from '../logic/export/expRun';
 import { ImpInstance } from '../logic/import/computeInstances';
+import { ScheduleOverrideMeta } from '../logic/scheduleOverrides';
 
 export interface CYCYImpRunResult {
   direction: 'Import';
@@ -50,7 +51,9 @@ interface PlannerState {
   truckCapacityData: { location: string; forecast: number[] }[];
   terminalCongestionData: TerminalCongestion[];
   schedules: Schedule[];
+  scheduleOverrideMeta: ScheduleOverrideMeta | null;
   setActiveTab: (tab: string) => void;
+  setScheduleOverrideMeta: (meta: ScheduleOverrideMeta | null) => void;
   setImportRequest: (req: Partial<ImportRequest>) => void;
   setExportRequest: (req: Partial<ExportRequest>) => void;
   setCYCYRequest: (req: Partial<CYCYRequest>) => void;
@@ -126,6 +129,7 @@ export const usePlannerStore = create<PlannerState>()(
       impRunResult: null,
       expRunResult: null,
       cycyRunResult: null,
+      scheduleOverrideMeta: null,
       truckCapacityData: [
         { location: 'Duisburg', forecast: [1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1] },
         { location: 'Mainz', forecast: [1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1] },
@@ -145,6 +149,7 @@ export const usePlannerStore = create<PlannerState>()(
         { id: '3', type: 'Barge', direction: 'Export', origin: 'Germersheim', destination: 'Rotterdam', departure: '2026-03-27T08:00', arrival: '2026-03-28T18:00', capacity: 150, status: 'On Time' },
       ],
       setActiveTab: (tab) => set({ activeTab: tab }),
+      setScheduleOverrideMeta: (meta) => set({ scheduleOverrideMeta: meta }),
       setImportRequest: (req) => set((state) => ({ importRequest: { ...state.importRequest, ...req } })),
       setExportRequest: (req) => set((state) => ({ exportRequest: { ...state.exportRequest, ...req } })),
       setCYCYRequest: (req) => set((state) => ({ cycyRequest: { ...state.cycyRequest, ...req } })),

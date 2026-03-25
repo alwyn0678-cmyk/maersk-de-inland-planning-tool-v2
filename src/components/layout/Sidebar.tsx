@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
+import { usePlannerStore } from '../../store/usePlannerStore';
 
 interface SidebarProps {
   activeTab: string;
@@ -35,6 +36,8 @@ const secondaryItems = [
 
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { scheduleOverrideMeta } = usePlannerStore();
+  const overrideActive = !!scheduleOverrideMeta;
 
   return (
     <motion.div
@@ -71,7 +74,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       {/* Main Navigation */}
       <div className="flex-1 space-y-1 overflow-y-auto overflow-x-hidden">
         {BASE_MENU_ITEMS.map((item) => (
-          <NavButton key={item.id} item={item} activeTab={activeTab} onTabChange={onTabChange} isCollapsed={isCollapsed} variant="main" />
+          <NavButton key={item.id} item={item} activeTab={activeTab} onTabChange={onTabChange} isCollapsed={isCollapsed} variant="main" showDot={item.id === 'schedules' && overrideActive} />
         ))}
       </div>
 
@@ -130,12 +133,14 @@ function NavButton({
   activeTab,
   onTabChange,
   isCollapsed,
+  showDot = false,
 }: {
   item: { id: string; label: string; icon: React.ElementType };
   activeTab: string;
   onTabChange: (tab: string) => void;
   isCollapsed: boolean;
   variant: 'main' | 'tool';
+  showDot?: boolean;
 }) {
   const isActive = activeTab === item.id;
   const isViolet = item.id === 'schedule-manager';
@@ -161,9 +166,12 @@ function NavButton({
       )} />
       {!isCollapsed && (
         <span className={cn(
-          "font-black text-xs tracking-tight whitespace-nowrap",
+          "font-black text-xs tracking-tight whitespace-nowrap flex-1",
           isActive ? "opacity-100" : "opacity-80 group-hover:opacity-100"
         )}>{item.label}</span>
+      )}
+      {showDot && !isCollapsed && (
+        <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-sm shadow-amber-400/50 mr-1 shrink-0" title="Custom schedules active" />
       )}
       {isActive && !isCollapsed && !isViolet && (
         <motion.div
