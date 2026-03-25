@@ -260,51 +260,36 @@ export function DashboardOverview() {
         {/* Bottom accent line */}
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#42b0d5]/40 to-transparent" />
 
-        <div className="relative z-10 px-7 pt-6 pb-6">
-          {/* Live pill + Maersk logo row */}
-          <div className="flex items-center justify-between mb-4">
+        <div className="relative z-10 px-6 pt-4 pb-4">
+          {/* Live pill + Maersk wordmark row */}
+          <div className="flex items-center justify-between mb-3">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/8 border border-white/12">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
               <span className="text-[8px] font-black text-white/50 uppercase tracking-[0.25em]">Live Data</span>
             </div>
-            {/* Maersk logo — 7-pointed star + wordmark */}
-            <div className="flex items-center gap-2.5 opacity-80">
-              <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M50 5 L57 35 L85 20 L67 45 L97 47 L70 60 L85 88 L55 72 L52 100 L45 72 L15 88 L30 60 L3 47 L33 45 L15 20 L43 35 Z"
-                  fill="white"
-                  fillOpacity="0.9"
-                />
-              </svg>
+            <div className="flex items-center gap-2 opacity-70">
               <div>
-                <div className="text-[11px] font-black text-white tracking-[0.15em] uppercase">Maersk</div>
-                <div className="text-[8px] font-bold text-white/40 uppercase tracking-widest leading-none">Germany</div>
+                <div className="text-[11px] font-black text-white tracking-[0.15em] uppercase text-right">Maersk</div>
+                <div className="text-[8px] font-bold text-white/40 uppercase tracking-widest leading-none text-right">Germany</div>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          {/* Title / badge / chips — vertically centred */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             {/* Left — title */}
             <div>
-              <h1 className="text-4xl font-black tracking-tighter text-white leading-[1.05]">
+              <h1 className="text-2xl font-black tracking-tighter text-white leading-tight">
                 Inland Operations
                 <br />
                 <span className="text-[#42b0d5]">Export Truck Capacity</span>
               </h1>
-              <p className="text-sm text-white/40 mt-3 leading-relaxed max-w-md">
-                Real-time export capacity, Rhine water levels, and terminal congestion across Maersk Germany's inland network.
-              </p>
             </div>
 
-            {/* Centre — Maersk logo badge blended into banner */}
+            {/* Centre — Maersk logo badge, perfectly centred in the gap */}
             <div className="hidden md:flex flex-1 items-center justify-center pointer-events-none select-none">
-              {/*
-                Maersk logo: rounded-square badge + accurate 7-pointed heptagram.
-                Star: outer R=38, inner r=14, center (50,50), first point at -90°.
-                Outer at -90°+k×(360°/7), inner at -90°+(180°/7)+k×(360°/7).
-              */}
               <svg
-                width="210" height="210"
+                width="96" height="96"
                 viewBox="0 0 100 100"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -315,7 +300,7 @@ export function DashboardOverview() {
                     <stop offset="100%" stopColor="#0076a8" stopOpacity="0.26" />
                   </linearGradient>
                   <filter id="maerskBadgeShadow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feDropShadow dx="0" dy="3" stdDeviation="6" floodColor="#000" floodOpacity="0.30" />
+                    <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#000" floodOpacity="0.30" />
                   </filter>
                   <filter id="maerskStarGlow" x="-25%" y="-25%" width="150%" height="150%">
                     <feGaussianBlur stdDeviation="1.2" result="blur" />
@@ -325,8 +310,7 @@ export function DashboardOverview() {
                     </feMerge>
                   </filter>
                 </defs>
-
-                {/* Rounded square badge — Maersk blue tinted */}
+                {/* Rounded square badge */}
                 <rect
                   x="3" y="3" width="94" height="94" rx="20"
                   fill="url(#maerskBadgeBg)"
@@ -335,8 +319,7 @@ export function DashboardOverview() {
                   strokeWidth="1.4"
                   filter="url(#maerskBadgeShadow)"
                 />
-
-                {/* 7-pointed star — white with soft glow */}
+                {/* 7-pointed star — outer R=38, inner r=14, centred at (50,50) */}
                 <path
                   d="M50,12 L56.1,37.4 L79.7,26.3 L63.6,46.9 L87.0,58.5 L61.0,58.7 L66.5,84.2 L50,64 L33.5,84.2 L39.0,58.7 L13.0,58.5 L36.4,46.9 L20.3,26.3 L43.9,37.4 Z"
                   fill="white"
@@ -352,13 +335,13 @@ export function DashboardOverview() {
                 initial={{ opacity: 0, x: 12 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 }}
-                className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-white/8 border border-white/10"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/8 border border-white/10"
               >
                 <div className="p-1.5 rounded-lg bg-[#42b0d5]/20">
-                  <Truck className="h-3.5 w-3.5 text-[#42b0d5]" />
+                  <Truck className="h-3 w-3 text-[#42b0d5]" />
                 </div>
                 <div>
-                  <div className="text-sm font-black text-white tracking-tight">3 Active Hubs</div>
+                  <div className="text-xs font-black text-white tracking-tight">3 Active Hubs</div>
                   <div className="text-[8px] text-white/30 uppercase tracking-widest">Germany</div>
                 </div>
               </motion.div>
@@ -366,13 +349,13 @@ export function DashboardOverview() {
                 initial={{ opacity: 0, x: 12 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.18 }}
-                className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-white/8 border border-white/10"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/8 border border-white/10"
               >
                 <div className="p-1.5 rounded-lg bg-blue-500/20">
-                  <Waves className="h-3.5 w-3.5 text-[#42b0d5]" />
+                  <Waves className="h-3 w-3 text-[#42b0d5]" />
                 </div>
                 <div>
-                  <div className="text-sm font-black text-white tracking-tight">5 Rhine Gauges</div>
+                  <div className="text-xs font-black text-white tracking-tight">5 Rhine Gauges</div>
                   <div className="text-[8px] text-white/30 uppercase tracking-widest">Live PEGEL</div>
                 </div>
               </motion.div>
@@ -384,7 +367,7 @@ export function DashboardOverview() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 }}
-            className="mt-5 flex items-center gap-2"
+            className="mt-3 flex items-center gap-2"
           >
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/6 border border-white/10">
               <MapPin className="h-3 w-3 text-white/35" />
@@ -413,10 +396,10 @@ export function DashboardOverview() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35 }}
-            className="mt-5 pt-4 border-t border-white/10"
+            className="mt-3 pt-3 border-t border-white/10"
           >
             {/* Header row */}
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <span className="text-[9px] font-black text-white/40 uppercase tracking-[0.25em]">
                   7-Day Forecast · Rotterdam / Rhine
@@ -441,7 +424,7 @@ export function DashboardOverview() {
                   <div
                     key={day.date}
                     className={cn(
-                      'flex flex-col items-center gap-1 px-1.5 py-2.5 rounded-xl border transition-all',
+                      'flex flex-col items-center gap-0.5 px-1.5 py-2 rounded-xl border transition-all',
                       i === 0
                         ? 'bg-white/12 border-white/25'
                         : day.isSevere
