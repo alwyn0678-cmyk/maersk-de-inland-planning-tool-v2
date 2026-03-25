@@ -5,138 +5,123 @@ export interface NewsItem {
   link: string;
   pubDate: string;
   source: string;
+  description: string;
 }
 
 export interface TerminalNews {
   id: string;
   name: string;
   shortName: string;
-  query: string;
   website: string;
+  newsPageUrl: string;
   items: NewsItem[];
+  rssUrl: string | null;
+  feedSource: string | null;   // 'rss-known' | 'rss-autodiscovered' | 'rss-probed' | 'no-feed' | null
   loading: boolean;
   error: boolean;
   lastFetched: Date | null;
 }
 
-export const TERMINAL_CONFIGS = [
+export const TERMINAL_CONFIGS: Omit<TerminalNews, 'items' | 'rssUrl' | 'feedSource' | 'loading' | 'error' | 'lastFetched'>[] = [
   {
     id: 'duisburg',
     name: 'Hutchison Ports Duisburg',
     shortName: 'HP Duisburg',
-    query: '"Hutchison Ports Duisburg" OR "HPEI Duisburg" terminal',
     website: 'https://www.hutchisonportsduisburg.de',
+    newsPageUrl: 'https://www.hutchisonportsduisburg.de/news',
   },
   {
     id: 'trier',
     name: 'Trier AZS',
     shortName: 'AZS Trier',
-    query: '"AZS Trier" terminal binnenschiff container',
     website: 'https://azs-group.com',
+    newsPageUrl: 'https://azs-group.com/en/news',
   },
   {
     id: 'bonn',
     name: 'Bonn AZS',
     shortName: 'AZS Bonn',
-    query: '"AZS Bonn" terminal inland container Rhein',
     website: 'https://azs-group.com',
+    newsPageUrl: 'https://azs-group.com/en/news',
   },
   {
     id: 'germersheim',
     name: 'Germersheim DP World',
     shortName: 'DPW Germersheim',
-    query: '"DP World Germersheim" terminal inland',
     website: 'https://www.dpworld.com/en/ports-terminals/eu-intermodal/germersheim',
+    newsPageUrl: 'https://www.dpworld.com/en/news',
   },
   {
     id: 'mannheim',
     name: 'Mannheim DP World',
     shortName: 'DPW Mannheim',
-    query: '"DP World Mannheim" terminal inland intermodal',
     website: 'https://www.dpworld.com/en/ports-terminals/eu-intermodal/mannheim',
+    newsPageUrl: 'https://www.dpworld.com/en/news',
   },
   {
     id: 'nuernberg',
     name: 'Nuernberg CDN',
     shortName: 'Contargo CDN',
-    query: '"Contargo Nürnberg" OR "Contargo Nuernberg" OR "CDN Nürnberg" terminal',
     website: 'https://www.contargo.net/en/locations/terminals-n-z/nuernberg/',
+    newsPageUrl: 'https://www.contargo.net/en/news',
   },
   {
     id: 'andernach',
     name: 'Rheinhafen Andernach',
     shortName: 'Hafen Andernach',
-    query: '"Rheinhafen Andernach" OR "hafen Andernach" binnenschiff',
-    website: 'https://www.hafen-andernach.de/',
+    website: 'https://www.hafen-andernach.de',
+    newsPageUrl: 'https://www.hafen-andernach.de/aktuelles',
   },
   {
     id: 'gustavsburg',
     name: 'Contargo Gustavsburg',
     shortName: 'Contargo Gustavsburg',
-    query: '"Contargo Gustavsburg" terminal inland',
     website: 'https://www.contargo.net/en/locations/terminals-a-k/gustavsburg/',
+    newsPageUrl: 'https://www.contargo.net/en/news',
   },
   {
     id: 'neuss',
     name: 'Contargo Neuss',
     shortName: 'Contargo Neuss',
-    query: '"Contargo Neuss" terminal inland binnenschiff',
     website: 'https://www.contargo.net/en/locations/terminals-n-z/neuss/',
+    newsPageUrl: 'https://www.contargo.net/en/news',
   },
   {
     id: 'hgk',
     name: 'HGK Intermodal',
     shortName: 'HGK Intermodal',
-    query: '"HGK Intermodal" OR "HGK Logistics" inland container',
     website: 'https://www.hgk.de/en/hgk-logistics-and-intermodal/',
+    newsPageUrl: 'https://www.hgk.de/en/news',
   },
 ];
 
-const CORS_PROXY = 'https://api.allorigins.win/get?url=';
-const GOOGLE_NEWS_RSS = 'https://news.google.com/rss/search';
-const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
+const CACHE_TTL_MS = 30 * 60 * 1000;
 
-interface CacheEntry { items: NewsItem[]; fetchedAt: number }
+interface CacheEntry { items: NewsItem[]; rssUrl: string | null; feedSource: string | null; fetchedAt: number }
 const cache: Record<string, CacheEntry> = {};
 
-function parseRssXml(xmlStr: string): NewsItem[] {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(xmlStr, 'text/xml');
-  const items = Array.from(doc.querySelectorAll('item')).slice(0, 5);
-  return items.map(el => {
-    // Google News wraps title in CDATA — textContent strips it automatically
-    const rawTitle = el.querySelector('title')?.textContent ?? '';
-    // Strip trailing "- Publisher" suffix that Google News appends
-    const title = rawTitle.replace(/\s*[-–]\s*[^-–]{3,60}$/, '').trim() || rawTitle.trim();
-    // Google News puts the URL in a <link> text node after the element
-    const link = el.querySelector('link')?.nextSibling?.textContent?.trim()
-      ?? el.getElementsByTagName('link')[0]?.textContent?.trim()
-      ?? '';
-    const pubDate = el.querySelector('pubDate')?.textContent ?? '';
-    const source = el.querySelector('source')?.textContent?.trim() ?? 'Google News';
-    return { title, link, pubDate, source };
+async function fetchFromApi(id: string): Promise<{ items: NewsItem[]; rssUrl: string | null; feedSource: string | null }> {
+  const cached = cache[id];
+  if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
+    return { items: cached.items, rssUrl: cached.rssUrl, feedSource: cached.feedSource };
+  }
+
+  const res = await fetch(`/api/terminal-news?id=${encodeURIComponent(id)}`, {
+    signal: AbortSignal.timeout(20000),
   });
-}
-
-async function fetchTerminalNews(query: string): Promise<NewsItem[]> {
-  const cached = cache[query];
-  if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) return cached.items;
-
-  const rssUrl = `${GOOGLE_NEWS_RSS}?q=${encodeURIComponent(query)}&hl=de&gl=DE&ceid=DE:de`;
-  const proxyUrl = `${CORS_PROXY}${encodeURIComponent(rssUrl)}`;
-
-  const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(12000) });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) throw new Error(`API ${res.status}`);
 
   const data = await res.json();
-  if (!data.contents) throw new Error('Empty proxy response');
+  const items: NewsItem[] = data.items ?? [];
+  const rssUrl: string | null = data.rssUrl ?? null;
+  const feedSource: string | null = data.source ?? null;
 
-  const items = parseRssXml(data.contents);
-  cache[query] = { items, fetchedAt: Date.now() };
-  return items;
+  cache[id] = { items, rssUrl, feedSource, fetchedAt: Date.now() };
+  return { items, rssUrl, feedSource };
 }
 
 export function timeAgo(dateStr: string): string {
+  if (!dateStr) return '';
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) return '';
   const diff = Date.now() - date.getTime();
@@ -150,29 +135,37 @@ export function timeAgo(dateStr: string): string {
 
 export function useInlandNews(autoRefreshMs = CACHE_TTL_MS) {
   const [terminals, setTerminals] = useState<TerminalNews[]>(() =>
-    TERMINAL_CONFIGS.map(cfg => ({ ...cfg, items: [], loading: true, error: false, lastFetched: null }))
+    TERMINAL_CONFIGS.map(cfg => ({
+      ...cfg,
+      items: [],
+      rssUrl: null,
+      feedSource: null,
+      loading: true,
+      error: false,
+      lastFetched: null,
+    }))
   );
   const mountedRef = useRef(true);
 
   const fetchAll = useCallback(async (forceRefresh = false) => {
-    if (forceRefresh) TERMINAL_CONFIGS.forEach(cfg => { delete cache[cfg.query]; });
+    if (forceRefresh) TERMINAL_CONFIGS.forEach(cfg => { delete cache[cfg.id]; });
     setTerminals(prev => prev.map(t => ({ ...t, loading: true, error: false })));
 
     await Promise.all(
       TERMINAL_CONFIGS.map(async (cfg, idx) => {
         try {
-          const items = await fetchTerminalNews(cfg.query);
+          const { items, rssUrl, feedSource } = await fetchFromApi(cfg.id);
           if (!mountedRef.current) return;
           setTerminals(prev => {
             const next = [...prev];
-            next[idx] = { ...next[idx], items, loading: false, error: false, lastFetched: new Date() };
+            next[idx] = { ...next[idx], items, rssUrl, feedSource, loading: false, error: false, lastFetched: new Date() };
             return next;
           });
         } catch {
           if (!mountedRef.current) return;
           setTerminals(prev => {
             const next = [...prev];
-            next[idx] = { ...next[idx], items: [], loading: false, error: true, lastFetched: null };
+            next[idx] = { ...next[idx], items: [], rssUrl: null, feedSource: 'error', loading: false, error: true, lastFetched: null };
             return next;
           });
         }
