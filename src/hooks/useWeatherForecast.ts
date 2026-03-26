@@ -8,7 +8,7 @@
  * Automatically flags severe weather (strong winds or storms) for operational alerts.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 const OPEN_METEO_URL =
   'https://api.open-meteo.com/v1/forecast' +
@@ -103,10 +103,16 @@ export function useWeatherForecast(): WeatherForecast {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const fetchForecast = useCallback(async () => {
+    // Cancel previous in-flight request
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const { signal } = controller;
     try {
-      const res = await fetch(OPEN_METEO_URL);
+      const res = await fetch(OPEN_METEO_URL, { signal });
       if (!res.ok) throw new Error('HTTP error');
       const json = await res.json();
       const d = json.daily;
@@ -175,17 +181,21 @@ export function useWeatherForecast(): WeatherForecast {
       setError(false);
       setLastRefresh(new Date());
     } catch (err) {
+      if ((err as Error)?.name === 'AbortError') return; // Normal cancellation — suppress
       console.warn('[Weather] Forecast fetch failed:', err);
-      setError(true);
+      if (!signal.aborted) setError(true);
     } finally {
-      setLoading(false);
+      if (!signal.aborted) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     fetchForecast();
     const id = setInterval(fetchForecast, REFRESH_INTERVAL);
-    return () => clearInterval(id);
+    return () => {
+      clearInterval(id);
+      abortRef.current?.abort();
+    };
   }, [fetchForecast]);
 
   return { days, alert, location: 'Rotterdam / Rhine Corridor', loading, error, lastRefresh };

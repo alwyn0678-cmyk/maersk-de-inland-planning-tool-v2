@@ -30,7 +30,10 @@ function containerToSizeType(ct: string): { size: string; type: string } {
 }
 
 export function ImportForm({ onSuccess }: { onSuccess?: () => void }) {
-  const { importRequest, setImportRequest, setImpRunResult, resetImport } = usePlannerStore();
+  const importRequest  = usePlannerStore(s => s.importRequest);
+  const setImportRequest = usePlannerStore(s => s.setImportRequest);
+  const setImpRunResult  = usePlannerStore(s => s.setImpRunResult);
+  const resetImport      = usePlannerStore(s => s.resetImport);
   const [zipError, setZipError] = useState('');
   const etdTime = importRequest.vesselEtdTime || '08:00';
 

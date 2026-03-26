@@ -1,75 +1,14 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Anchor, Download, Upload, CheckCircle2, Info, Activity, Globe } from 'lucide-react';
+import { Anchor, CheckCircle2, Info, Globe } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
-import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { cn } from '../../lib/utils';
-import { usePlannerStore, TerminalCongestion } from '../../store/usePlannerStore';
-import * as XLSX from 'xlsx';
+import { usePlannerStore } from '../../store/usePlannerStore';
 
 export function TerminalCongestionOverview() {
-  const { terminalCongestionData, setTerminalCongestionData } = usePlannerStore();
+  const terminalCongestionData = usePlannerStore(s => s.terminalCongestionData);
 
-  // Auto-classify congestion status from waiting hours:
-  // Low ≤ 8h · Medium ≤ 24h · High > 24h
-  function classifyStatus(hours: number): 'Low' | 'Medium' | 'High' {
-    if (hours <= 8)  return 'Low';
-    if (hours <= 24) return 'Medium';
-    return 'High';
-  }
-
-  const handleExport = () => {
-    // Simplified template — only Terminal + Waiting Hours required
-    const dataToExport = terminalCongestionData.map(item => ({
-      Port: item.port,
-      Terminal: item.terminal,
-      'Waiting Hours': item.waitingTime,
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Congestion');
-    XLSX.writeFile(workbook, 'Terminal_Congestion_Update.xlsx');
-  };
-
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const data = new Uint8Array(event.target?.result as ArrayBuffer);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet) as any[];
-
-      const updatedData: TerminalCongestion[] = jsonData
-        .filter(row => row.Terminal && (row['Waiting Hours'] !== undefined || row['Waiting Time (Hours)'] !== undefined))
-        .map((row, idx) => {
-          // Accept both column name variants for backward compatibility
-          const hours = Number(row['Waiting Hours'] ?? row['Waiting Time (Hours)'] ?? 0);
-          return {
-            id: `upd-${idx}`,
-            port: (row.Port ?? 'Rotterdam') as 'Rotterdam' | 'Antwerp',
-            terminal: String(row.Terminal),
-            waitingTime: hours,
-            // Status is auto-calculated — no manual input needed
-            status: classifyStatus(hours),
-            lastUpdated: new Date().toISOString(),
-          };
-        });
-
-      if (updatedData.length > 0) {
-        setTerminalCongestionData(updatedData);
-      }
-    };
-    reader.onerror = () => console.warn('[TerminalCongestion] FileReader error:', reader.error);
-    reader.readAsArrayBuffer(file);
-    // Reset input so the same file can be re-uploaded
-    e.target.value = '';
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -100,37 +39,6 @@ export function TerminalCongestionOverview() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="flex items-center bg-white/5 rounded-xl p-1 border border-white/10">
-              <Button
-                onClick={handleExport}
-                variant="ghost"
-                className="rounded-lg font-black text-[9px] uppercase tracking-widest text-white/70 hover:text-white hover:bg-white/10 transition-all h-8 px-3"
-              >
-                <Download className="h-3 w-3 mr-1.5" />
-                Extract
-              </Button>
-              <div className="relative">
-                <input
-                  type="file"
-                  accept=".xlsx, .xls"
-                  onChange={handleUpload}
-                  className="absolute inset-0 opacity-0 cursor-pointer"
-                />
-                <Button
-                  variant="ghost"
-                  className="rounded-lg font-black text-[9px] uppercase tracking-widest text-white/70 hover:text-white hover:bg-white/10 transition-all h-8 px-3"
-                >
-                  <Upload className="h-3 w-3 mr-1.5" />
-                  Upload
-                </Button>
-              </div>
-            </div>
-            <Badge className="bg-emerald-500 text-white border-none shadow-md shadow-emerald-500/20 px-3 py-1 rounded-lg font-black text-[9px] uppercase tracking-widest">
-              <Activity className="h-2.5 w-2.5 mr-1.5 animate-pulse" />
-              Active Sync
-            </Badge>
-          </div>
         </div>
       </CardHeader>
 

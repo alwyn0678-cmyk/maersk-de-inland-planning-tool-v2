@@ -52,7 +52,9 @@ interface ScheduleManagerProps {
 }
 
 export function ScheduleManager({ direction }: ScheduleManagerProps) {
-  const { schedules, setSchedules, addSchedule } = usePlannerStore();
+  const schedules    = usePlannerStore(s => s.schedules);
+  const setSchedules = usePlannerStore(s => s.setSchedules);
+  const addSchedule  = usePlannerStore(s => s.addSchedule);
   const [isAdding, setIsAdding] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<'All' | 'Barge' | 'Rail'>('All');

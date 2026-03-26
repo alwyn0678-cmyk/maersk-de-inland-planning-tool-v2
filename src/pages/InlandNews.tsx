@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 import {
   Globe, Newspaper, MapPin, ExternalLink,
   Anchor, Train, Building2,
   Waves, ArrowUpRight, Info,
   ChevronRight, AlertTriangle, Mail,
-  CheckCircle2, MinusCircle, Ship,
+  CheckCircle2, MinusCircle, Ship, CalendarDays, FileDown,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
@@ -27,8 +27,13 @@ type OperatorKey = keyof typeof OPERATORS;
 interface TerminalLink {
   label: string;
   url: string;
-  icon: 'globe' | 'news' | 'terminal';
+  icon: 'globe' | 'news' | 'terminal' | 'schedule';
   primary?: boolean;
+}
+
+interface SchedulePdf {
+  label: string;
+  url: string;
 }
 
 interface Terminal {
@@ -42,6 +47,7 @@ interface Terminal {
   ports: Array<'RTM' | 'ANR'>;
   hasSchedule: boolean;
   links: TerminalLink[];
+  pdfs?: SchedulePdf[];
   mapsQuery: string;
   warning?: string;
 }
@@ -62,6 +68,12 @@ const TERMINALS: Terminal[] = [
     links: [
       { label: 'Website', url: 'https://www.hutchisonportsduisburg.de', icon: 'globe', primary: true },
     ],
+    pdfs: [
+      { label: 'Barge RTM Import', url: 'https://www.hutchisonportseuropeintermodal.com/sites/d10p.hutchisonportseuropeintermodal.com/files/terminals/schedules/duisburg_rotterdam_barge_import_20260103.pdf' },
+      { label: 'Barge RTM Export', url: 'https://www.hutchisonportseuropeintermodal.com/sites/d10p.hutchisonportseuropeintermodal.com/files/terminals/schedules/duisburg_rotterdam_barge_export_20260103.pdf' },
+      { label: 'Barge ANR Import', url: 'https://www.hutchisonportseuropeintermodal.com/sites/d10p.hutchisonportseuropeintermodal.com/files/terminals/schedules/duisburg_antwerpen_barge_import_20260103.pdf' },
+      { label: 'Barge ANR Export', url: 'https://www.hutchisonportseuropeintermodal.com/sites/d10p.hutchisonportseuropeintermodal.com/files/terminals/schedules/duisburg_antwerpen_barge_export_20230103.pdf' },
+    ],
     mapsQuery: 'Hutchison+Ports+Duisburg',
     warning: 'IMO & Reefer on request only — raise ISR before booking',
   },
@@ -76,7 +88,8 @@ const TERMINALS: Terminal[] = [
     ports: ['RTM', 'ANR'],
     hasSchedule: true,
     links: [
-      { label: 'Terminal', url: 'https://www.contargo.net/en/locations/terminals-a-k/gustavsburg/', icon: 'terminal', primary: true },
+      { label: 'Terminal', url: 'https://www.contargo.net/en/locations/terminals-a-k/gustavsburg', icon: 'terminal', primary: true },
+      { label: 'Schedules', url: 'https://www.contargo.net/en/locations/terminals-a-k/gustavsburg', icon: 'schedule' },
     ],
     mapsQuery: 'Contargo+Gustavsburg+Terminal',
   },
@@ -91,7 +104,8 @@ const TERMINALS: Terminal[] = [
     ports: ['RTM', 'ANR'],
     hasSchedule: true,
     links: [
-      { label: 'DP World', url: 'https://www.dpworld.com', icon: 'globe', primary: true },
+      { label: 'Website', url: 'https://www.dpworld.com', icon: 'globe', primary: true },
+      { label: 'Schedules', url: 'https://www.dpworld.com/en/ports-terminals/eu-intermodal/germersheim/tools-and-resources/schedules', icon: 'schedule' },
     ],
     mapsQuery: 'DP+World+Germersheim+Inland+Terminal',
   },
@@ -106,7 +120,8 @@ const TERMINALS: Terminal[] = [
     ports: ['RTM', 'ANR'],
     hasSchedule: true,
     links: [
-      { label: 'DP World', url: 'https://www.dpworld.com', icon: 'globe', primary: true },
+      { label: 'Website', url: 'https://www.dpworld.com', icon: 'globe', primary: true },
+      { label: 'Schedules', url: 'https://www.dpworld.com/en/ports-terminals/eu-intermodal/mannheim/tools-and-resources/schedules', icon: 'schedule' },
     ],
     mapsQuery: 'DP+World+Mannheim+Inland+Terminal',
   },
@@ -122,6 +137,7 @@ const TERMINALS: Terminal[] = [
     hasSchedule: true,
     links: [
       { label: 'Website', url: 'https://www.hafen-andernach.de', icon: 'globe', primary: true },
+      { label: 'Schedules', url: 'https://www.hafen-andernach.de/schiff/container/', icon: 'schedule' },
     ],
     mapsQuery: 'Rheinhafen+Andernach',
   },
@@ -138,6 +154,10 @@ const TERMINALS: Terminal[] = [
     links: [
       { label: 'Website', url: 'https://azs-group.com', icon: 'globe', primary: true },
     ],
+    pdfs: [
+      { label: 'Barge Regular', url: 'https://azs-group.com/files/Barge_Regular_Schedule.pdf' },
+      { label: 'Barge Additional', url: 'https://azs-group.com/files/Barge_Additional_Schedule.pdf' },
+    ],
     mapsQuery: 'AZS+Terminal+Bonn+Hafen',
   },
   {
@@ -148,10 +168,11 @@ const TERMINALS: Terminal[] = [
     city: 'Neuss',
     region: 'NRW',
     modalities: ['barge'],
-    ports: ['RTM', 'ANR'],
+    ports: ['ANR'],
     hasSchedule: false,
     links: [
-      { label: 'Terminal', url: 'https://www.contargo.net/en/locations/terminals-n-z/neuss/', icon: 'terminal', primary: true },
+      { label: 'Terminal', url: 'https://www.contargo.net/en/locations/terminals-l-z/neuss-tilsiter-strasse', icon: 'terminal', primary: true },
+      { label: 'Schedules', url: 'https://www.contargo.net/en/locations/terminals-l-z/neuss-tilsiter-strasse', icon: 'schedule' },
     ],
     mapsQuery: 'Contargo+Neuss+Terminal',
   },
@@ -168,22 +189,30 @@ const TERMINALS: Terminal[] = [
     links: [
       { label: 'Website', url: 'https://azs-group.com', icon: 'globe', primary: true },
     ],
+    pdfs: [
+      { label: 'Barge Regular', url: 'https://azs-group.com/files/Barge_Regular_Schedule.pdf' },
+      { label: 'Barge Additional', url: 'https://azs-group.com/files/Barge_Additional_Schedule.pdf' },
+    ],
     mapsQuery: 'AZS+Terminal+Trier+Hafen',
   },
   {
     id: 'nuernberg',
     code: 'NUE02',
-    name: 'Contargo Nuernberg CDN',
-    operator: 'contargo',
+    name: 'HPEI Nuremberg (EGS)',
+    operator: 'hutchison',
     city: 'Nürnberg',
     region: 'Bavaria',
     modalities: ['rail'],
     ports: ['RTM'],
     hasSchedule: true,
     links: [
-      { label: 'Terminal', url: 'https://www.contargo.net/en/locations/terminals-n-z/nuernberg/', icon: 'terminal', primary: true },
+      { label: 'Terminal', url: 'https://www.hutchisonportseuropeintermodal.com/en/nuremberg', icon: 'terminal', primary: true },
     ],
-    mapsQuery: 'Contargo+Nuernberg+CDN+Terminal',
+    pdfs: [
+      { label: 'Rail Import', url: 'https://www.hutchisonportseuropeintermodal.com/sites/d10p.hutchisonportseuropeintermodal.com/files/terminals/schedules/nurnberg_rail_schedule_import_20260101.pdf' },
+      { label: 'Rail Export', url: 'https://www.hutchisonportseuropeintermodal.com/sites/d10p.hutchisonportseuropeintermodal.com/files/terminals/schedules/nurnberg_rail_schedule_export_20260101.pdf' },
+    ],
+    mapsQuery: 'TriCon+Container+Terminal+Nuernberg',
   },
   {
     id: 'hgk',
@@ -197,6 +226,9 @@ const TERMINALS: Terminal[] = [
     hasSchedule: false,
     links: [
       { label: 'Website', url: 'https://www.hgk.de', icon: 'globe', primary: true },
+    ],
+    pdfs: [
+      { label: 'Intermodal Schedule 2024', url: 'https://www.hgk.de/fileadmin/dokumente/Downloads/HGK_Logistics_and_Intermodal/Fahrplaene_unserer_Systemverkehre/HGK_Intermodal_Schedule_2024.pdf' },
     ],
     mapsQuery: 'HGK+Intermodal+Cologne',
   },
@@ -265,23 +297,42 @@ const REMINDERS = [
 function LinkIcon({ icon }: { icon: TerminalLink['icon'] }) {
   if (icon === 'globe') return <Globe className="h-2.5 w-2.5" />;
   if (icon === 'news') return <Newspaper className="h-2.5 w-2.5" />;
+  if (icon === 'schedule') return <CalendarDays className="h-2.5 w-2.5" />;
   return <Building2 className="h-2.5 w-2.5" />;
 }
 
 function TerminalCard({ terminal, delay }: { terminal: Terminal; delay: number }) {
   const op = OPERATORS[terminal.operator];
+  const [schedOpen, setSchedOpen] = useState(false);
+  const schedRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    if (!schedOpen) return;
+    function onOutside(e: MouseEvent) {
+      if (schedRef.current && !schedRef.current.contains(e.target as Node)) {
+        setSchedOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', onOutside);
+    return () => document.removeEventListener('mousedown', onOutside);
+  }, [schedOpen]);
+
+  const schedLinks = terminal.links.filter(l => l.icon === 'schedule');
+  const mainLinks  = terminal.links.filter(l => l.icon !== 'schedule');
+  const hasSchedContent = (terminal.pdfs && terminal.pdfs.length > 0) || schedLinks.length > 0;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.28 }}
-      className="relative rounded-xl bg-white/5 border border-white/10 overflow-hidden hover:border-white/20 hover:bg-white/[0.08] transition-all duration-200 flex flex-col"
+      className="relative rounded-xl bg-white/5 border border-white/10 overflow-visible hover:border-white/20 hover:bg-white/[0.08] transition-all duration-200"
     >
       {/* Operator colour bar */}
-      <div className={cn('h-0.5 w-full flex-none', op.bar)} />
+      <div className={cn('h-0.5 w-full rounded-t-xl flex-none', op.bar)} />
 
-      <div className="p-4 flex flex-col gap-3 flex-1">
+      <div className="p-4 flex flex-col gap-2.5">
         {/* Header */}
         <div className="flex items-start justify-between gap-2">
           <p className="text-[11px] font-black text-white uppercase tracking-wide leading-snug flex-1">
@@ -328,13 +379,19 @@ function TerminalCard({ terminal, delay }: { terminal: Terminal; delay: number }
           'flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[8.5px] font-bold',
           terminal.hasSchedule
             ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-            : 'bg-white/5 border-white/10 text-white/25'
+            : hasSchedContent
+              ? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+              : 'bg-white/5 border-white/10 text-white/25'
         )}>
           {terminal.hasSchedule
             ? <CheckCircle2 className="h-2.5 w-2.5 flex-none" />
             : <MinusCircle className="h-2.5 w-2.5 flex-none" />
           }
-          {terminal.hasSchedule ? 'Schedule data available in tool' : 'Contact terminal for schedule'}
+          {terminal.hasSchedule
+            ? 'Schedule data available in tool'
+            : hasSchedContent
+              ? 'Not in planning tool — see linked schedules'
+              : 'Contact terminal for schedule'}
         </div>
 
         {/* Warning */}
@@ -345,26 +402,89 @@ function TerminalCard({ terminal, delay }: { terminal: Terminal; delay: number }
           </div>
         )}
 
-        {/* Links */}
-        <div className="mt-auto pt-1 flex flex-wrap gap-1.5">
-          {terminal.links.map(link => (
+        {/* Bottom action row */}
+        <div className="pt-0.5 flex flex-wrap gap-1.5 items-center">
+          {/* Regular links (website / terminal) */}
+          {mainLinks.map(link => (
             <a
               key={link.label}
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className={cn(
-                'inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all',
-                link.primary
-                  ? 'bg-white/10 text-white/70 border border-white/15 hover:bg-white/20 hover:text-white'
-                  : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10 hover:text-white/70'
-              )}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest bg-white/10 text-white/70 border border-white/15 hover:bg-white/20 hover:text-white transition-all"
             >
               <LinkIcon icon={link.icon} />
               {link.label}
               <ExternalLink className="h-2 w-2 opacity-40" />
             </a>
           ))}
+
+          {/* Schedules dropdown button */}
+          {hasSchedContent && (
+            <div ref={schedRef} className="relative">
+              <button
+                onClick={() => setSchedOpen(v => !v)}
+                className={cn(
+                  'inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all',
+                  schedOpen
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                    : 'bg-white/5 text-white/50 border-white/10 hover:bg-white/10 hover:text-white/80'
+                )}
+              >
+                <CalendarDays className="h-2.5 w-2.5" />
+                Schedules
+                <span className={cn('transition-transform duration-150 text-[8px]', schedOpen ? 'rotate-180' : '')}>▾</span>
+              </button>
+
+              {schedOpen && (
+                <div className="absolute bottom-full left-0 mb-1.5 z-50 min-w-[200px] rounded-xl bg-[#0d1e35] border border-white/15 shadow-2xl shadow-black/50 overflow-hidden">
+                  {/* PDFs */}
+                  {terminal.pdfs && terminal.pdfs.length > 0 && (
+                    <div className="p-2 space-y-0.5">
+                      <p className="text-[7.5px] font-black text-white/25 uppercase tracking-widest px-1.5 pb-1">PDF Schedules</p>
+                      {terminal.pdfs.map(pdf => (
+                        <a
+                          key={pdf.label}
+                          href={pdf.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => setSchedOpen(false)}
+                          className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[9px] font-bold text-white/60 hover:bg-emerald-500/15 hover:text-emerald-300 transition-all"
+                        >
+                          <FileDown className="h-3 w-3 flex-none text-emerald-500/60" />
+                          {pdf.label}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Schedule page links */}
+                  {schedLinks.length > 0 && (
+                    <div className={cn('p-2 space-y-0.5', terminal.pdfs && terminal.pdfs.length > 0 && 'border-t border-white/10')}>
+                      {terminal.pdfs && terminal.pdfs.length > 0 && (
+                        <p className="text-[7.5px] font-black text-white/25 uppercase tracking-widest px-1.5 pb-1">Schedule Pages</p>
+                      )}
+                      {schedLinks.map(link => (
+                        <a
+                          key={link.label}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => setSchedOpen(false)}
+                          className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[9px] font-bold text-white/60 hover:bg-white/10 hover:text-white/90 transition-all"
+                        >
+                          <ExternalLink className="h-3 w-3 flex-none text-white/30" />
+                          {link.label}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Map */}
           <a
             href={`https://maps.google.com/?q=${terminal.mapsQuery}`}
             target="_blank"

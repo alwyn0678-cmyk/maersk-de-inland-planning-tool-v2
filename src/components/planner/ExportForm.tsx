@@ -39,7 +39,10 @@ const TERMINAL_OPTIONS = [
 ];
 
 export function ExportForm({ onSuccess }: { onSuccess?: () => void }) {
-  const { exportRequest, setExportRequest, setExpRunResult, resetExport } = usePlannerStore();
+  const exportRequest  = usePlannerStore(s => s.exportRequest);
+  const setExportRequest = usePlannerStore(s => s.setExportRequest);
+  const setExpRunResult  = usePlannerStore(s => s.setExpRunResult);
+  const resetExport      = usePlannerStore(s => s.resetExport);
   const [zipError, setZipError] = useState('');
   const terminalValue = exportRequest.portTerminal || 'NLROTTM|5|RTM';
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 export interface WaterLevelSite {
   site: string;
@@ -63,10 +63,13 @@ function computeTrend(history: { val: number }[]): 'up' | 'down' | 'stable' {
 }
 
 // Pegelonline v2 API returns a bare JSON array — NOT wrapped in { measurements: [...] }
-async function fetchStation(station: string): Promise<{ timestamp: string; value: number }[]> {
+async function fetchStation(
+  station: string,
+  signal: AbortSignal
+): Promise<{ timestamp: string; value: number }[]> {
   const start = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const url = `${PEGEL_BASE}/${encodeURIComponent(station)}/W/measurements.json?start=${start}`;
-  const res = await fetch(url);
+  const res = await fetch(url, { signal });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const data = await res.json();
   if (!Array.isArray(data) || data.length === 0) throw new Error('No data');
@@ -77,12 +80,20 @@ export function useRhineWaterLevels(refreshIntervalMs = 60 * 60 * 1000) {
   const [data, setData] = useState<WaterLevelSite[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  // Track live AbortController so interval-triggered fetches can be cancelled on unmount
+  const abortRef = useRef<AbortController | null>(null);
 
   const fetchAll = useCallback(async () => {
+    // Cancel any in-flight request before starting a new one
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const { signal } = controller;
+
     const results: WaterLevelSite[] = await Promise.all(
       STATIONS.map(async ({ site, station, thresholdCm, criticalCm }) => {
         try {
-          const measurements = await fetchStation(station);
+          const measurements = await fetchStation(station, signal);
 
           // Sample 6 points across the last 24h (oldest → newest).
           // The last slot is always the most recent reading so trend arrows
@@ -144,6 +155,8 @@ export function useRhineWaterLevels(refreshIntervalMs = 60 * 60 * 1000) {
         }
       })
     );
+    // Don't update state if the request was cancelled (component unmounted)
+    if (signal.aborted) return;
     setData(results);
     setLastRefresh(new Date());
     setLoading(false);
@@ -152,7 +165,11 @@ export function useRhineWaterLevels(refreshIntervalMs = 60 * 60 * 1000) {
   useEffect(() => {
     fetchAll();
     const interval = setInterval(fetchAll, refreshIntervalMs);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      // Cancel any in-flight fetch when the component unmounts
+      abortRef.current?.abort();
+    };
   }, [fetchAll, refreshIntervalMs]);
 
   return { data, loading, lastRefresh, refresh: fetchAll };

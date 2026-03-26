@@ -727,21 +727,57 @@ export function Help() {
                     </p>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                        <div className="h-8 w-8 rounded-md bg-emerald-500 flex items-center justify-center flex-none">
+                        <div className="h-8 w-8 rounded-md bg-emerald-500 flex items-center justify-center flex-none shrink-0">
                           <CheckCircle2 className="h-4 w-4 text-white" />
                         </div>
                         <div>
-                          <p className="text-xs font-black text-emerald-400">Green — Available</p>
-                          <p className="text-[10px] text-white/50 leading-snug mt-0.5">Truck capacity is available on this date. Click to look up export schedules.</p>
+                          <p className="text-xs font-black text-emerald-400">Green — All possible</p>
+                          <p className="text-[10px] text-white/50 leading-snug mt-0.5">Full day capacity available. Click to look up export schedules.</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-yellow-400/10 border border-yellow-400/20">
+                        <div className="h-8 w-8 rounded-md bg-yellow-400 flex items-center justify-center flex-none shrink-0">
+                          <Clock className="h-4 w-4 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-black text-yellow-400">Yellow — From 1100hrs</p>
+                          <p className="text-[10px] text-white/50 leading-snug mt-0.5">Capacity available from 11:00 CET only. Clickable.</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                        <div className="h-8 w-8 rounded-md bg-orange-500 flex items-center justify-center flex-none shrink-0">
+                          <Clock className="h-4 w-4 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-black text-orange-400">Orange — From 1300hrs</p>
+                          <p className="text-[10px] text-white/50 leading-snug mt-0.5">Capacity available from 13:00 CET only. Clickable.</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                        <div className="h-8 w-8 rounded-md bg-blue-500 flex items-center justify-center flex-none shrink-0">
+                          <Clock className="h-4 w-4 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-black text-blue-400">Blue — From 1600hrs</p>
+                          <p className="text-[10px] text-white/50 leading-snug mt-0.5">Capacity available from 16:00 CET only. Clickable.</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-400/10 border border-slate-400/20">
+                        <div className="h-8 w-8 rounded-md bg-slate-400 flex items-center justify-center flex-none shrink-0">
+                          <Info className="h-4 w-4 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-black text-slate-400">Grey — On request</p>
+                          <p className="text-[10px] text-white/50 leading-snug mt-0.5">Contact inland ops before booking. Clickable for schedule lookup.</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 p-3 rounded-lg bg-rose-500/10 border border-rose-500/20">
-                        <div className="h-8 w-8 rounded-md bg-rose-500 flex items-center justify-center flex-none">
+                        <div className="h-8 w-8 rounded-md bg-rose-500 flex items-center justify-center flex-none shrink-0">
                           <AlertTriangle className="h-4 w-4 text-white" />
                         </div>
                         <div>
-                          <p className="text-xs font-black text-rose-400">Red — Booked Out</p>
-                          <p className="text-[10px] text-white/50 leading-snug mt-0.5">No truck capacity on this date. Not clickable.</p>
+                          <p className="text-xs font-black text-rose-400">Red — Not possible</p>
+                          <p className="text-[10px] text-white/50 leading-snug mt-0.5">No capacity on this date. Not clickable.</p>
                         </div>
                       </div>
                     </div>
@@ -750,7 +786,7 @@ export function Help() {
                     <div className="mt-2 rounded-xl border border-[#42b0d5]/20 bg-[#42b0d5]/5 p-4 space-y-3">
                       <div className="flex items-center gap-2">
                         <MousePointerClick className="h-4 w-4 text-[#42b0d5] flex-none" />
-                        <p className="text-xs font-black text-[#42b0d5]">Clicking a green date — step by step</p>
+                        <p className="text-xs font-black text-[#42b0d5]">Clicking an available date — step by step</p>
                       </div>
                       <div className="space-y-2.5 pl-1">
                         {[
@@ -791,8 +827,8 @@ export function Help() {
                     </p>
                     <div className="space-y-2 mt-1">
                       {[
-                        { label: 'Extract Excel', desc: 'Downloads the current capacity grid as a .xlsx file. Open it, update Available/Booked Out cells, then upload.' },
-                        { label: 'Upload Capacity', desc: 'Uploads a filled Excel template and refreshes the board. The file must match the exact column format of the extract.' },
+                        { label: 'Extract Excel', desc: 'Downloads the current capacity grid as a .xlsx file. Open it, update each cell using the 6-status values (All possible / From 1100hrs / From 1300hrs / From 1600hrs / On request / Not possible), then upload.' },
+                        { label: 'Upload Capacity', desc: 'Uploads the filled Excel template, syncs to the server, and refreshes the board for all users instantly. The file must match the exact column format of the extract.' },
                       ].map(item => (
                         <div key={item.label} className="flex items-start gap-3 py-2 border-b border-white/5 last:border-0">
                           <span className="text-[10px] font-black text-[#42b0d5] w-28 flex-none pt-0.5">{item.label}</span>

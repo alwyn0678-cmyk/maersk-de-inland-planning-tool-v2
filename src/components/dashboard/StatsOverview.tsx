@@ -11,7 +11,7 @@ interface StatsOverviewProps {
 }
 
 export function StatsOverview({ waterLevelData }: StatsOverviewProps) {
-  const { truckCapacityData } = usePlannerStore();
+  const truckCapacityData = usePlannerStore(s => s.truckCapacityData);
 
   const getStatus = (val: number) => {
     if (val > 80) return 'Capacity Full';
@@ -22,7 +22,8 @@ export function StatsOverview({ waterLevelData }: StatsOverviewProps) {
   // Memoize stats so Math.random() only runs when truckCapacityData or waterLevelData changes
   const stats = useMemo(() => {
     const truckStats = truckCapacityData.map((hub, i) => {
-      const capacity = Math.round((hub.forecast.filter(v => v === 1).length / 15) * 100);
+      // Count all non-zero statuses (1–5) as "available" — status 0 = Not possible
+      const capacity = Math.round((hub.forecast.filter(v => v > 0).length / 15) * 100);
       const colors = [
         { text: 'text-blue-600', bg: 'bg-blue-50' },
         { text: 'text-amber-600', bg: 'bg-amber-50' },
@@ -39,7 +40,7 @@ export function StatsOverview({ waterLevelData }: StatsOverviewProps) {
         // Avoids re-randomization on every waterLevelData refresh (every 30 min)
         chart: hub.forecast.map((v, idx) => {
           const seed = (idx * 17 + hub.location.charCodeAt(0) * 3 + hub.location.charCodeAt(hub.location.length - 1)) % 100;
-          return v === 1 ? 75 + (seed % 25) : 15 + (seed % 25);
+          return v > 0 ? 75 + (seed % 25) : 15 + (seed % 25);
         })
       };
     });

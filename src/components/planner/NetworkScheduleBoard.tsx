@@ -102,13 +102,15 @@ interface Props {
 
 export function NetworkScheduleBoard({ direction, onRowClick }: Props) {
   const [modFilter, setModFilter] = useState<'All' | 'Barge' | 'Rail'>('All');
-  const today = useMemo(() => new Date(), []);
 
+  // Compute fresh `today` each time direction changes so schedules stay correct
+  // if the tab is left open overnight.
   const allDepartures = useMemo(() => {
+    const today = new Date();
     return direction === 'Import'
       ? buildImportDepartures(today)
       : buildExportDepartures(today);
-  }, [direction, today]);
+  }, [direction]);
 
   const filtered = useMemo(() => {
     return allDepartures

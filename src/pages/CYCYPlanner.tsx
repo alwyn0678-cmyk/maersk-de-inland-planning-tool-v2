@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { CYCYForm } from '../components/planner/CYCYForm';
 import { CYCYResultCard } from '../components/planner/CYCYResultCard';
 import { usePlannerStore } from '../store/usePlannerStore';
@@ -7,8 +7,21 @@ import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 
 export function CYCYPlanner() {
-  const { cycyRequest, cycyRunResult, setCYCYRequest, setCycyRunResult, resetCYCY } = usePlannerStore();
+  const cycyRequest     = usePlannerStore(s => s.cycyRequest);
+  const cycyRunResult   = usePlannerStore(s => s.cycyRunResult);
+  const setCYCYRequest  = usePlannerStore(s => s.setCYCYRequest);
+  const setCycyRunResult = usePlannerStore(s => s.setCycyRunResult);
+  const resetCYCY       = usePlannerStore(s => s.resetCYCY);
   const [filterOpen, setFilterOpen] = useState(false);
+
+  const handleKey = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape' && filterOpen) setFilterOpen(false);
+  }, [filterOpen]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [handleKey]);
 
   const isImport = cycyRequest.direction === 'Import';
 
@@ -229,7 +242,7 @@ export function CYCYPlanner() {
           >
             <div
               className="absolute inset-0 bg-maersk-dark/70 backdrop-blur-sm"
-              onClick={() => cycyRunResult && setFilterOpen(false)}
+              onClick={() => setFilterOpen(false)}
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -248,14 +261,12 @@ export function CYCYPlanner() {
                     <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.2em] mt-0.5">Terminal-to-Terminal Network</p>
                   </div>
                 </div>
-                {cycyRunResult && (
-                  <button
-                    onClick={() => setFilterOpen(false)}
-                    className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/10 transition-all"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
+                <button
+                  onClick={() => setFilterOpen(false)}
+                  className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/10 transition-all"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
               <div className="rounded-b-2xl overflow-hidden shadow-2xl shadow-black/40 max-h-[80vh] overflow-y-auto">
                 <CYCYForm onSuccess={() => setFilterOpen(false)} />

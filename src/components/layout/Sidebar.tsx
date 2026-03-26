@@ -36,7 +36,7 @@ const secondaryItems = [
 
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { scheduleOverrideMeta } = usePlannerStore();
+  const scheduleOverrideMeta = usePlannerStore(s => s.scheduleOverrideMeta);
   const overrideActive = !!scheduleOverrideMeta;
 
   return (
@@ -74,7 +74,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       {/* Main Navigation */}
       <div className="flex-1 space-y-1 overflow-y-auto overflow-x-hidden">
         {BASE_MENU_ITEMS.map((item) => (
-          <NavButton key={item.id} item={item} activeTab={activeTab} onTabChange={onTabChange} isCollapsed={isCollapsed} variant="main" showDot={item.id === 'schedules' && overrideActive} />
+          <NavButton key={item.id} item={item} activeTab={activeTab} onTabChange={onTabChange} isCollapsed={isCollapsed} showDot={item.id === 'schedules' && overrideActive} />
         ))}
       </div>
 
@@ -139,7 +139,6 @@ function NavButton({
   activeTab: string;
   onTabChange: (tab: string) => void;
   isCollapsed: boolean;
-  variant: 'main' | 'tool';
   showDot?: boolean;
 }) {
   const isActive = activeTab === item.id;

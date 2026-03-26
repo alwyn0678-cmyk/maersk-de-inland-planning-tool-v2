@@ -62,7 +62,10 @@ const EXP_INLAND_DEPOTS = [
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export function CYCYForm({ onSuccess }: { onSuccess?: () => void }) {
-  const { cycyRequest, setCYCYRequest, setCycyRunResult, resetCYCY } = usePlannerStore();
+  const cycyRequest     = usePlannerStore(s => s.cycyRequest);
+  const setCYCYRequest  = usePlannerStore(s => s.setCYCYRequest);
+  const setCycyRunResult = usePlannerStore(s => s.setCycyRunResult);
+  const resetCYCY       = usePlannerStore(s => s.resetCYCY);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

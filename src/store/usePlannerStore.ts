@@ -1,10 +1,25 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { ImportRequest, ExportRequest, ImportResult, ExportResult, CYCYRequest, CYCYResult } from '../types';
 import { ImpRunResult } from '../logic/import/impRun';
 import { ExpRunResult, ExpCard } from '../logic/export/expRun';
 import { ImpInstance } from '../logic/import/computeInstances';
 import { ScheduleOverrideMeta } from '../logic/scheduleOverrides';
+
+// Debounced localStorage adapter — batches writes into a single flush 500ms after the
+// last state change, preventing synchronous I/O on every keystroke.
+let _writeTimer: ReturnType<typeof setTimeout> | null = null;
+const debouncedStorage = createJSONStorage(() => ({
+  getItem: (key: string) => localStorage.getItem(key),
+  setItem: (key: string, value: string) => {
+    if (_writeTimer) clearTimeout(_writeTimer);
+    _writeTimer = setTimeout(() => {
+      try { localStorage.setItem(key, value); } catch { /* quota exceeded — silent */ }
+      _writeTimer = null;
+    }, 500);
+  },
+  removeItem: (key: string) => localStorage.removeItem(key),
+}));
 
 export interface CYCYImpRunResult {
   direction: 'Import';
@@ -206,13 +221,16 @@ export const usePlannerStore = create<PlannerState>()(
     }),
     {
       name: 'maersk-planner-storage',
+      storage: debouncedStorage,
       partialize: (state) => ({
         importRequest: state.importRequest,
         exportRequest: state.exportRequest,
         cycyRequest: state.cycyRequest,
-        truckCapacityData: state.truckCapacityData,
-        terminalCongestionData: state.terminalCongestionData,
         schedules: state.schedules,
+        // truckCapacityData and terminalCongestionData are intentionally excluded —
+        // they are always loaded from Supabase on app startup so all users share
+        // the same uploaded data. Persisting them to localStorage would cause
+        // different computers to show different (stale) data.
         // Computed run results intentionally excluded — contain Date objects
         // that would be serialised to strings and crash on reload
       }),

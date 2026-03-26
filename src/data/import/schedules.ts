@@ -36,6 +36,7 @@ export const IMP_SCHEDULES: ImpSchedule[] = [
   { t: 'Antwerpen', etd: 'Wed', loc: 'DEDUI01', eta: 'Mon', mod: 'Barge' },
   { t: 'Antwerpen', etd: 'Thu', loc: 'DEDUI01', eta: 'Mon', mod: 'Barge' },
   { t: 'Antwerpen', etd: 'Fri', loc: 'DEDUI01', eta: 'Mon', mod: 'Barge' },
+  { t: 'Rotterdam', etd: 'Tue', loc: 'DEDUI01', eta: 'Thu', mod: 'Barge' },
   { t: 'Rotterdam', etd: 'Wed', loc: 'DEDUI01', eta: 'Fri', mod: 'Barge' },
   { t: 'Rotterdam', etd: 'Sat', loc: 'DEDUI01', eta: 'Mon', mod: 'Barge' },
   { t: 'Rotterdam', etd: 'Wed', loc: 'DEDUI01', eta: 'Fri', mod: 'Rail' },

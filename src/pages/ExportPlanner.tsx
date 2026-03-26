@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ExportForm } from '../components/planner/ExportForm';
 import { ExportResultView } from '../components/planner/ExportResultView';
 import { usePlannerStore } from '../store/usePlannerStore';
@@ -8,16 +8,18 @@ import { cn } from '../lib/utils';
 import { fmtS } from '../logic/dateUtils';
 
 export function ExportPlanner() {
-  const { expRunResult } = usePlannerStore();
+  // Selector: only re-renders when expRunResult changes
+  const expRunResult = usePlannerStore(s => s.expRunResult);
   const [filterOpen, setFilterOpen] = useState(!expRunResult);
 
+  const handleKey = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape' && filterOpen) setFilterOpen(false);
+  }, [filterOpen]);
+
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && filterOpen && expRunResult) setFilterOpen(false);
-    };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [filterOpen, expRunResult]);
+  }, [handleKey]);
 
   return (
     <div className="space-y-5 pb-10">
@@ -104,7 +106,7 @@ export function ExportPlanner() {
           >
             <div
               className="absolute inset-0 bg-maersk-dark/70 backdrop-blur-sm"
-              onClick={() => expRunResult && setFilterOpen(false)}
+              onClick={() => setFilterOpen(false)}
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -123,14 +125,12 @@ export function ExportPlanner() {
                     <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.2em] mt-0.5">Inland Collection → Port</p>
                   </div>
                 </div>
-                {expRunResult && (
-                  <button
-                    onClick={() => setFilterOpen(false)}
-                    className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/10 transition-all"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
+                <button
+                  onClick={() => setFilterOpen(false)}
+                  className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/10 transition-all"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
               <div className="rounded-b-2xl overflow-hidden shadow-2xl shadow-black/40 max-h-[80vh] overflow-y-auto">
                 <ExportForm onSuccess={() => setFilterOpen(false)} />

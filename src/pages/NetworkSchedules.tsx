@@ -57,19 +57,43 @@ export function NetworkSchedules() {
     <div className="space-y-6 pb-10">
 
       {/* ── DISCLAIMER ──────────────────────────────────────────────────── */}
-      <div className="flex items-start gap-3 px-5 py-4 bg-amber-50 border-2 border-amber-300 rounded-2xl shadow-sm">
-        <AlertTriangle className="h-5 w-5 text-amber-600 flex-none mt-0.5" />
-        <div>
-          <p className="text-sm font-black text-amber-900 uppercase tracking-wide mb-1">
-            For Visibility Purposes Only — Do Not Use for Booking
+      <motion.div
+        animate={{ boxShadow: ['0 0 0px rgba(220,38,38,0)', '0 0 18px rgba(220,38,38,0.45)', '0 0 0px rgba(220,38,38,0)'] }}
+        transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+        className="relative overflow-hidden flex items-start gap-4 px-5 py-4 bg-gradient-to-r from-rose-950 via-red-900 to-rose-950 border-2 border-red-500/70 rounded-2xl shadow-lg shadow-red-900/40"
+      >
+        {/* Subtle grid texture */}
+        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'repeating-linear-gradient(90deg,#fff 0,#fff 1px,transparent 0,transparent 18px),repeating-linear-gradient(180deg,#fff 0,#fff 1px,transparent 0,transparent 18px)' }} />
+        {/* Pulsing left accent bar */}
+        <motion.div
+          animate={{ opacity: [0.6, 1, 0.6] }}
+          transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute left-0 top-0 bottom-0 w-1 bg-red-400 rounded-l-2xl"
+        />
+        <motion.div
+          animate={{ scale: [1, 1.12, 1], opacity: [0.9, 1, 0.9] }}
+          transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+          className="relative z-10 p-2 rounded-xl bg-red-500/25 border border-red-400/40 shrink-0"
+        >
+          <AlertTriangle className="h-5 w-5 text-red-300" />
+        </motion.div>
+        <div className="relative z-10">
+          <p className="text-sm font-black text-red-100 uppercase tracking-widest mb-1.5">
+            ⚠ For Visibility Only — Do Not Use for Booking
           </p>
-          <p className="text-sm font-bold text-amber-800 leading-relaxed">
-            These schedules are displayed <strong>for visibility and reference only</strong>.
-            They <strong>must NOT be used to make inland planning bookings</strong>.
-            Always use the Import or Export Planner to calculate exact dates and generate a valid transport order.
+          <p className="text-sm font-bold text-red-200/80 leading-relaxed">
+            These schedules are displayed <span className="text-red-100 font-black">for reference only</span>.
+            They <span className="text-white font-black underline decoration-red-400 underline-offset-2">must NOT be used to make inland planning bookings</span>.
+            Always use the <span className="text-red-100 font-black">Import or Export Planner</span> to calculate exact dates and generate a valid transport order.
           </p>
         </div>
-      </div>
+        {/* Bottom glow line */}
+        <motion.div
+          animate={{ opacity: [0.3, 0.7, 0.3] }}
+          transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-400 to-transparent"
+        />
+      </motion.div>
 
       {/* Page Header */}
       <div className="flex items-center justify-between">

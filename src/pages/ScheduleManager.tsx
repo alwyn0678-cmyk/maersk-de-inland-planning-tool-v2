@@ -1,10 +1,12 @@
 import { useRef, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { usePlannerStore, TerminalCongestion } from '../store/usePlannerStore';
+import * as XLSX from 'xlsx';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Database, Download, Upload, CheckCircle2, AlertTriangle,
   RefreshCw, FileSpreadsheet, ChevronDown, ChevronUp,
-  Anchor, Send, Info, X,
+  Anchor, Send, Info, X, Truck,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { IMP_SCHEDULES } from '../data/import/schedules';
@@ -807,6 +809,317 @@ export function ScheduleManager() {
           )}
         </div>
 
+      </div>
+
+      {/* ── Truck Capacity Manager ─────────────────────────────────────── */}
+      <TruckCapacityManager />
+
+      {/* ── Terminal Congestion Manager ────────────────────────────────── */}
+      <CongestionManager />
+
+    </div>
+  );
+}
+
+// ─── Truck Capacity Manager ───────────────────────────────────────────────────
+
+function TruckCapacityManager() {
+  const truckCapacityData    = usePlannerStore(s => s.truckCapacityData);
+  const setTruckCapacityData = usePlannerStore(s => s.setTruckCapacityData);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Build the same 15-day working-day headers used by the dashboard chart
+  function buildDays() {
+    const days: { dayName: string; date: string }[] = [];
+    const d = new Date();
+    while (days.length < 15) {
+      const dow = d.getDay();
+      if (dow !== 0 && dow !== 6) {
+        days.push({
+          dayName: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dow],
+          date: `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`,
+        });
+      }
+      d.setDate(d.getDate() + 1);
+    }
+    return days;
+  }
+
+  const CAPACITY_LABELS: Record<number, string> = {
+    0: 'Not possible',
+    1: 'All possible',
+    2: 'From 1100hrs',
+    3: 'From 1300hrs',
+    4: 'From 1600hrs',
+    5: 'On request',
+  };
+
+  function parseCapacityLabel(val: string | undefined): number {
+    if (!val) return 0;
+    const v = val.trim().toLowerCase();
+    if (v === 'all possible' || v === 'available') return 1;
+    if (v === 'from 1100hrs' || v === '1100hrs') return 2;
+    if (v === 'from 1300hrs' || v === '1300hrs') return 3;
+    if (v === 'from 1600hrs' || v === '1600hrs') return 4;
+    if (v === 'on request' || v === 'request') return 5;
+    return 0; // 'not possible', 'booked out', or anything unrecognised
+  }
+
+  function handleDownload() {
+    const days = buildDays();
+    const data = truckCapacityData.map(hub => {
+      const row: Record<string, string> = { Hub: hub.location };
+      days.forEach((day, i) => {
+        row[`${day.dayName} ${day.date}`] = CAPACITY_LABELS[hub.forecast[i] ?? 0] ?? 'Not possible';
+      });
+      return row;
+    });
+    // Legend sheet so colleagues know which values to use
+    const legendData = Object.entries(CAPACITY_LABELS).map(([val, label]) => ({
+      Value: label,
+      Description: val === '0' ? 'No truck capacity — leave as is or mark Not possible'
+        : val === '1' ? 'Full day availability — all loading times possible'
+        : val === '2' ? 'Loading only possible from 1100hrs onwards'
+        : val === '3' ? 'Loading only possible from 1300hrs onwards'
+        : val === '4' ? 'Loading only possible from 1600hrs onwards'
+        : 'Available on request only — contact inland ops',
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wsLegend = XLSX.utils.json_to_sheet(legendData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Capacity Forecast');
+    XLSX.utils.book_append_sheet(wb, wsLegend, 'Status Guide');
+    XLSX.writeFile(wb, 'Maersk_Truck_Capacity_Forecast.xlsx');
+  }
+
+  function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadError(null);
+    setUploadSuccess(false);
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      try {
+        const days = buildDays();
+        const data = new Uint8Array(ev.target?.result as ArrayBuffer);
+        const wb = XLSX.read(data, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws) as Record<string, string>[];
+        const updated = rows.map(row => ({
+          location: String(row.Hub ?? ''),
+          forecast: days.map(day => parseCapacityLabel(row[`${day.dayName} ${day.date}`])),
+        })).filter(r => r.location);
+        if (updated.length > 0) {
+          setTruckCapacityData(updated);
+          // Persist to Supabase — await so we know if it succeeded before showing success
+          const { error } = await supabase.from('schedule_overrides').upsert([
+            { id: 'truck_capacity', data: updated, updated_at: new Date().toISOString() },
+          ]);
+          if (error) {
+            setUploadError(`Data updated locally but failed to sync to server: ${error.message}. Other users may not see the change.`);
+          } else {
+            setUploadSuccess(true);
+            setTimeout(() => setUploadSuccess(false), 4000);
+          }
+        } else {
+          setUploadError('No valid rows found. Make sure the Hub column and date headers match the template.');
+        }
+      } catch {
+        setUploadError('Could not read file. Make sure it is a valid .xlsx file.');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    e.target.value = '';
+  }
+
+  return (
+    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-3">
+        <div className="p-2 bg-blue-50 rounded-xl border border-blue-100">
+          <Truck className="h-4 w-4 text-blue-600" />
+        </div>
+        <div>
+          <p className="text-sm font-black text-slate-800 uppercase tracking-tight">Export Truck Capacity Forecast</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Download · Edit · Re-upload to update the dashboard chart</p>
+        </div>
+      </div>
+      <div className="px-5 py-4 space-y-4">
+        <p className="text-sm text-slate-600 leading-relaxed">
+          Download the current 15-day capacity grid, mark hubs as <strong>Available</strong> or <strong>Booked Out</strong> in Excel, then upload to instantly reflect changes on the dashboard.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={handleDownload}
+            className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-colors shadow-md shadow-blue-500/20"
+          >
+            <Download className="h-4 w-4" />
+            Extract Excel Template
+          </button>
+          <label className="flex-1 flex items-center justify-center gap-2 py-3 bg-violet-600 text-white rounded-xl font-bold text-sm hover:bg-violet-700 transition-colors shadow-md shadow-violet-500/20 cursor-pointer">
+            <Upload className="h-4 w-4" />
+            Upload Updated Capacity
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleUpload}
+              className="hidden"
+            />
+          </label>
+        </div>
+        <AnimatePresence>
+          {uploadSuccess && (
+            <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+              className="flex items-center gap-2 px-4 py-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-800 font-medium">
+              <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+              Capacity updated — dashboard chart now reflects the new data.
+            </motion.div>
+          )}
+          {uploadError && (
+            <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+              className="flex items-start gap-2 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+              <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+              {uploadError}
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <p className="text-[10px] text-slate-400 text-center">
+          Only <span className="font-bold">.xlsx</span> files are supported. Use the extract button to get the correct column headers.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Terminal Congestion Manager ──────────────────────────────────────────────
+
+function classifyStatus(hours: number): 'Low' | 'Medium' | 'High' {
+  if (hours <= 8)  return 'Low';
+  if (hours <= 24) return 'Medium';
+  return 'High';
+}
+
+function CongestionManager() {
+  const terminalCongestionData    = usePlannerStore(s => s.terminalCongestionData);
+  const setTerminalCongestionData = usePlannerStore(s => s.setTerminalCongestionData);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+
+  function handleDownload() {
+    const data = terminalCongestionData.map(item => ({
+      Port: item.port,
+      Terminal: item.terminal,
+      'Waiting Hours': item.waitingTime,
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Congestion');
+    XLSX.writeFile(wb, 'Terminal_Congestion_Update.xlsx');
+  }
+
+  function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadError(null);
+    setUploadSuccess(false);
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      try {
+        const data = new Uint8Array(ev.target?.result as ArrayBuffer);
+        const wb = XLSX.read(data, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws) as Record<string, unknown>[];
+        const updated: TerminalCongestion[] = rows
+          .filter(row => row.Terminal && (row['Waiting Hours'] !== undefined || row['Waiting Time (Hours)'] !== undefined))
+          .map((row, idx) => {
+            const hours = Number(row['Waiting Hours'] ?? row['Waiting Time (Hours)'] ?? 0);
+            return {
+              id: `upd-${idx}`,
+              port: (row.Port ?? 'Rotterdam') as 'Rotterdam' | 'Antwerp',
+              terminal: String(row.Terminal),
+              waitingTime: hours,
+              status: classifyStatus(hours),
+              lastUpdated: new Date().toISOString(),
+            };
+          });
+        if (updated.length > 0) {
+          setTerminalCongestionData(updated);
+          // Persist to Supabase — await so we know if it succeeded before showing success
+          const { error } = await supabase.from('schedule_overrides').upsert([
+            { id: 'congestion', data: updated, updated_at: new Date().toISOString() },
+          ]);
+          if (error) {
+            setUploadError(`Data updated locally but failed to sync to server: ${error.message}. Other users may not see the change.`);
+          } else {
+            setUploadSuccess(true);
+            setTimeout(() => setUploadSuccess(false), 4000);
+          }
+        } else {
+          setUploadError('No valid rows found. Ensure the Terminal and Waiting Hours columns are present.');
+        }
+      } catch {
+        setUploadError('Could not read file. Make sure it is a valid .xlsx file.');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    e.target.value = '';
+  }
+
+  return (
+    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-3">
+        <div className="p-2 bg-blue-50 rounded-xl border border-blue-100">
+          <Anchor className="h-4 w-4 text-blue-600" />
+        </div>
+        <div>
+          <p className="text-sm font-black text-slate-800 uppercase tracking-tight">Terminal Barge Congestion</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Download · Edit · Re-upload to update the dashboard congestion table</p>
+        </div>
+      </div>
+      <div className="px-5 py-4 space-y-4">
+        <p className="text-sm text-slate-600 leading-relaxed">
+          Download the current congestion data, update the <strong>Waiting Hours</strong> column per terminal in Excel, then upload. Status (Low / Medium / High) is auto-classified on import.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={handleDownload}
+            className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-colors shadow-md shadow-blue-500/20"
+          >
+            <Download className="h-4 w-4" />
+            Extract Excel Template
+          </button>
+          <label className="flex-1 flex items-center justify-center gap-2 py-3 bg-violet-600 text-white rounded-xl font-bold text-sm hover:bg-violet-700 transition-colors shadow-md shadow-violet-500/20 cursor-pointer">
+            <Upload className="h-4 w-4" />
+            Upload Updated Congestion
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleUpload}
+              className="hidden"
+            />
+          </label>
+        </div>
+        <AnimatePresence>
+          {uploadSuccess && (
+            <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+              className="flex items-center gap-2 px-4 py-3 bg-green-50 border border-green-200 rounded-xl text-sm text-green-800 font-medium">
+              <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+              Congestion data updated — dashboard table now reflects the new data.
+            </motion.div>
+          )}
+          {uploadError && (
+            <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+              className="flex items-start gap-2 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+              <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+              {uploadError}
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <p className="text-[10px] text-slate-400 text-center">
+          Columns required: <span className="font-bold">Port · Terminal · Waiting Hours</span>. Status is auto-calculated — do not include it in the upload.
+        </p>
       </div>
     </div>
   );

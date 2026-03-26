@@ -11,6 +11,7 @@ export const EXP_SCHED: Record<string, { RTM?: ExpScheduleEntry[]; ANR?: ExpSche
     RTM: [
       { mod: 'Rail',  dep: 4, transit: 1, buffer: 2 },
       { mod: 'Rail',  dep: 7, transit: 2, buffer: 2 },
+      { mod: 'Barge', dep: 2, transit: 3, buffer: 2 },
       { mod: 'Barge', dep: 3, transit: 3, buffer: 2 },
       { mod: 'Barge', dep: 5, transit: 3, buffer: 2 },
     ],
