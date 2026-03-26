@@ -66,6 +66,7 @@ function buildExportCopyText(card: ExpCard, result: ExpRunResult): string {
     '─────────────────────────────────',
     `Order Deadline      : ${fmt(card.orderDL)}`,
     `Transport Order Remarks: Please plan on ${modName} departure with ETD ${card.etd.toLocaleDateString('en-GB',{weekday:'short'})} ${card.etd.getDate().toString().padStart(2,'0')}/${(card.etd.getMonth()+1).toString().padStart(2,'0')}`,
+    'Upon receipt of this transport order, please confirm acceptance and return the TIR to us by email.',
     '',
     '─────────────────────────────────',
     result.emptyDepot ? `EMPTY CONTAINER RELEASE (${result.emptyLabel})` : '',
@@ -211,6 +212,7 @@ const ExportCard = memo(function ExportCard({ card, result, idx }: { card: ExpCa
                   <p className="text-xs font-black text-white/50 font-mono">
                     {card.mod.toLowerCase()} ETD {card.etd.toLocaleDateString('en-GB',{weekday:'short'})} {card.etd.getDate().toString().padStart(2,'0')}/{(card.etd.getMonth()+1).toString().padStart(2,'0')}
                   </p>
+                  <p className="text-[9px] font-bold text-amber-400/70 mt-0.5">Upon receipt, please return TIR by email</p>
                 </div>
               </div>
             </div>
@@ -340,21 +342,21 @@ export function ExportResultView({ result }: { result: ExpRunResult }) {
       </div>
 
       {result.customsDeadline && (
-        <div className="relative overflow-hidden px-5 py-4 bg-gradient-to-r from-amber-950/80 via-amber-900/60 to-amber-950/80 border border-amber-400/50 rounded-xl flex items-center gap-4 max-w-5xl mx-auto shadow-lg shadow-amber-900/30">
-          <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'repeating-linear-gradient(90deg,#fbbf24 0,#fbbf24 1px,transparent 0,transparent 20px)' }} />
-          <div className="relative z-10 p-2 rounded-lg bg-amber-400/20 border border-amber-400/30 shrink-0">
-            <AlertTriangle className="h-4 w-4 text-amber-300" />
+        <div className="relative overflow-hidden px-5 py-4 bg-gradient-to-r from-orange-900 via-amber-800 to-orange-900 border-2 border-amber-400/80 rounded-xl flex items-center gap-4 max-w-5xl mx-auto shadow-xl shadow-amber-900/50">
+          <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'repeating-linear-gradient(90deg,#fff 0,#fff 1px,transparent 0,transparent 20px)' }} />
+          <div className="relative z-10 p-2.5 rounded-lg bg-white/15 border border-white/30 shrink-0">
+            <AlertTriangle className="h-5 w-5 text-white" />
           </div>
           <div className="relative z-10 flex-1 min-w-0">
-            <p className="text-[9px] font-black text-amber-400/80 uppercase tracking-[0.25em] mb-0.5">Rotterdam Customs Document Deadline</p>
-            <p className="text-base font-black text-amber-100">
+            <p className="text-[9px] font-black text-white/70 uppercase tracking-[0.25em] mb-0.5">Rotterdam Customs Document Deadline</p>
+            <p className="text-base font-black text-white">
               {fmt(result.customsDeadline)}{' '}
-              <span className="font-mono text-amber-300">
+              <span className="font-mono text-amber-200 text-lg">
                 {result.customsDeadline.getHours().toString().padStart(2,'0')}:{result.customsDeadline.getMinutes().toString().padStart(2,'0')}
               </span>
             </p>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-amber-400/60 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-white/40 to-transparent" />
         </div>
       )}
 

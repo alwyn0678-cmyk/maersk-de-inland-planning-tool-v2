@@ -67,7 +67,7 @@ function buildImpCopyText(inst: ImpInstance, result: CYCYImpRunResult): string {
     inst.custDL ? `Customs Deadline: ${fmt(inst.custDL)} ${inst.custDL.getHours().toString().padStart(2,'0')}:${inst.custDL.getMinutes().toString().padStart(2,'0')}` : '',
     '',
     `Transport Order Remarks: Please plan on ${modName} departure with ETD ${inst.etdDay} ${inst.etd.getDate().toString().padStart(2,'0')}/${(inst.etd.getMonth()+1).toString().padStart(2,'0')}`,
-    '⚠ IMPORTANT: TIR documentation MUST be included with the transport order.',
+    'Upon receipt of this transport order, please confirm acceptance and return the TIR to us by email.',
     '',
     '⚠ REMINDERS',
     '- Always send copy of Customs document to nlaopsinlrbc@maersk.com (DO NOT send this to us)',
@@ -99,7 +99,7 @@ function buildExpCopyText(card: ExpCard, result: CYCYExpRunResult): string {
     '',
     `Order Deadline: ${fmt(card.orderDL)}`,
     `Transport Order Remarks: Please plan on ${modName} departure with ETD ${card.etd.toLocaleDateString('en-GB', { weekday: 'short' })} ${card.etd.getDate().toString().padStart(2,'0')}/${(card.etd.getMonth()+1).toString().padStart(2,'0')}`,
-    '⚠ IMPORTANT: TIR documentation MUST be included with the transport order.',
+    'Upon receipt of this transport order, please confirm acceptance and return the TIR to us by email.',
   ].filter(Boolean);
   return lines.join('\n');
 }
@@ -365,6 +365,7 @@ function ExportCard({ card, result, idx }: { card: ExpCard; result: CYCYExpRunRe
                 <p className="text-xs font-black text-white/50 font-mono">
                   {card.mod.toLowerCase()} ETD {card.etd.toLocaleDateString('en-GB',{weekday:'short'})} {card.etd.getDate().toString().padStart(2,'0')}/{(card.etd.getMonth()+1).toString().padStart(2,'0')}
                 </p>
+                <p className="text-[9px] font-bold text-amber-400/70 mt-0.5">Upon receipt, please return TIR by email</p>
               </div>
             </div>
 
@@ -463,16 +464,25 @@ function ExportResults({ result }: { result: CYCYExpRunResult }) {
     <div className="space-y-4">
       {/* Customs deadline banner (RTM only) */}
       {result.customsDeadline && (
-        <div className="bg-amber-400/10 border border-amber-400/25 rounded-xl px-4 py-3 flex items-center gap-3">
-          <AlertTriangle className="h-4 w-4 text-amber-400 flex-none" />
-          <div>
-            <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest">Rotterdam Customs Deadline</p>
-            <p className="text-sm font-black text-amber-200">
-              {fmt(result.customsDeadline)} {result.customsDeadline.getHours().toString().padStart(2,'0')}:{result.customsDeadline.getMinutes().toString().padStart(2,'0')} CET
-              <span className="text-[10px] font-bold ml-2 text-amber-400/60">(Loading time + 3h)</span>
+        <div className="relative overflow-hidden px-4 py-3.5 bg-gradient-to-r from-orange-900 via-amber-800 to-orange-900 border-2 border-amber-400/80 rounded-xl flex items-center gap-3 shadow-xl shadow-amber-900/50">
+          <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'repeating-linear-gradient(90deg,#fff 0,#fff 1px,transparent 0,transparent 20px)' }} />
+          <div className="relative z-10 p-2 rounded-lg bg-white/15 border border-white/30 shrink-0">
+            <AlertTriangle className="h-4 w-4 text-white" />
+          </div>
+          <div className="relative z-10 flex-1 min-w-0">
+            <p className="text-[9px] font-black text-white/70 uppercase tracking-widest mb-0.5">Rotterdam Customs Deadline</p>
+            <p className="text-sm font-black text-white">
+              {fmt(result.customsDeadline)}{' '}
+              <span className="font-mono text-amber-200">
+                {result.customsDeadline.getHours().toString().padStart(2,'0')}:{result.customsDeadline.getMinutes().toString().padStart(2,'0')} CET
+              </span>
+              <span className="text-[10px] font-bold ml-2 text-white/50">(Loading time + 3h)</span>
             </p>
           </div>
-          <UrgencyBadge date={result.customsDeadline} />
+          <div className="relative z-10">
+            <UrgencyBadge date={result.customsDeadline} />
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-white/40 to-transparent" />
         </div>
       )}
 
