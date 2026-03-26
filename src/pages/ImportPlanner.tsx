@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { ImportForm } from '../components/planner/ImportForm';
 import { ImportResultView } from '../components/planner/ImportResultView';
 import { usePlannerStore } from '../store/usePlannerStore';
-import { Anchor, SlidersHorizontal, X } from 'lucide-react';
+import { Anchor, SlidersHorizontal, X, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { fmtS } from '../logic/dateUtils';
@@ -10,6 +10,7 @@ import { fmtS } from '../logic/dateUtils';
 export function ImportPlanner() {
   // Selector: only re-renders when impRunResult changes, not on any other store update
   const impRunResult = usePlannerStore(s => s.impRunResult);
+  const resetImport  = usePlannerStore(s => s.resetImport);
   const [filterOpen, setFilterOpen] = useState(!impRunResult);
 
   const handleKey = useCallback((e: KeyboardEvent) => {
@@ -50,6 +51,16 @@ export function ImportPlanner() {
                 <span className="text-white/20">·</span>
                 <span>{fmtS(impRunResult.vesselETD)}</span>
               </div>
+            )}
+            {impRunResult && (
+              <button
+                onClick={() => resetImport()}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl font-black text-xs uppercase tracking-widest transition-all duration-200 bg-white/5 border border-white/10 text-white/50 hover:text-white/80 hover:bg-white/10"
+                title="Clear results and start a new search"
+              >
+                <RotateCcw className="h-3 w-3" />
+                New Search
+              </button>
             )}
             <button
               onClick={() => setFilterOpen(true)}
@@ -130,7 +141,7 @@ export function ImportPlanner() {
                 </div>
                 <button
                   onClick={() => setFilterOpen(false)}
-                  className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/10 transition-all"
+                  className="p-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all"
                 >
                   <X className="h-4 w-4" />
                 </button>

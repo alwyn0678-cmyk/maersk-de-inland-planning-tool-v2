@@ -68,6 +68,8 @@ function buildCopyText(inst: ImpInstance, result: ImpRunResult): string {
     '⚠ REMINDERS',
     '- Always send copy of Customs document to nlaopsinlrbc@maersk.com (DO NOT send this to us)',
     '- When multistop is needed, send ATA at least 2 days before customer Delivery date',
+    '',
+    `Generated           : ${new Date().toLocaleDateString('en-GB')} · Maersk DE Inland Ops v2.3`,
   ].filter(l => l !== null && l !== undefined);
   return lines.join('\n');
 }
@@ -141,21 +143,21 @@ const ImportCard = memo(function ImportCard({ inst, result, idx }: { inst: ImpIn
                 <div>
                   <div className="flex items-center gap-1.5 mb-2">
                     <div className={cn("h-2 w-2 rounded-full shrink-0", isBarge ? "bg-[#42b0d5] shadow-sm shadow-[#42b0d5]/60" : "bg-purple-400 shadow-sm shadow-purple-400/60")} />
-                    <p className="text-[9px] font-black text-white/40 uppercase tracking-widest leading-none">Terminal ETD</p>
+                    <p className="text-[9px] font-black text-white/55 uppercase tracking-widest leading-none">Terminal ETD</p>
                   </div>
                   <p className="text-base font-black text-white font-mono leading-tight">{fmtS(inst.etd)}</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5 mb-2">
                     <div className="h-2 w-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/60 shrink-0" />
-                    <p className="text-[9px] font-black text-white/40 uppercase tracking-widest leading-none">Depot Arrival</p>
+                    <p className="text-[9px] font-black text-white/55 uppercase tracking-widest leading-none">Depot Arrival</p>
                   </div>
                   <p className="text-base font-black text-emerald-400 font-mono leading-tight">{fmtS(inst.eta)}</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5 mb-2">
                     <div className="h-2 w-2 rounded-full bg-white/40 shrink-0" />
-                    <p className="text-[9px] font-black text-white/40 uppercase tracking-widest leading-none">Customer Delivery</p>
+                    <p className="text-[9px] font-black text-white/55 uppercase tracking-widest leading-none">Customer Delivery</p>
                   </div>
                   <p className="text-base font-black text-white font-mono leading-tight">{fmtS(inst.custDel)}</p>
                   {isDui && <p className="text-[10px] text-amber-400 font-black mt-0.5">after 12:00</p>}
@@ -189,9 +191,9 @@ const ImportCard = memo(function ImportCard({ inst, result, idx }: { inst: ImpIn
               )}
 
               <div className="ml-auto text-right hidden sm:block">
-                <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-0.5">Transport Remarks</p>
-                <p className="text-xs font-black text-white/50 font-mono">
-                  {inst.mod.toLowerCase()} ETD {inst.etdDay} {inst.etd.getDate().toString().padStart(2,'0')}/{(inst.etd.getMonth()+1).toString().padStart(2,'0')}
+                <p className="text-[9px] font-black text-white/55 uppercase tracking-widest mb-0.5">Transport Remarks</p>
+                <p className="text-xs font-black text-white/65 font-mono">
+                  Plan on {inst.mod.toLowerCase()} ETD {inst.etdDay} {inst.etd.getDate().toString().padStart(2,'0')}/{(inst.etd.getMonth()+1).toString().padStart(2,'0')}
                 </p>
               </div>
             </div>
@@ -242,7 +244,7 @@ export function ImportResultView({ result }: { result: ImpRunResult }) {
         ].map(({ label, value }, i, arr) => (
           <div key={label} className="flex items-center gap-5">
             <div>
-              <p className="text-[9px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">{label}</p>
+              <p className="text-[9px] font-black text-white/55 uppercase tracking-widest leading-none mb-1">{label}</p>
               <p className="text-base font-black text-white">{value}</p>
             </div>
             {i < arr.length - 1 && <div className="h-9 w-px bg-white/10" />}

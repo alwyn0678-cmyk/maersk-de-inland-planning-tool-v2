@@ -72,7 +72,7 @@ function buildExportCopyText(card: ExpCard, result: ExpRunResult): string {
     result.emptyDepot ? `Preferred       : ${result.emptyDepot.p1} — ${result.emptyDepot.p1n}` : '',
     result.emptyDepot?.p2 ? `2nd Option      : ${result.emptyDepot.p2} — ${result.emptyDepot.p2n}` : '',
     '─────────────────────────────────',
-    `Generated           : ${new Date().toLocaleDateString('en-GB')} · Maersk DE Inland Ops v2.2`,
+    `Generated           : ${new Date().toLocaleDateString('en-GB')} · Maersk DE Inland Ops v2.3`,
   ].filter(Boolean);
   return lines.join('\n');
 }
@@ -157,7 +157,7 @@ const ExportCard = memo(function ExportCard({ card, result, idx }: { card: ExpCa
                 <div>
                   <div className="flex items-center gap-1.5 mb-2">
                     <div className="h-2 w-2 rounded-full bg-white/30 shrink-0" />
-                    <p className="text-[9px] font-black text-white/40 uppercase tracking-widest leading-none">Loading</p>
+                    <p className="text-[9px] font-black text-white/55 uppercase tracking-widest leading-none">Loading</p>
                   </div>
                   <p className="text-base font-black text-white font-mono leading-tight">{fmtS(result.loadingDate)}</p>
                   <p className="text-[10px] text-white/30 font-bold mt-0.5">{result.loadTime}</p>
@@ -165,14 +165,14 @@ const ExportCard = memo(function ExportCard({ card, result, idx }: { card: ExpCa
                 <div>
                   <div className="flex items-center gap-1.5 mb-2">
                     <div className={cn("h-2 w-2 rounded-full shrink-0", isBarge ? "bg-[#42b0d5] shadow-sm shadow-[#42b0d5]/60" : "bg-purple-400 shadow-sm shadow-purple-400/60")} />
-                    <p className="text-[9px] font-black text-white/40 uppercase tracking-widest leading-none">Depot ETD</p>
+                    <p className="text-[9px] font-black text-white/55 uppercase tracking-widest leading-none">Depot ETD</p>
                   </div>
                   <p className="text-base font-black text-white font-mono leading-tight">{fmtS(card.etd)}</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5 mb-2">
                     <div className="h-2 w-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/60 shrink-0" />
-                    <p className="text-[9px] font-black text-white/40 uppercase tracking-widest leading-none">Terminal EAT</p>
+                    <p className="text-[9px] font-black text-white/55 uppercase tracking-widest leading-none">Terminal EAT</p>
                   </div>
                   <p className="text-base font-black text-emerald-400 font-mono leading-tight">{fmtS(card.eat)}</p>
                 </div>
@@ -188,11 +188,11 @@ const ExportCard = memo(function ExportCard({ card, result, idx }: { card: ExpCa
                   <p className="text-[9px] font-black text-white/40 uppercase tracking-widest mb-1.5">Vessel Window · {card.termCode}</p>
                   <div className="flex gap-5">
                     <div>
-                      <p className="text-[9px] text-white/30 font-black uppercase mb-0.5">Earliest CCO</p>
+                      <p className="text-[9px] text-white/55 font-black uppercase mb-0.5">Earliest CCO</p>
                       <p className="text-base font-black text-white font-mono">{fmtS(card.earliestCCO)}</p>
                     </div>
                     <div>
-                      <p className="text-[9px] text-white/30 font-black uppercase mb-0.5">Latest ETA</p>
+                      <p className="text-[9px] text-white/55 font-black uppercase mb-0.5">Latest ETA</p>
                       <p className="text-base font-black text-white font-mono">{fmtS(card.latestETA)}</p>
                     </div>
                   </div>
@@ -207,9 +207,9 @@ const ExportCard = memo(function ExportCard({ card, result, idx }: { card: ExpCa
                 </div>
 
                 <div className="ml-auto text-right hidden sm:block">
-                  <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-0.5">Transport Remarks</p>
-                  <p className="text-xs font-black text-white/50 font-mono">
-                    {card.mod.toLowerCase()} ETD {card.etd.toLocaleDateString('en-GB',{weekday:'short'})} {card.etd.getDate().toString().padStart(2,'0')}/{(card.etd.getMonth()+1).toString().padStart(2,'0')}
+                  <p className="text-[9px] font-black text-white/55 uppercase tracking-widest mb-0.5">Transport Remarks</p>
+                  <p className="text-xs font-black text-white/65 font-mono">
+                    Plan on {card.mod.toLowerCase()} ETD {card.etd.toLocaleDateString('en-GB',{weekday:'short'})} {card.etd.getDate().toString().padStart(2,'0')}/{(card.etd.getMonth()+1).toString().padStart(2,'0')}
                   </p>
                 </div>
               </div>
@@ -331,7 +331,7 @@ export function ExportResultView({ result }: { result: ExpRunResult }) {
         ].map(({ label, value }, i, arr) => (
           <div key={label} className="flex items-center gap-5">
             <div>
-              <p className="text-[9px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">{label}</p>
+              <p className="text-[9px] font-black text-white/55 uppercase tracking-widest leading-none mb-1">{label}</p>
               <p className="text-base font-black text-white">{value}</p>
             </div>
             {i < arr.length - 1 && <div className="h-9 w-px bg-white/10" />}

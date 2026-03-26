@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { CYCYForm } from '../components/planner/CYCYForm';
 import { CYCYResultCard } from '../components/planner/CYCYResultCard';
 import { usePlannerStore } from '../store/usePlannerStore';
-import { ArrowRightLeft, Anchor, TrendingUp, SlidersHorizontal, X } from 'lucide-react';
+import { ArrowRightLeft, Anchor, TrendingUp, SlidersHorizontal, X, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 
@@ -177,6 +177,16 @@ export function CYCYPlanner() {
             </button>
           </div>
 
+          {cycyRunResult && (
+            <button
+              onClick={() => resetCYCY()}
+              className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest transition-all duration-200 bg-slate-100 border border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-200"
+              title="Clear results and start a new search"
+            >
+              <RotateCcw className="h-3 w-3" />
+              New Search
+            </button>
+          )}
           <button
             onClick={() => setFilterOpen(true)}
             className={cn(
