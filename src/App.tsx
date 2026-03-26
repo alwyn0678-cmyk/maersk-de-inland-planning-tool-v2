@@ -18,7 +18,8 @@ const NetworkSchedules = lazy(() => import('./pages/NetworkSchedules').then(m =>
 const InlandNews      = lazy(() => import('./pages/InlandNews').then(m => ({ default: m.InlandNews })));
 const PRD             = lazy(() => import('./pages/PRD').then(m => ({ default: m.PRD })));
 const Help            = lazy(() => import('./pages/Help').then(m => ({ default: m.Help })));
-const ScheduleManager = lazy(() => import('./pages/ScheduleManager').then(m => ({ default: m.ScheduleManager })));
+const ScheduleManager  = lazy(() => import('./pages/ScheduleManager').then(m => ({ default: m.ScheduleManager })));
+const ShipmentMonitor  = lazy(() => import('./pages/ShipmentMonitor').then(m => ({ default: m.ShipmentMonitor })));
 
 // Minimal spinner shown while a lazy tab is loading (first visit only)
 function TabSpinner() {
@@ -38,6 +39,7 @@ const TAB_META: Record<string, { label: string; sub: string }> = {
   news:       { label: 'Terminal Directory',  sub: 'DE Inland Network' },
   prd:        { label: 'Specifications',      sub: 'Product Requirements' },
   'schedule-manager': { label: 'Schedule Manager', sub: 'Barge & Rail Schedule Updates' },
+  'ops-monitor':      { label: 'Ops Monitor',      sub: 'Operations Shipment Monitor' },
   help:       { label: 'Tool Guidelines',     sub: 'How-to & Rules' },
 };
 
@@ -208,6 +210,7 @@ export default function App() {
       case 'news':          return <InlandNews />;
       case 'prd':           return <PRD />;
       case 'schedule-manager': return <ScheduleManager />;
+      case 'ops-monitor':   return <ShipmentMonitor />;
       case 'help':          return <Help />;
       default:              return <DashboardOverview />;
     }

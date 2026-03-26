@@ -29,6 +29,7 @@ import {
   TriangleAlert,
   Database,
   FileText,
+  Activity,
 } from 'lucide-react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -1030,6 +1031,13 @@ export function Help() {
         >
           <Database className="h-3.5 w-3.5" />
           Schedule Manager
+        </button>
+        <button
+          onClick={() => setAppTab('ops-monitor')}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-white hover:bg-[#00243d] transition-all border border-slate-200 hover:border-[#00243d]"
+        >
+          <Activity className="h-3.5 w-3.5" />
+          Ops Monitor
         </button>
       </div>
 
