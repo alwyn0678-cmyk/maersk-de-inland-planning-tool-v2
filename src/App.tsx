@@ -112,6 +112,9 @@ export default function App() {
   const setScheduleOverrideMeta = usePlannerStore(s => s.setScheduleOverrideMeta);
   const setTruckCapacityData    = usePlannerStore(s => s.setTruckCapacityData);
   const setTerminalCongestionData = usePlannerStore(s => s.setTerminalCongestionData);
+  const resetImport             = usePlannerStore(s => s.resetImport);
+  const resetExport             = usePlannerStore(s => s.resetExport);
+  const resetCYCY               = usePlannerStore(s => s.resetCYCY);
 
   // Rhine water level alert (2-hour refresh — separate from dashboard's 30-min refresh)
   const { data: rhineData } = useRhineWaterLevels(2 * 60 * 60 * 1000);
@@ -153,12 +156,12 @@ export default function App() {
   }, []);
 
   // Stable reference — won't cause Sidebar to re-render on unrelated state changes
-  // NOTE: No automatic resets on tab switch — results persist so users can compare
-  // planners side-by-side without losing their work. Use "New Search" in each planner
-  // to explicitly clear results and start fresh.
   const handleTabChange = useCallback((tab: string) => {
+    if (tab === 'import') resetImport();
+    else if (tab === 'export') resetExport();
+    else if (tab === 'cycy') resetCYCY();
     setActiveTab(tab);
-  }, [setActiveTab]);
+  }, [resetImport, resetExport, resetCYCY, setActiveTab]);
 
   // Keyboard shortcuts
   useEffect(() => {
