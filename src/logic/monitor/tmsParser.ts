@@ -103,8 +103,8 @@ function toHHMM(d: Date): string {
 /** Normalize ZIP to 4–5 digit string */
 function normalizeZip(raw: string | number | undefined | null): string | null {
   if (raw === null || raw === undefined || raw === '') return null;
-  const s = String(raw).trim().replace(/\D/g, '').padStart(4, '0');
-  if (s.length < 4 || s.length > 5) return null;
+  const s = String(raw).trim().replace(/\D/g, '').padStart(5, '0');
+  if (s.length !== 5) return null;
   return s;
 }
 
@@ -179,7 +179,10 @@ export function parseTmsRow(row: TmsRawRow, index: number): NormalizedShipment {
 
   // Equipment
   const eqCode = String(row['Equipment Type'] || '').trim().toUpperCase();
-  const equipment = EQUIPMENT_MAP[eqCode] ?? (eqCode ? { size: '40', type: 'standard', rawCode: eqCode } : null);
+  // Clone so IMO mutation below never modifies the shared EQUIPMENT_MAP constant
+  const equipment = EQUIPMENT_MAP[eqCode]
+    ? { ...EQUIPMENT_MAP[eqCode] }
+    : (eqCode ? { size: '40', type: 'standard', rawCode: eqCode } : null);
 
   // Port/ocean terminal
   const portRaw = String(row['Port'] || '').trim();

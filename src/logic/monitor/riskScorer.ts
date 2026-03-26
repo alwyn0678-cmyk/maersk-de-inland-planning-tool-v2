@@ -23,11 +23,6 @@ function hoursUntil(d: Date): number {
   return (d.getTime() - Date.now()) / (1000 * 60 * 60);
 }
 
-/** Days between now and a Date (negative = in the past) */
-function daysUntil(d: Date): number {
-  return (d.getTime() - Date.now()) / (1000 * 60 * 60 * 24);
-}
-
 function riskLevelFromScore(score: number): RiskLevel {
   if (score >= 80) return 'Critical';
   if (score >= 60) return 'High';
@@ -185,11 +180,9 @@ function checkNotStartedUrgency(s: NormalizedShipment): IssueFlag[] {
   return [];
 }
 
-/** Check 4: Export vessel feasibility (calls expRun via feasibilityChecker) */
-function checkVesselFeasibility(s: NormalizedShipment): IssueFlag[] {
-  if (s.direction !== 'Export') return [];
-
-  const feas = checkExportFeasibility(s);
+/** Check 4: Export vessel feasibility — accepts pre-computed result to avoid double expRun call */
+function checkVesselFeasibility(feas: import('../../types/monitor').FeasibilityResult | null): IssueFlag[] {
+  if (!feas) return [];
 
   if (feas.status === 'Not Feasible') {
     return [{
@@ -211,8 +204,14 @@ function checkVesselFeasibility(s: NormalizedShipment): IssueFlag[] {
   return [];
 }
 
+// Depots confirmed to have no schedule in the tool — expRun returns noSchedule for these
+const NO_SCHEDULE_DEPOTS = new Set(['DEDTM01', 'DEMUN01']);
+
 /** Check 5: Terminal schedule mismatch */
-function checkTerminalSchedule(s: NormalizedShipment): IssueFlag[] {
+function checkTerminalSchedule(
+  s: NormalizedShipment,
+  feasibility: import('../../types/monitor').FeasibilityResult | null,
+): IssueFlag[] {
   if (s.inlandTerminal.source === 'unknown') {
     return [{
       category: 'terminal-schedule',
@@ -221,6 +220,30 @@ function checkTerminalSchedule(s: NormalizedShipment): IssueFlag[] {
       detail: 'Could not derive inland terminal from TMS data or ZIP lookup. Manual review required.',
     }];
   }
+
+  // Known no-schedule depot — flag regardless of feasibility result
+  if (NO_SCHEDULE_DEPOTS.has(s.inlandTerminal.code)) {
+    return [{
+      category: 'terminal-schedule',
+      severity: 'medium',
+      label: `No Schedule — ${s.inlandTerminal.name}`,
+      detail: `${s.inlandTerminal.name} has no barge/rail schedule in the tool. Raise an ISR before booking.`,
+    }];
+  }
+
+  // Feasibility returned Cannot Validate due to missing schedule (not missing data)
+  if (
+    feasibility?.status === 'Cannot Validate' &&
+    feasibility.reason?.startsWith('No schedule for')
+  ) {
+    return [{
+      category: 'terminal-schedule',
+      severity: 'medium',
+      label: 'No Schedule Found for Depot',
+      detail: feasibility.reason,
+    }];
+  }
+
   return [];
 }
 
@@ -254,12 +277,15 @@ function determineValidationStatus(s: NormalizedShipment): ValidationStatus {
 
 /** Score a single shipment — runs all checks and returns a RiskAssessment */
 export function scoreShipment(s: NormalizedShipment): RiskAssessment {
+  // Run feasibility once — reused by both checkVesselFeasibility and checkTerminalSchedule
+  const feasibility = s.direction === 'Export' ? checkExportFeasibility(s) : null;
+
   // Run all checks
   const missingDataFlags   = checkMissingData(s);
   const missingRefFlags    = checkMissingCustomerRef(s);
   const notStartedFlags    = checkNotStartedUrgency(s);
-  const feasibilityFlags   = checkVesselFeasibility(s);
-  const terminalFlags      = checkTerminalSchedule(s);
+  const feasibilityFlags   = checkVesselFeasibility(feasibility);
+  const terminalFlags      = checkTerminalSchedule(s, feasibility);
 
   const allFlags = [
     ...feasibilityFlags,   // highest priority
@@ -302,8 +328,6 @@ export function scoreShipment(s: NormalizedShipment): RiskAssessment {
     }
   }
 
-  // Run feasibility check for exports (already done in feasibilityFlags but we need full result)
-  const feasibility = s.direction === 'Export' ? checkExportFeasibility(s) : null;
   const bufferToCCO = feasibility?.bufferDays ?? null;
 
   return {
