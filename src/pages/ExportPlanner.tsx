@@ -38,12 +38,12 @@ export function ExportPlanner() {
                   Export <span className="text-emerald-400">Booking</span>
                 </h2>
               </div>
-              <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.25em]">Inland Collection → Depot → Port Terminal</p>
+              <p className="text-[9px] font-bold text-white/65 uppercase tracking-[0.25em]">Inland Collection → Depot → Port Terminal</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             {expRunResult && !expRunResult.error && !expRunResult.isrRequired && !expRunResult.notServicedAntwerp && (
-              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white/8 border border-white/10 rounded-xl text-xs font-bold text-white/60">
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white/8 border border-white/15 rounded-xl text-xs font-bold text-white/80">
                 <span className="font-mono font-black text-white/80">{expRunResult.zip}</span>
                 <span className="text-white/20">·</span>
                 <span>{expRunResult.termCode}</span>
@@ -80,10 +80,10 @@ export function ExportPlanner() {
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none translate-y-1/2 -translate-x-1/2" />
           <div className="relative z-10">
             <div className="inline-flex p-5 bg-emerald-500/8 rounded-2xl border border-emerald-500/15 mb-5 shadow-inner">
-              <Send className="h-10 w-10 text-emerald-500/40" />
+              <Send className="h-10 w-10 text-emerald-500/70" />
             </div>
             <p className="text-base font-black text-slate-500 uppercase tracking-widest mb-1.5">Export Booking</p>
-            <p className="text-sm text-slate-300 font-bold mb-8 max-w-xs mx-auto">Enter postcode, terminal &amp; loading date to find the earliest vessel window</p>
+            <p className="text-sm text-slate-500 font-bold mb-8 max-w-xs mx-auto">Enter postcode, terminal &amp; loading date to find the earliest vessel window</p>
             <button
               onClick={() => setFilterOpen(true)}
               className="inline-flex items-center gap-2 px-8 py-3 bg-emerald-500 text-white rounded-xl font-black text-sm uppercase tracking-wider shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -122,7 +122,7 @@ export function ExportPlanner() {
                   </div>
                   <div>
                     <p className="text-sm font-black text-white uppercase tracking-widest leading-none">Export Booking</p>
-                    <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.2em] mt-0.5">Inland Collection → Port</p>
+                    <p className="text-[9px] font-bold text-white/65 uppercase tracking-[0.2em] mt-0.5">Inland Collection → Port</p>
                   </div>
                 </div>
                 <button

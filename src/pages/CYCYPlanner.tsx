@@ -70,7 +70,7 @@ export function CYCYPlanner() {
                 Import <span className="not-italic">Flow</span>
               </h3>
               <p className="text-slate-400 text-xs font-bold">Port → Inland Terminal</p>
-              <p className="text-[9px] opacity-40 font-black tracking-widest uppercase">Rotterdam → Duisburg</p>
+              <p className="text-[9px] opacity-70 font-black tracking-widest uppercase">Rotterdam → Duisburg</p>
             </div>
           </motion.button>
 

@@ -192,7 +192,7 @@ export function NetworkSchedules() {
                       }
                     </div>
                     <div>
-                      <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Service Intel</p>
+                      <p className="text-[10px] font-black text-white/65 uppercase tracking-widest">Service Intel</p>
                       <p className="text-sm font-black text-white">{selectedDep.mod} Service</p>
                     </div>
                   </div>
@@ -207,13 +207,13 @@ export function NetworkSchedules() {
                 {/* Route summary */}
                 <div className="px-5 py-4 border-b border-white/10">
                   <div className="flex items-center gap-2 mb-4">
-                    <span className="text-sm font-bold text-white/60">{selectedDep.origin}</span>
-                    <ArrowRight className="h-3.5 w-3.5 text-white/30 flex-none" />
+                    <span className="text-sm font-bold text-white/80">{selectedDep.origin}</span>
+                    <ArrowRight className="h-3.5 w-3.5 text-white/50 flex-none" />
                     <span className="text-sm font-black text-white">{selectedDep.destination}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-                      <p className="text-[9px] font-black text-white/40 uppercase tracking-widest mb-1">Departure (ETD)</p>
+                      <p className="text-[9px] font-black text-white/65 uppercase tracking-widest mb-1">Departure (ETD)</p>
                       <p className="text-xs font-black text-white leading-snug">{fmtShort(selectedDep.etdDate)}</p>
                       <p className={cn(
                         "text-[9px] font-black mt-1 uppercase tracking-wider",
@@ -223,7 +223,7 @@ export function NetworkSchedules() {
                       </p>
                     </div>
                     <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-                      <p className="text-[9px] font-black text-white/40 uppercase tracking-widest mb-1">Arrival (ETA)</p>
+                      <p className="text-[9px] font-black text-white/65 uppercase tracking-widest mb-1">Arrival (ETA)</p>
                       <p className="text-xs font-black text-white leading-snug">{fmtShort(selectedDep.etaDate)}</p>
                       <p className="text-[9px] font-black text-emerald-400 mt-1 uppercase tracking-wider">{selectedDep.transitDays}d transit</p>
                     </div>
@@ -235,22 +235,22 @@ export function NetworkSchedules() {
                   <div className="flex items-start gap-2 text-[10px]">
                     <Clock className="h-3 w-3 text-maersk-blue/60 mt-0.5 flex-none" />
                     <div>
-                      <span className="font-black text-white/40 uppercase tracking-wider">ETD: </span>
-                      <span className="font-bold text-white/70">{fmtFull(selectedDep.etdDate)}</span>
+                      <span className="font-black text-white/65 uppercase tracking-wider">ETD: </span>
+                      <span className="font-bold text-white/90">{fmtFull(selectedDep.etdDate)}</span>
                     </div>
                   </div>
                   <div className="flex items-start gap-2 text-[10px]">
                     <MapPin className="h-3 w-3 text-emerald-500/60 mt-0.5 flex-none" />
                     <div>
-                      <span className="font-black text-white/40 uppercase tracking-wider">ETA: </span>
-                      <span className="font-bold text-white/70">{fmtFull(selectedDep.etaDate)}</span>
+                      <span className="font-black text-white/65 uppercase tracking-wider">ETA: </span>
+                      <span className="font-bold text-white/90">{fmtFull(selectedDep.etaDate)}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Intel tips */}
                 <div className="px-5 py-4 space-y-2.5">
-                  <p className="text-[9px] font-black text-white/30 uppercase tracking-widest">Booking Intel</p>
+                  <p className="text-[9px] font-black text-white/65 uppercase tracking-widest">Booking Intel</p>
                   {tips.map((tip, i) => (
                     <motion.div
                       key={i}
@@ -272,7 +272,7 @@ export function NetworkSchedules() {
 
                 {/* CTA */}
                 <div className="px-5 pb-5">
-                  <div className="text-[9px] font-black text-white/20 uppercase tracking-widest text-center pt-2 border-t border-white/10">
+                  <div className="text-[9px] font-black text-white/55 uppercase tracking-widest text-center pt-2 border-t border-white/10">
                     Use Import or Export Planner to calculate exact dates
                   </div>
                 </div>

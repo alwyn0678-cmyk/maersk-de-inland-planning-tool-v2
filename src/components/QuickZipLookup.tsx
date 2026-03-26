@@ -155,7 +155,7 @@ export function QuickZipLookup() {
                   </div>
                   <div>
                     <p className="text-xs font-black text-white uppercase tracking-widest">Quick ZIP Lookup</p>
-                    <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest">Instant coverage check</p>
+                    <p className="text-[8px] font-bold text-white/65 uppercase tracking-widest">Instant coverage check</p>
                   </div>
                 </div>
                 <button onClick={() => setIsOpen(false)} className="text-white/40 hover:text-white transition-colors">
@@ -205,13 +205,13 @@ export function QuickZipLookup() {
                         {result.region && (
                           <div className="flex items-center gap-2 px-2 py-1 bg-white/5 rounded-lg border border-white/8">
                             <MapPin className="h-3 w-3 text-[#42b0d5] shrink-0" />
-                            <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">{result.region}</span>
+                            <span className="text-[10px] font-black text-white/85 uppercase tracking-widest">{result.region}</span>
                           </div>
                         )}
 
                         {/* Import Coverage */}
                         <div className="space-y-1.5">
-                          <p className="text-[8px] font-black text-white/30 uppercase tracking-widest px-0.5">Import Coverage</p>
+                          <p className="text-[8px] font-black text-white/65 uppercase tracking-widest px-0.5">Import Coverage</p>
                           <div className="grid grid-cols-2 gap-1.5">
                             {(['rtm', 'anr'] as const).map(port => {
                               const imp = result.import[port];
@@ -234,7 +234,7 @@ export function QuickZipLookup() {
                                       {imp.barge2 && (
                                         <div className="flex items-center gap-1">
                                           <Anchor className="h-2.5 w-2.5 text-[#42b0d5]/60 shrink-0" />
-                                          <span className="text-[9px] text-white/50 font-bold truncate">{imp.barge2}</span>
+                                          <span className="text-[9px] text-white/75 font-bold truncate">{imp.barge2}</span>
                                         </div>
                                       )}
                                       {imp.rail && (
@@ -246,12 +246,12 @@ export function QuickZipLookup() {
                                       {!imp.barge && !imp.rail && (
                                         <div className="flex items-center gap-1">
                                           <Truck className="h-2.5 w-2.5 text-amber-400 shrink-0" />
-                                          <span className="text-[9px] text-amber-300/70 font-bold truncate">Truck only</span>
+                                          <span className="text-[9px] text-amber-300 font-bold truncate">Truck only</span>
                                         </div>
                                       )}
                                     </div>
                                   ) : (
-                                    <span className="text-[9px] text-white/30 font-bold">Not covered</span>
+                                    <span className="text-[9px] text-white/60 font-bold">Not covered</span>
                                   )}
                                 </div>
                               );
@@ -261,7 +261,7 @@ export function QuickZipLookup() {
 
                         {/* Export Coverage */}
                         <div className="space-y-1.5">
-                          <p className="text-[8px] font-black text-white/30 uppercase tracking-widest px-0.5">Export Coverage</p>
+                          <p className="text-[8px] font-black text-white/65 uppercase tracking-widest px-0.5">Export Coverage</p>
                           <div className="grid grid-cols-2 gap-1.5">
                             {(['rtm', 'anr'] as const).map(port => {
                               const exp = result.export[port];
@@ -282,12 +282,12 @@ export function QuickZipLookup() {
                                       {exp.p2name && (
                                         <div className="flex items-center gap-1">
                                           <ArrowRight className="h-2.5 w-2.5 text-emerald-400/50 shrink-0" />
-                                          <span className="text-[9px] text-white/50 font-bold truncate">{exp.p2name}</span>
+                                          <span className="text-[9px] text-white/75 font-bold truncate">{exp.p2name}</span>
                                         </div>
                                       )}
                                     </div>
                                   ) : (
-                                    <span className="text-[9px] text-white/30 font-bold">Not covered</span>
+                                    <span className="text-[9px] text-white/60 font-bold">Not covered</span>
                                   )}
                                 </div>
                               );
@@ -315,7 +315,7 @@ export function QuickZipLookup() {
                       </>
                     ) : (
                       <div className="py-4 text-center">
-                        <p className="text-[10px] font-black text-white/30 uppercase tracking-widest">
+                        <p className="text-[10px] font-black text-white/60 uppercase tracking-widest">
                           No coverage found for ZIP {zip}
                         </p>
                       </div>
@@ -330,7 +330,7 @@ export function QuickZipLookup() {
                     animate={{ opacity: 1 }}
                     className="px-4 pb-4 pt-1"
                   >
-                    <p className="text-[9px] font-black text-white/20 uppercase tracking-widest text-center">
+                    <p className="text-[9px] font-black text-white/55 uppercase tracking-widest text-center">
                       Type a ZIP to instantly see import & export coverage
                     </p>
                   </motion.div>

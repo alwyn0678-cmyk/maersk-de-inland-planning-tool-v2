@@ -58,7 +58,7 @@ export function TerminalCongestionOverview() {
               </div>
               <div className="text-right">
                 <div className="text-lg font-black text-white tracking-tighter">{avgRotterdam}h</div>
-                <div className="text-[8px] font-black text-white/40 uppercase tracking-widest">Avg. Wait</div>
+                <div className="text-[8px] font-black text-white/65 uppercase tracking-widest">Avg. Wait</div>
               </div>
             </div>
 
@@ -81,7 +81,7 @@ export function TerminalCongestionOverview() {
 
                   <div className="flex items-baseline space-x-1 mb-2 relative z-10">
                     <span className="text-xl font-black text-white tracking-tighter">{item.waitingTime}</span>
-                    <span className="text-xs font-bold text-white/40 uppercase">hrs</span>
+                    <span className="text-xs font-bold text-white/65 uppercase">hrs</span>
                   </div>
 
                   <div className="space-y-1 relative z-10">
@@ -96,7 +96,7 @@ export function TerminalCongestionOverview() {
                         )}
                       />
                     </div>
-                    <div className="flex items-center justify-between text-[8px] font-black uppercase tracking-widest text-white/30">
+                    <div className="flex items-center justify-between text-[8px] font-black uppercase tracking-widest text-white/55">
                       <span>0h</span>
                       <span>48h+</span>
                     </div>
@@ -120,7 +120,7 @@ export function TerminalCongestionOverview() {
               </div>
               <div className="text-right">
                 <div className="text-lg font-black text-white tracking-tighter">{avgAntwerp}h</div>
-                <div className="text-[8px] font-black text-white/40 uppercase tracking-widest">Avg. Wait</div>
+                <div className="text-[8px] font-black text-white/65 uppercase tracking-widest">Avg. Wait</div>
               </div>
             </div>
 
@@ -143,7 +143,7 @@ export function TerminalCongestionOverview() {
 
                   <div className="flex items-baseline space-x-1 mb-2 relative z-10">
                     <span className="text-xl font-black text-white tracking-tighter">{item.waitingTime}</span>
-                    <span className="text-xs font-bold text-white/40 uppercase">hrs</span>
+                    <span className="text-xs font-bold text-white/65 uppercase">hrs</span>
                   </div>
 
                   <div className="space-y-1 relative z-10">
@@ -158,7 +158,7 @@ export function TerminalCongestionOverview() {
                         )}
                       />
                     </div>
-                    <div className="flex items-center justify-between text-[8px] font-black uppercase tracking-widest text-white/30">
+                    <div className="flex items-center justify-between text-[8px] font-black uppercase tracking-widest text-white/55">
                       <span>0h</span>
                       <span>48h+</span>
                     </div>
@@ -170,7 +170,7 @@ export function TerminalCongestionOverview() {
         </div>
 
         <div className="p-3 bg-white/5 border-t border-white/10 flex items-center justify-end">
-          <div className="flex items-center space-x-2 text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">
+          <div className="flex items-center space-x-2 text-[10px] font-black text-white/55 uppercase tracking-[0.2em]">
             <Info className="h-3.5 w-3.5 text-maersk-blue" />
             Upload: Terminal + Waiting Hours only — Low ≤8h · Medium ≤24h · High &gt;24h (auto-classified)
           </div>

@@ -66,7 +66,6 @@ function buildExportCopyText(card: ExpCard, result: ExpRunResult): string {
     '─────────────────────────────────',
     `Order Deadline      : ${fmt(card.orderDL)}`,
     `Transport Order Remarks: Please plan on ${modName} departure with ETD ${card.etd.toLocaleDateString('en-GB',{weekday:'short'})} ${card.etd.getDate().toString().padStart(2,'0')}/${(card.etd.getMonth()+1).toString().padStart(2,'0')}`,
-    'Upon receipt of this transport order, please confirm acceptance and return the TIR to us by email.',
     '',
     '─────────────────────────────────',
     result.emptyDepot ? `EMPTY CONTAINER RELEASE (${result.emptyLabel})` : '',
@@ -212,7 +211,6 @@ const ExportCard = memo(function ExportCard({ card, result, idx }: { card: ExpCa
                   <p className="text-xs font-black text-white/50 font-mono">
                     {card.mod.toLowerCase()} ETD {card.etd.toLocaleDateString('en-GB',{weekday:'short'})} {card.etd.getDate().toString().padStart(2,'0')}/{(card.etd.getMonth()+1).toString().padStart(2,'0')}
                   </p>
-                  <p className="text-[9px] font-bold text-amber-400/70 mt-0.5">Upon receipt, please return TIR by email</p>
                 </div>
               </div>
             </div>

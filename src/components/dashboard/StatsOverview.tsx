@@ -114,7 +114,7 @@ export function StatsOverview({ waterLevelData }: StatsOverviewProps) {
                   <div
                     key={idx}
                     style={{ height: `${(val / (stat.value.includes('m') ? 4 : 100)) * 100}%` }}
-                    className={`flex-1 rounded-sm ${stat.color.replace('text', 'bg')} opacity-25 group-hover:opacity-70 transition-opacity duration-300`}
+                    className={`flex-1 rounded-sm ${stat.color.replace('text', 'bg')} opacity-45 group-hover:opacity-80 transition-opacity duration-300`}
                   />
                 ))}
               </div>

@@ -136,7 +136,7 @@ export function NetworkScheduleBoard({ direction, onRowClick }: Props) {
             <p className="text-sm font-black text-white uppercase tracking-widest">
               {direction} Network · Upcoming Departures
             </p>
-            <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mt-0.5">
+            <p className="text-[9px] font-black text-white/60 uppercase tracking-widest mt-0.5">
               Live schedule · next 14 services
             </p>
           </div>
@@ -152,7 +152,7 @@ export function NetworkScheduleBoard({ direction, onRowClick }: Props) {
                 'px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-200',
                 modFilter === f
                   ? f === 'Barge' ? 'bg-maersk-blue text-white' : f === 'Rail' ? 'bg-purple-600 text-white' : 'bg-white/20 text-white'
-                  : 'text-white/40 hover:text-white/70'
+                  : 'text-white/65 hover:text-white/90'
               )}
             >
               {f === 'Barge' && <Anchor className="inline h-2.5 w-2.5 mr-1" />}
@@ -164,9 +164,9 @@ export function NetworkScheduleBoard({ direction, onRowClick }: Props) {
       </div>
 
       {/* Column headers */}
-      <div className="grid grid-cols-[72px_1fr_40px_104px] gap-0 bg-[#0d1e35] px-5 py-2 border-b border-white/5">
+      <div className="grid grid-cols-[72px_1fr_40px_104px] gap-0 bg-[#0d1e35] px-5 py-2 border-b border-white/10">
         {['Mode', 'Route & ETD', 'T+', 'ETA'].map(h => (
-          <span key={h} className="text-[9px] font-black text-white/30 uppercase tracking-widest">{h}</span>
+          <span key={h} className="text-[9px] font-black text-white/55 uppercase tracking-widest">{h}</span>
         ))}
       </div>
 
@@ -207,13 +207,13 @@ export function NetworkScheduleBoard({ direction, onRowClick }: Props) {
               {/* Route + ETD combined */}
               <div className="min-w-0 pr-3">
                 <div className="flex items-center gap-1 min-w-0">
-                  <span className="text-[11px] font-bold text-white/50 truncate shrink-0 max-w-[38%]">{dep.origin}</span>
-                  <ArrowRight className="h-2.5 w-2.5 text-white/20 flex-none" />
+                  <span className="text-[11px] font-bold text-white/75 truncate shrink-0 max-w-[38%]">{dep.origin}</span>
+                  <ArrowRight className="h-2.5 w-2.5 text-white/40 flex-none" />
                   <span className="text-[11px] font-black text-white truncate">{dep.destination}</span>
                 </div>
                 <p className={cn('text-[9px] font-black mt-0.5', urgencyColor(dep.daysAhead))}>
                   {fmtShort(dep.etdDate)}
-                  <span className="text-white/30 font-bold ml-1.5">
+                  <span className="text-white/55 font-bold ml-1.5">
                     {dep.daysAhead === 0 ? '· Today' : dep.daysAhead === 1 ? '· Tomorrow' : `· in ${dep.daysAhead}d`}
                   </span>
                 </p>
@@ -226,7 +226,7 @@ export function NetworkScheduleBoard({ direction, onRowClick }: Props) {
 
               {/* ETA */}
               <div className="flex items-center">
-                <p className="text-[11px] font-black text-white/60">{fmtShort(dep.etaDate)}</p>
+                <p className="text-[11px] font-black text-white/85">{fmtShort(dep.etaDate)}</p>
               </div>
             </motion.div>
           ))
@@ -234,11 +234,11 @@ export function NetworkScheduleBoard({ direction, onRowClick }: Props) {
       </div>
 
       {/* Footer */}
-      <div className="bg-[#0a1628] px-5 py-2.5 flex items-center justify-between border-t border-white/5">
-        <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
+      <div className="bg-[#0a1628] px-5 py-2.5 flex items-center justify-between border-t border-white/10">
+        <p className="text-[9px] font-black text-white/50 uppercase tracking-widest">
           {filtered.length} of {allDepartures.length} services shown
         </p>
-        <div className="flex items-center gap-3 text-[9px] font-black text-white/20 uppercase tracking-widest">
+        <div className="flex items-center gap-3 text-[9px] font-black text-white/50 uppercase tracking-widest">
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-maersk-blue inline-block" /> Barge</span>
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-purple-500 inline-block" /> Rail</span>
         </div>

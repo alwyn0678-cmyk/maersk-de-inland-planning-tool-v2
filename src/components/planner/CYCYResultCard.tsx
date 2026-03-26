@@ -399,11 +399,11 @@ function ImportResults({ result }: { result: CYCYImpRunResult }) {
   if (cards.length === 0) {
     return (
       <div className="p-8 text-center bg-[#001829] border border-white/10 rounded-2xl shadow-xl">
-        <Ship className="h-8 w-8 text-white/10 mx-auto mb-3" />
-        <p className="text-sm font-black text-white/40 uppercase tracking-widest">
+        <Ship className="h-8 w-8 text-white/35 mx-auto mb-3" />
+        <p className="text-sm font-black text-white/65 uppercase tracking-widest">
           No departures found for {result.portName} → {result.termName}
         </p>
-        <p className="text-xs text-white/20 mt-1">Try a later vessel ETD or contact the inland team</p>
+        <p className="text-xs text-white/50 mt-1">Try a later vessel ETD or contact the inland team</p>
       </div>
     );
   }
@@ -451,11 +451,11 @@ function ExportResults({ result }: { result: CYCYExpRunResult }) {
   if (result.cards.length === 0) {
     return (
       <div className="p-8 text-center bg-[#001829] border border-white/10 rounded-2xl shadow-xl">
-        <Ship className="h-8 w-8 text-white/10 mx-auto mb-3" />
-        <p className="text-sm font-black text-white/40 uppercase tracking-widest">
+        <Ship className="h-8 w-8 text-white/35 mx-auto mb-3" />
+        <p className="text-sm font-black text-white/65 uppercase tracking-widest">
           No departures found for {result.depotName} → {result.termName}
         </p>
-        <p className="text-xs text-white/20 mt-1">This route may not be available or schedules are not yet configured</p>
+        <p className="text-xs text-white/50 mt-1">This route may not be available or schedules are not yet configured</p>
       </div>
     );
   }

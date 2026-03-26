@@ -38,12 +38,12 @@ export function ImportPlanner() {
                   Import <span className="text-[#42b0d5]">Booking</span>
                 </h2>
               </div>
-              <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.25em]">Port → Inland Depot → Customer Delivery</p>
+              <p className="text-[9px] font-bold text-white/65 uppercase tracking-[0.25em]">Port → Inland Depot → Customer Delivery</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             {impRunResult && !impRunResult.error && (
-              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white/8 border border-white/10 rounded-xl text-xs font-bold text-white/60">
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white/8 border border-white/15 rounded-xl text-xs font-bold text-white/80">
                 <span className="font-mono font-black text-white/80">{impRunResult.zip}</span>
                 <span className="text-white/20">·</span>
                 <span>{impRunResult.portName}</span>
@@ -82,10 +82,10 @@ export function ImportPlanner() {
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-maersk-blue/5 rounded-full blur-3xl pointer-events-none translate-y-1/2 -translate-x-1/2" />
           <div className="relative z-10">
             <div className="inline-flex p-5 bg-maersk-blue/8 rounded-2xl border border-maersk-blue/15 mb-5 shadow-inner">
-              <Anchor className="h-10 w-10 text-maersk-blue/40" />
+              <Anchor className="h-10 w-10 text-maersk-blue/70" />
             </div>
             <p className="text-base font-black text-slate-500 uppercase tracking-widest mb-1.5">Import Booking</p>
-            <p className="text-sm text-slate-300 font-bold mb-8 max-w-xs mx-auto">Enter postcode, port &amp; vessel ETD to calculate the best inland schedule</p>
+            <p className="text-sm text-slate-500 font-bold mb-8 max-w-xs mx-auto">Enter postcode, port &amp; vessel ETD to calculate the best inland schedule</p>
             <button
               onClick={() => setFilterOpen(true)}
               className="inline-flex items-center gap-2 px-8 py-3 bg-maersk-blue text-white rounded-xl font-black text-sm uppercase tracking-wider shadow-lg shadow-maersk-blue/30 hover:bg-maersk-blue/90 transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -125,7 +125,7 @@ export function ImportPlanner() {
                   </div>
                   <div>
                     <p className="text-sm font-black text-white uppercase tracking-widest leading-none">Import Booking</p>
-                    <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.2em] mt-0.5">Port → Inland Delivery</p>
+                    <p className="text-[9px] font-bold text-white/65 uppercase tracking-[0.2em] mt-0.5">Port → Inland Delivery</p>
                   </div>
                 </div>
                 <button
