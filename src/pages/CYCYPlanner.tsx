@@ -91,7 +91,7 @@ export function CYCYPlanner() {
                 Export <span className="not-italic">Flow</span>
               </h3>
               <p className="text-slate-400 text-xs font-bold">Inland Terminal → Port</p>
-              <p className="text-[9px] opacity-40 font-black tracking-widest uppercase">Duisburg → Rotterdam</p>
+              <p className="text-[9px] opacity-70 font-black tracking-widest uppercase">Duisburg → Rotterdam</p>
             </div>
           </motion.button>
         </div>
@@ -121,7 +121,7 @@ export function CYCYPlanner() {
                     </div>
                     <div>
                       <p className="text-sm font-black text-white uppercase tracking-widest leading-none">CY/CY {cycyRequest.direction} Booking</p>
-                      <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.2em] mt-0.5">Terminal-to-Terminal Network</p>
+                      <p className="text-[9px] font-bold text-white/65 uppercase tracking-[0.2em] mt-0.5">Terminal-to-Terminal Network</p>
                     </div>
                   </div>
                   <button onClick={() => setFilterOpen(false)} className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/10 transition-all">
@@ -205,14 +205,14 @@ export function CYCYPlanner() {
         >
           <div className={cn("inline-flex p-5 rounded-2xl mb-5", isImport ? "bg-maersk-blue/5" : "bg-emerald-500/5")}>
             {isImport
-              ? <Anchor className="h-12 w-12 text-maersk-blue/25" />
-              : <TrendingUp className="h-12 w-12 text-emerald-500/25" />
+              ? <Anchor className="h-12 w-12 text-maersk-blue/60" />
+              : <TrendingUp className="h-12 w-12 text-emerald-500/60" />
             }
           </div>
           <p className="text-base font-black text-slate-400 uppercase tracking-widest mb-2">
             {isImport ? 'Import Flow' : 'Export Flow'} Ready
           </p>
-          <p className="text-sm text-slate-300 font-bold mb-7">
+          <p className="text-sm text-slate-500 font-bold mb-7">
             {isImport ? 'Select port, inland terminal & vessel ETD to plan inland delivery' : 'Select depot, port terminal & loading date to plan export route'}
           </p>
           <button
@@ -263,7 +263,7 @@ export function CYCYPlanner() {
                 </div>
                 <button
                   onClick={() => setFilterOpen(false)}
-                  className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/10 transition-all"
+                  className="p-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all"
                 >
                   <X className="h-4 w-4" />
                 </button>

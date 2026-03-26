@@ -412,10 +412,10 @@ function ImportResults({ result }: { result: CYCYImpRunResult }) {
     <div className="space-y-4">
       <div className="flex items-center justify-between px-1">
         <div>
-          <h3 className="text-base font-black text-white tracking-tight uppercase">
-            {result.portName} <span className="text-[#42b0d5]">→</span> {result.termName}
+          <h3 className="text-base font-black text-maersk-dark tracking-tight uppercase">
+            {result.portName} <span className="text-maersk-blue">→</span> {result.termName}
           </h3>
-          <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mt-0.5">
+          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-0.5">
             {cards.length} departure{cards.length !== 1 ? 's' : ''} · Vessel ETD {fmtS(result.vesselETD)}
           </p>
         </div>
@@ -488,10 +488,10 @@ function ExportResults({ result }: { result: CYCYExpRunResult }) {
 
       <div className="flex items-center justify-between px-1">
         <div>
-          <h3 className="text-base font-black text-white tracking-tight uppercase">
-            {result.depotName} <span className="text-emerald-400">→</span> {result.termName}
+          <h3 className="text-base font-black text-maersk-dark tracking-tight uppercase">
+            {result.depotName} <span className="text-emerald-600">→</span> {result.termName}
           </h3>
-          <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mt-0.5">
+          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-0.5">
             {result.cards.length} departure option{result.cards.length !== 1 ? 's' : ''} · YOT {result.yot}d
           </p>
         </div>
